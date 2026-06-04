@@ -1,11 +1,11 @@
-Scenario ID,Scenario Name,Category,Objective,Preconditions,Business Steps,Expected Result
+Scenario ID,Scenario Name,Category,Objective,Preconditions,Business Steps,Expected Result,Test Data (Deal Code / Title ID)
 UAT-01,Default trigger values are displayed correctly,Core Functionality,"Confirm the system displays the new default trigger values in Finance.","- The default values for the new fields are mainly applicable for newly created deals
 - Rights Engineering / Rights Operations to create some set of deals for testing. Ideally mirror some existing deals identified by Finance
 - A deal is accepted into Finance
 - Title Valuation is available","1. Open the deal in Finance
 2. Navigate to Title Valuation
 3. Review the displayed values for Cap Trigger and Amort Trigger","- Cap Trigger default is displayed as Licence Start Date
-- Amort Trigger default is displayed as First Airing"
+- Amort Trigger default is displayed as First Airing",
 UAT-02,"Valid combination: Cap Trigger = Licence Start Date / Amort Trigger = First Airing",Core Functionality,"Validate the default business scenario for Currents and Library content.","- Title is available in Finance
 - Trigger fields are editable","1. Set Cap Trigger to Licence Start Date
 2. Set Amort Trigger to First Airing
@@ -13,7 +13,7 @@ UAT-02,"Valid combination: Cap Trigger = Licence Start Date / Amort Trigger = Fi
 4. Attempt TV approval
 5. Review Amort behaviour","- Combination is accepted as valid
 - TV can be approved and posted to GL
-- Amort does not proceed to approval until trigger conditions are met, in line with agreed design"
+- Amort does not proceed to approval until trigger conditions are met, in line with agreed design",
 UAT-03,"Valid combination: Cap Trigger = Licence Start Date / Amort Trigger = Licence Start Date",Core Functionality,"Validate the edge case where no First Airing date exists and Finance switches Amort Trigger.","- Title has no First Airing date available
 - Deal accepted into Finance","1. Set Cap Trigger to Licence Start Date
 2. Set Amort Trigger to Licence Start Date
@@ -21,12 +21,12 @@ UAT-03,"Valid combination: Cap Trigger = Licence Start Date / Amort Trigger = Li
 4. Attempt TV approval
 5. Attempt Amort approval","- Combination is accepted as valid
 - TV can be approved and posted
-- Amort can be approved and posted"
+- Amort can be approved and posted",
 UAT-04,"Invalid combination: Cap Trigger = First Airing / Amort Trigger = Licence Start Date",Edge Case,"Validate that the invalid business combination cannot be processed as a valid scenario.","- Deal/title available in Finance","1. Set Cap Trigger to First Airing
 2. Set Amort Trigger to Licence Start Date
 3. Attempt to save and/or progress the deal through approval","- This combination is treated as invalid
 - System prevents, blocks, or otherwise does not allow this combination to progress as a valid scenario
-- Ideally, we are expecting a UI error message which shout this as an invalid combination"
+- Ideally, we are expecting a UI error message which shout this as an invalid combination",
 UAT-05,"Valid combination: Cap Trigger = First Airing / Amort Trigger = First Airing",Core Functionality,"Validate the Sky Originals scenario.","- Title has a First Airing date available
 - Deal accepted into Finance","1. Set Cap Trigger to First Airing
 2. Set Amort Trigger to First Airing
@@ -35,76 +35,76 @@ UAT-05,"Valid combination: Cap Trigger = First Airing / Amort Trigger = First Ai
 5. Review Amort schedule and approval state","- Combination is accepted as valid
 - FX basis is aligned to the Month of Premiere TX
 - TV cannot be approved until First Airing date is populated
-- Amort schedule is created and behaves as per agreed design"
+- Amort schedule is created and behaves as per agreed design",
 UAT-06,FX is always based on Cap Trigger,Core Functionality,"Validate that FX for Asset Value and Amortisation follows the Cap Trigger.","- Need to create 2 test deals for testing this scenario. Rights Engineering/RightsOps to create these deals
 - Test data available for at least: Cap Trigger = Licence Start Date and Cap Trigger = First Airing
 - Relevant FX scenario visible in Finance/reporting","1. Use a scenario where Cap Trigger = Licence Start Date and capture the FX month used
 2. Use a scenario where Cap Trigger = First Airing and capture the FX month used
 3. Compare the FX basis in both scenarios","- If Cap Trigger = Licence Start Date, FX basis = Month of Licence Start
 - If Cap Trigger = First Airing, FX basis = Month of Premiere TX
-- Asset Value and Amortisation follow the Cap Trigger consistently"
+- Asset Value and Amortisation follow the Cap Trigger consistently","Deal Code 1 (Lic Start): | Deal Code 2 (FA):"
 UAT-07,"Subscriber deal: Cap Trigger can be changed in Finance",Subscriber Deal,"Validate subscriber-specific Cap Trigger behaviour.","- Need to create 1 subscriber test deal for testing this scenario. Rights Engineering/RightsOps to create this deal
 - Subscriber deal available in Finance
 - Deal accepted into Finance","1. Open the Subscriber deal in Finance
 2. Navigate to Title Valuation
 3. Change Cap Trigger to First Airing
-4. Save the deal","- Finance user can set Cap Trigger = First Airing for Subscriber deals"
+4. Save the deal","- Finance user can set Cap Trigger = First Airing for Subscriber deals","Subscriber Deal Code: | Title ID:"
 UAT-08,"Subscriber deal: Cap Trigger change does not sync back and does not reset on re-acceptance",Subscriber Deal,"Validate persistence of the Finance-side Cap Trigger change for Subscriber deals.","- Need to create 1 test deal for testing this scenario. Rights Engineering/RightsOps to create this deal
 - Subscriber deal already updated in Finance
 - A Rights In change is available for re-acceptance","1. Change Cap Trigger in Finance
 2. Re-accept the deal into Finance after a subsequent Rights In change
 3. Re-open Title Valuation","- Cap Trigger changed in Finance does not reflect back to Rights In
-- Cap Trigger does not reset to the original/default value on re-acceptance"
+- Cap Trigger does not reset to the original/default value on re-acceptance","Subscriber Deal Code: | Title ID:"
 UAT-09,"Title Valuation approval when Cap Trigger = First Airing and premiere date is missing",Edge Case,"Validate title-level approval blocking when Cap Trigger depends on First Airing.","- Need to create 1 test deal for testing this scenario. Rights Engineering/RightsOps to create these deals
 - Cap Trigger = First Airing
 - At least one title has no premiere / First Airing date","1. Open Title Valuation
 2. Attempt to approve all titles using title-level approval
 3. Review which titles are selectable","- Only titles with a premiere date can be approved
 - Titles without a First Airing date are greyed out
-- TV cannot be approved for titles where First Airing is missing"
+- TV cannot be approved for titles where First Airing is missing","Deal Code: | Title ID (with FA): | Title ID (without FA):"
 UAT-10,Amort schedule is created based on Licence Start Date when First Airing is missing,Edge Case,"Validate the agreed behaviour for unscheduled titles.","- First Airing date is missing
 - Trigger combination under test relies on First Airing","1. Open the title in Finance
 2. Review/generate the Amort schedule
-3. Check the initial schedule start month","- Initial Amort schedule is created based on Licence Start Date when airing date is missing"
+3. Check the initial schedule start month","- Initial Amort schedule is created based on Licence Start Date when airing date is missing","Deal Code: | Title ID:"
 UAT-11,Amort schedule auto-adjusts when First Airing arrives later,Core Functionality,"Validate automatic schedule adjustment after First Airing becomes available.","- UAT 12 scenario completed
 - First Airing date becomes available later","1. Re-open the title after the First Airing date is populated
 2. Review the Amort schedule again
 3. Compare the new schedule with the earlier version","- Schedule is adjusted automatically
 - Old transactions are reversed
-- New transactions are generated"
+- New transactions are generated","Deal Code: | Title ID:"
 UAT-12,Amort approval with Amort Trigger = First Airing,Core Functionality,"Validate Amort approval behaviour for First Airing-based scenarios.","- Amort Trigger = First Airing
 - Mixed-title deal with some scheduled and some unscheduled titles","1. Open the deal in Finance
 2. Attempt Amort approval using title-level approval
 3. Review resulting title statuses and messages","- Titles with airing date available can be approved
 - Titles without airing date remain unapproved
-- User sees message: ""Some transactions cannot be approved due to a missing trigger"""
+- User sees message: ""Some transactions cannot be approved due to a missing trigger""","Deal Code: | Title ID (scheduled): | Title ID (unscheduled):"
 UAT-13,Deal-level Submit and Approve with missing airing date,Edge Case,"Validate deal-level approval behaviour and user message.","- At least one title has no airing date
 - Deal-level approval path is used","1. Open Submit and Approve
 2. Search for the deal
 3. Attempt to approve the deal","- User sees the message: ""The transactions cannot be approved; kindly approve from the View Transaction Screen""
 - Only titles with an airing date can be selected
-- Remaining titles are greyed out"
+- Remaining titles are greyed out","Deal Code: | Title ID (with FA): | Title ID (without FA):"
 UAT-14,Trigger changes after TV and Amort approvals,Post-Approval,"Validate controlled handling of post-approval trigger changes.","- Title Valuation and Amortisation already approved","1. Attempt to change Cap Trigger and/or Amort Trigger after approval
 2. Follow the required corrective process
 3. Re-approve TV and Amort","- System requires manual reversal of transactions
-- TV and Amort must be re-approved after reversal"
+- TV and Amort must be re-approved after reversal","Deal Code: | Title ID:"
 UAT-15,Clearance revoked after posting,Post-Approval,"Validate that posted transactions are not reversed on clearance revocation.","- TV and/or Amort already posted to GL","1. Identify a posted title/deal
 2. Revoke clearance
-3. Review transactions","- Posted transactions are not reversed"
+3. Review transactions","- Posted transactions are not reversed","Deal Code: | Title ID: | Transaction ID:"
 UAT-16,Clearance revoked after approval but before posting,Post-Approval,"Validate behaviour when clearance is revoked before GL posting.","- TV and/or Amort approved
 - Not yet posted to GL","1. Revoke clearance
 2. Review title/deal state
 3. Perform the required corrective process","- User must manually reverse transactions
-- User must approve and post again"
+- User must approve and post again","Deal Code: | Title ID:"
 UAT-17,Data fix patch corrects invalid trigger combinations,Data Patch,"Validate the separate patch for existing deals.","- Agreed list of impacted deals available
 - Patch deployed in test","1. Run the data fix patch/script
 2. Review impacted deals
-3. Confirm trigger combinations are corrected","- Existing invalid trigger combinations are corrected"
+3. Confirm trigger combinations are corrected","- Existing invalid trigger combinations are corrected","Impacted Deal Codes: (List from patch documentation)"
 UAT-18,Data fix patch corrects wrong FX outcomes,Data Patch,"Validate FX correction delivered by the data fix patch.","- Patch executed
 - Impacted deals available for review","1. Review corrected deals before and after patch execution
-2. Compare FX basis and expected trigger logic","- FX outcomes are corrected in line with Cap Trigger"
+2. Compare FX basis and expected trigger logic","- FX outcomes are corrected in line with Cap Trigger","Impacted Deal Codes: (List from patch documentation)"
 UAT-19,Reporting visibility using existing report,Mitigation,"Validate the agreed reporting mitigation.","- Deals available in accepted-but-not-approved state
 - Existing agreed report available","1. Run the agreed existing report
 2. Review whether affected deals are visible
 3. Record any limitations or gaps","- Existing report can be used operationally
-- Any gaps compared with the original requirement are documented and accepted"
+- Any gaps compared with the original requirement are documented and accepted","Test Deal Codes (various): | Report Name:"

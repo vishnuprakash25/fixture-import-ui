@@ -191,6 +191,7 @@ body.dark .badge-gray { background:#1e293b; color:#94a3b8; }
 .modal-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000;
   align-items:center; justify-content:center; backdrop-filter:blur(4px);
+  padding:20px;
 }
 .modal-overlay.visible { display:flex; animation:fadeIn .2s ease; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
@@ -199,12 +200,19 @@ body.dark .badge-gray { background:#1e293b; color:#94a3b8; }
   background:var(--card); border-radius:var(--radius); width:100%; max-width:520px;
   box-shadow:0 20px 60px rgba(0,0,0,.2); border:1px solid var(--border);
   animation:slideUp .25s ease;
+  max-height:calc(100vh - 40px);
+  display:flex;
+  flex-direction:column;
 }
 @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
 .modal-header {
   display:flex; justify-content:space-between; align-items:center;
   padding:20px 24px; border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  background:var(--card);
+  z-index:2;
 }
 .modal-header h3 { font-size:18px; font-weight:700; color:var(--text); }
 .modal-close {
@@ -214,7 +222,10 @@ body.dark .badge-gray { background:#1e293b; color:#94a3b8; }
 }
 .modal-close:hover { background:#fee2e2; color:#dc2626; }
 
-.modal-body { padding:24px; }
+.modal-body {
+  padding:24px;
+  overflow:auto;
+}
 .modal-section { margin-bottom:18px; }
 .modal-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
 .modal-input {
@@ -243,6 +254,9 @@ body.dark .badge-gray { background:#1e293b; color:#94a3b8; }
 .modal-footer {
   display:flex; justify-content:flex-end; gap:10px; padding:16px 24px;
   border-top:1px solid var(--border); background:var(--bg); border-radius:0 0 var(--radius) var(--radius);
+  position:sticky;
+  bottom:0;
+  z-index:2;
 }
 
 /* Dark mode modal */
@@ -250,6 +264,7 @@ body.dark .modal-close { background:var(--bg); }
 body.dark .modal-close:hover { background:#1c1117; color:#f87171; }
 body.dark .modal-input { background:var(--bg); color:var(--text); }
 body.dark .modal-select { background:var(--bg); color:var(--text); }
+body.dark .modal-header { background:var(--card); }
 
 /* Multiselect Dropdown */
 .multiselect-wrapper, .daterange-wrapper { position:relative; display:flex; align-items:center; gap:0; }

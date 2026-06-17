@@ -3,6 +3,138 @@ function switchPage(index) {
   document.querySelectorAll('.page').forEach((page, i) => page.classList.toggle('active', i === index));
 }
 
+function probeInlineHandlersAvailable() {
+  const probe = document.createElement('button');
+  window.__inlineHandlersProbe = 0;
+  probe.setAttribute('onclick', 'window.__inlineHandlersProbe = 1');
+  probe.style.display = 'none';
+  document.body.appendChild(probe);
+  probe.click();
+  probe.remove();
+  return window.__inlineHandlersProbe === 1;
+}
+
+function normalizeGroupKey(name) {
+  const n = (name || '').trim().toLowerCase();
+  for (const key in fixtureGroupData) {
+    if (fixtureGroupData[key].name.toLowerCase() === n) return key;
+  }
+  return '';
+}
+
+function bindHostedPageFallbacks() {
+  const searchInput = document.querySelector('.search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) { searchFixtures(e.target.value); });
+  }
+
+  const searchBtn = document.querySelector('.toolbar .btn.btn-primary');
+  if (searchBtn) searchBtn.addEventListener('click', performSearch);
+
+  const sportTrigger = document.querySelector('#sportTypeMultiselect .multiselect-trigger');
+  const sportClear = document.getElementById('sportClearBtn');
+  const sportSearch = document.querySelector('#sportDropdown .multiselect-search');
+  const sportClearAll = document.querySelector('#sportDropdown .multiselect-actions .btn');
+  if (sportTrigger) sportTrigger.addEventListener('click', function() { toggleDropdown('sportDropdown'); });
+  if (sportClear) sportClear.addEventListener('click', clearSportFilter);
+  if (sportSearch) sportSearch.addEventListener('input', function(e) { filterSportOptions(e.target.value); });
+  if (sportClearAll) sportClearAll.addEventListener('click', clearSportFilter);
+  document.querySelectorAll('#sportOptions input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener('change', applySportFilter);
+  });
+
+  const groupTrigger = document.querySelector('#fixtureGroupMultiselect .multiselect-trigger');
+  const groupClear = document.getElementById('groupClearBtn');
+  const groupSearch = document.querySelector('#groupDropdown .multiselect-search');
+  const groupClearAll = document.querySelector('#groupDropdown .multiselect-actions .btn');
+  if (groupTrigger) groupTrigger.addEventListener('click', function() { toggleDropdown('groupDropdown'); });
+  if (groupClear) groupClear.addEventListener('click', clearGroupFilter);
+  if (groupSearch) groupSearch.addEventListener('input', function(e) { filterGroupOptions(e.target.value); });
+  if (groupClearAll) groupClearAll.addEventListener('click', clearGroupFilter);
+  document.querySelectorAll('#groupOptions input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener('change', applyGroupFilter);
+  });
+
+  const dateTrigger = document.querySelector('#dateRangeWrapper .multiselect-trigger');
+  const dateClearBtn = document.getElementById('dateClearBtn');
+  const presetButtons = document.querySelectorAll('#datePickerPopup .preset-btn');
+  const navButtons = document.querySelectorAll('#datePickerPopup .cal-nav-btn');
+  const dateActionButtons = document.querySelectorAll('#datePickerPopup .datepicker-actions .btn');
+  if (dateTrigger) dateTrigger.addEventListener('click', toggleDatePicker);
+  if (dateClearBtn) dateClearBtn.addEventListener('click', clearDateRange);
+  presetButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const t = btn.textContent.trim();
+      if (t === 'Today') selectDatePreset('today');
+      if (t === 'This Week') selectDatePreset('week');
+      if (t === 'This Month') selectDatePreset('month');
+      if (t === 'This Quarter') selectDatePreset('quarter');
+    });
+  });
+  if (navButtons[0]) navButtons[0].addEventListener('click', function() { changeMonth(-1); });
+  if (navButtons[1]) navButtons[1].addEventListener('click', function() { changeMonth(1); });
+  if (dateActionButtons[0]) dateActionButtons[0].addEventListener('click', clearDateRange);
+  if (dateActionButtons[1]) dateActionButtons[1].addEventListener('click', applyDatePicker);
+
+  const selectAll = document.getElementById('selectAll');
+  const bulkImportBtn = document.querySelector('.bulk-bar .btn.btn-primary');
+  const clearSelectionBtn = document.querySelector('.bulk-bar .btn.btn-secondary');
+  if (selectAll) {
+    selectAll.addEventListener('change', function(e) { toggleSelectAll(e.target); });
+  }
+  if (bulkImportBtn) bulkImportBtn.addEventListener('click', importSelected);
+  if (clearSelectionBtn) clearSelectionBtn.addEventListener('click', clearSelection);
+
+  document.querySelectorAll('#fixturesTable .fixture-group-link').forEach(function(el) {
+    el.addEventListener('click', function() {
+      const row = el.closest('tr');
+      if (row && row.getAttribute('data-group')) {
+        openGroupModal(row.getAttribute('data-group'));
+      }
+    });
+  });
+
+  document.querySelectorAll('#fixturesTable tbody tr').forEach(function(row) {
+    const importBtn = row.querySelector('td:last-child .btn.btn-primary');
+    if (!importBtn) return;
+    importBtn.addEventListener('click', function() {
+      const idCell = row.querySelector('.fixture-id');
+      const id = idCell ? (idCell.getAttribute('title') || idCell.textContent.trim()) : '';
+      const name = row.getAttribute('data-name') || '';
+      const sportType = row.querySelector('td:nth-child(4)') ? row.querySelector('td:nth-child(4)').textContent.trim() : '';
+      const date = row.querySelector('td:nth-child(5)') ? row.querySelector('td:nth-child(5)').textContent.trim() : '';
+      openImportModal(id, name, sportType, date);
+    });
+  });
+
+  document.querySelectorAll('#recentlyImportedTable tbody tr').forEach(function(row) {
+    const viewBtn = row.querySelector('td:last-child .btn');
+    if (!viewBtn) return;
+    viewBtn.addEventListener('click', function() {
+      const name = row.querySelector('td:nth-child(1) strong') ? row.querySelector('td:nth-child(1) strong').textContent.trim() : '';
+      const groupName = row.querySelector('td:nth-child(2) .badge') ? row.querySelector('td:nth-child(2) .badge').textContent.trim() : '';
+      const groupId = normalizeGroupKey(groupName);
+      const sport = row.querySelector('td:nth-child(3)') ? row.querySelector('td:nth-child(3)').textContent.trim() : '';
+      const importDate = row.querySelector('td:nth-child(4)') ? row.querySelector('td:nth-child(4)').textContent.trim() : '';
+      const idCell = row.querySelector('td:nth-child(5).fixture-id');
+      const titleId = idCell ? (idCell.getAttribute('title') || idCell.textContent.trim()) : '';
+      let venue = 'Venue not available';
+      if (groupId && fixtureGroupData[groupId] && fixtureGroupData[groupId].fixtures) {
+        const f = fixtureGroupData[groupId].fixtures.find(function(x) { return x.name === name; });
+        if (f) venue = f.venue;
+      }
+      const importedBy = name.indexOf('Monaco GP') >= 0 ? 'system@sky.uk' : 'admin@sky.uk';
+      viewImportedFixture(name, groupId, sport, importDate, titleId, venue, importedBy);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!probeInlineHandlersAvailable()) {
+    bindHostedPageFallbacks();
+  }
+});
+
 function refreshData() {
   alert('Refreshing fixture data from Fixture Manager API…');
 }

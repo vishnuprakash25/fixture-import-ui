@@ -85,28 +85,28 @@
         <div class="card-body">
           <table>
             <thead>
-              <tr><th>Fixture</th><th>Type</th><th>Import Date</th><th>Status</th><th>Title ID</th><th></th></tr>
+              <tr><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Import Date</th><th>RightsLogic Title ID</th><th></th></tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>Manchester Derby</strong></td><td>Football</td><td>Nov 10, 2025</td>
-                <td><span class="badge badge-blue">New</span></td><td class="fixture-id">174849</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="viewFixture(174849)">View</button></td>
+                <td><strong>Manchester Derby</strong></td><td><span class="badge badge-gray">Premier League 2025/26</span></td><td>Football</td><td>Nov 10, 2025</td>
+                <td class="fixture-id" title="3a7f2b1c-9d4e-4a8b-b5c6-1e2f3a4b5c6d">3a7f2b1c</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="viewImportedFixture('Manchester Derby','premier-league-2025','Football','Nov 10, 2025','3a7f2b1c-9d4e-4a8b-b5c6-1e2f3a4b5c6d','Old Trafford, Manchester','admin@sky.uk')">View</button></td>
               </tr>
               <tr>
-                <td><strong>Wimbledon Finals</strong></td><td>Tennis</td><td>Nov 8, 2025</td>
-                <td><span class="badge badge-green">Imported</span></td><td class="fixture-id">279337</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="viewFixture(279337)">View</button></td>
+                <td><strong>Wimbledon Finals</strong></td><td><span class="badge badge-gray">Grand Slam Series 2025</span></td><td>Tennis</td><td>Nov 8, 2025</td>
+                <td class="fixture-id" title="8b4e5c2d-1a3f-4b9c-a6d7-2e3f4a5b6c7d">8b4e5c2d</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="viewImportedFixture('Wimbledon Finals','grand-slam-2025','Tennis','Nov 8, 2025','8b4e5c2d-1a3f-4b9c-a6d7-2e3f4a5b6c7d','All England Club, London','admin@sky.uk')">View</button></td>
               </tr>
               <tr>
-                <td><strong>Champions League Final</strong></td><td>Football</td><td>Nov 7, 2025</td>
-                <td><span class="badge badge-green">Imported</span></td><td class="fixture-id">281042</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="viewFixture(281042)">View</button></td>
+                <td><strong>Champions League Final</strong></td><td><span class="badge badge-gray">Champions League 2025/26</span></td><td>Football</td><td>Nov 7, 2025</td>
+                <td class="fixture-id" title="9c5f6d3e-2b4a-5c0d-b7e8-3f4a5b6c7d8e">9c5f6d3e</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="viewImportedFixture('Champions League Final','champions-league-2025','Football','Nov 7, 2025','9c5f6d3e-2b4a-5c0d-b7e8-3f4a5b6c7d8e','Allianz Arena, Munich','admin@sky.uk')">View</button></td>
               </tr>
               <tr>
-                <td><strong>NBA Eastern Finals</strong></td><td>Basketball</td><td>Nov 5, 2025</td>
-                <td><span class="badge badge-amber">Pending</span></td><td class="fixture-id">265891</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="viewFixture(265891)">View</button></td>
+                <td><strong>Monaco GP - Qualifying</strong></td><td><span class="badge badge-gray">F1 Monaco Grand Prix 2025</span></td><td>Motor Sport</td><td>Nov 5, 2025</td>
+                <td class="fixture-id" title="0d6a7e4f-3c5b-6d1e-c8f9-4a5b6c7d8e9f">0d6a7e4f</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="viewImportedFixture('Monaco GP - Qualifying','f1-monaco-gp-2025','Motor Sport','Nov 5, 2025','0d6a7e4f-3c5b-6d1e-c8f9-4a5b6c7d8e9f','Circuit de Monaco, Monte Carlo','system@sky.uk')">View</button></td>
               </tr>
             </tbody>
           </table>
@@ -124,21 +124,98 @@
       </div>
       <div class="card">
         <div class="toolbar">
-          <input type="text" class="search-input" placeholder="Search fixtures by name, ID, or team…" oninput="searchFixtures(this.value)">
-          <select onchange="filterByType(this.value)">
-            <option value="">All Sports</option>
-            <option value="football">Football</option>
-            <option value="tennis">Tennis</option>
-            <option value="basketball">Basketball</option>
-            <option value="motorsport">MotorSport</option>
-            <option value="cricket">Cricket</option>
-          </select>
-          <select onchange="filterByDate(this.value)">
-            <option value="">All Dates</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
+          <input type="text" class="search-input" placeholder="Search by fixture name, ID, team, or Fixture Group…" oninput="searchFixtures(this.value)">
+          <div class="multiselect-wrapper" id="sportTypeMultiselect">
+            <button class="multiselect-trigger" onclick="toggleDropdown('sportDropdown')">
+              <span id="sportFilterLabel">All Sports</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button class="multiselect-clear" id="sportClearBtn" onclick="clearSportFilter()" style="display:none;" title="Clear selection">✕</button>
+            <div class="multiselect-dropdown" id="sportDropdown">
+              <input type="text" class="multiselect-search" placeholder="Search sport types…" oninput="filterSportOptions(this.value)">
+              <div class="multiselect-options" id="sportOptions">
+                <label class="multiselect-option"><input type="checkbox" value="american-football" onchange="applySportFilter()"> American Football</label>
+                <label class="multiselect-option"><input type="checkbox" value="athletics" onchange="applySportFilter()"> Athletics</label>
+                <label class="multiselect-option"><input type="checkbox" value="baseball" onchange="applySportFilter()"> Baseball</label>
+                <label class="multiselect-option"><input type="checkbox" value="basketball" onchange="applySportFilter()"> Basketball</label>
+                <label class="multiselect-option"><input type="checkbox" value="boxing" onchange="applySportFilter()"> Boxing</label>
+                <label class="multiselect-option"><input type="checkbox" value="cricket" onchange="applySportFilter()"> Cricket</label>
+                <label class="multiselect-option"><input type="checkbox" value="darts" onchange="applySportFilter()"> Darts</label>
+                <label class="multiselect-option"><input type="checkbox" value="equestrian" onchange="applySportFilter()"> Equestrian</label>
+                <label class="multiselect-option"><input type="checkbox" value="extreme-sports" onchange="applySportFilter()"> Extreme Sports</label>
+                <label class="multiselect-option"><input type="checkbox" value="fishing" onchange="applySportFilter()"> Fishing</label>
+                <label class="multiselect-option"><input type="checkbox" value="football" onchange="applySportFilter()"> Football</label>
+                <label class="multiselect-option"><input type="checkbox" value="golf" onchange="applySportFilter()"> Golf</label>
+                <label class="multiselect-option"><input type="checkbox" value="motorsport" onchange="applySportFilter()"> Motor Sport</label>
+                <label class="multiselect-option"><input type="checkbox" value="racing-horse" onchange="applySportFilter()"> Racing (Horse)</label>
+                <label class="multiselect-option"><input type="checkbox" value="rugby" onchange="applySportFilter()"> Rugby (Union League)</label>
+                <label class="multiselect-option"><input type="checkbox" value="snooker-pool" onchange="applySportFilter()"> Snooker/Pool</label>
+                <label class="multiselect-option"><input type="checkbox" value="tennis" onchange="applySportFilter()"> Tennis</label>
+                <label class="multiselect-option"><input type="checkbox" value="watersports" onchange="applySportFilter()"> Watersports</label>
+              </div>
+              <div class="multiselect-actions">
+                <button class="btn btn-ghost btn-sm" onclick="clearSportFilter()">Clear All</button>
+              </div>
+            </div>
+          </div>
+          <div class="multiselect-wrapper" id="fixtureGroupMultiselect">
+            <button class="multiselect-trigger" onclick="toggleDropdown('groupDropdown')">
+              <span id="groupFilterLabel">All Fixture Groups</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button class="multiselect-clear" id="groupClearBtn" onclick="clearGroupFilter()" style="display:none;" title="Clear selection">✕</button>
+            <div class="multiselect-dropdown" id="groupDropdown">
+              <input type="text" class="multiselect-search" placeholder="Search fixture groups…" oninput="filterGroupOptions(this.value)">
+              <div class="multiselect-options" id="groupOptions">
+                <label class="multiselect-option"><input type="checkbox" value="premier-league-2025" onchange="applyGroupFilter()"> Premier League 2025/26</label>
+                <label class="multiselect-option"><input type="checkbox" value="champions-league-2025" onchange="applyGroupFilter()"> Champions League 2025/26</label>
+                <label class="multiselect-option"><input type="checkbox" value="grand-slam-2025" onchange="applyGroupFilter()"> Grand Slam Series 2025</label>
+                <label class="multiselect-option"><input type="checkbox" value="f1-monaco-gp-2025" onchange="applyGroupFilter()"> F1 Monaco Grand Prix 2025</label>
+                <label class="multiselect-option"><input type="checkbox" value="f1-silverstone-gp-2025" onchange="applyGroupFilter()"> F1 British Grand Prix 2025</label>
+                <label class="multiselect-option"><input type="checkbox" value="f1-monza-gp-2025" onchange="applyGroupFilter()"> F1 Italian Grand Prix 2025</label>
+                <label class="multiselect-option"><input type="checkbox" value="f1-spa-gp-2025" onchange="applyGroupFilter()"> F1 Belgian Grand Prix 2025</label>
+                <label class="multiselect-option"><input type="checkbox" value="nba-season-2025" onchange="applyGroupFilter()"> NBA Season 2025/26</label>
+                <label class="multiselect-option"><input type="checkbox" value="nfl-season-2025" onchange="applyGroupFilter()"> NFL Season 2025/26</label>
+                <label class="multiselect-option"><input type="checkbox" value="ashes-2025" onchange="applyGroupFilter()"> The Ashes 2025</label>
+              </div>
+              <div class="multiselect-actions">
+                <button class="btn btn-ghost btn-sm" onclick="clearGroupFilter()">Clear All</button>
+              </div>
+            </div>
+          </div>
+          <div class="daterange-wrapper" id="dateRangeWrapper">
+            <button class="multiselect-trigger" onclick="toggleDatePicker()">
+              <span id="dateRangeLabel">All Dates</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button class="multiselect-clear" id="dateClearBtn" onclick="clearDateRange()" style="display:none;" title="Clear dates">✕</button>
+            <div class="datepicker-popup" id="datePickerPopup">
+              <div class="datepicker-presets">
+                <button class="preset-btn" onclick="selectDatePreset('today')">Today</button>
+                <button class="preset-btn" onclick="selectDatePreset('week')">This Week</button>
+                <button class="preset-btn" onclick="selectDatePreset('month')">This Month</button>
+                <button class="preset-btn" onclick="selectDatePreset('quarter')">This Quarter</button>
+              </div>
+              <div class="datepicker-divider"></div>
+              <div class="datepicker-calendars">
+                <div class="datepicker-cal">
+                  <div class="cal-nav">
+                    <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                    <span class="cal-month" id="calMonth1"></span>
+                    <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+                  </div>
+                  <div class="cal-grid" id="calGrid1"></div>
+                </div>
+              </div>
+              <div class="datepicker-footer">
+                <span class="datepicker-range-text" id="dateRangeText">Select start date</span>
+                <div class="datepicker-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="clearDateRange()">Clear</button>
+                  <button class="btn btn-primary btn-sm" onclick="applyDatePicker()">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <button class="btn btn-primary" onclick="performSearch()">Search</button>
         </div>
         <div class="bulk-bar">
@@ -147,38 +224,209 @@
           <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Clear</button>
         </div>
         <div class="card-body">
-          <table>
+          <table id="fixturesTable">
             <thead>
-              <tr><th style="width:44px"></th><th>Fixture</th><th>Type</th><th>Date</th><th>Venue</th><th>Fixture ID</th><th>Status</th><th></th></tr>
+              <tr><th style="width:44px"></th><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Date</th><th>Venue</th><th>Fixture ID</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
-              <tr>
+              <!-- Premier League -->
+              <tr data-group="premier-league-2025" data-type="football" data-name="Arsenal vs Chelsea">
                 <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
-                <td><strong>Super Bowl LVIII</strong></td><td>American Football</td><td>Dec 15, 2025</td>
-                <td>Las Vegas, Nevada</td><td class="fixture-id">a3f7b2c1</td>
+                <td><strong>Arsenal vs Chelsea</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('premier-league-2025')">Premier League 2025/26</span></td><td>Football</td><td>Dec 22, 2025</td>
+                <td>Emirates Stadium, London</td><td class="fixture-id" title="a1b2c3d4-e5f6-7890-abcd-ef1234567001">a1b2c3d4</td>
                 <td><span class="badge badge-indigo">Available</span></td>
-                <td><button class="btn btn-primary btn-sm" onclick="importSingle('a3f7b2c1-9d4e-4a8b-b5c6-1e2f3a4b5c6d')">Import</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('a1b2c3d4-e5f6-7890-abcd-ef1234567001', 'Arsenal vs Chelsea', 'Football', 'Dec 22, 2025')">Import</button></td>
               </tr>
-              <tr>
+              <tr data-group="premier-league-2025" data-type="football" data-name="Liverpool vs Man United">
                 <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
-                <td><strong>Australian Open Finals</strong></td><td>Tennis</td><td>Dec 20, 2025</td>
-                <td>Melbourne, Australia</td><td class="fixture-id">b8e4c5d2</td>
+                <td><strong>Liverpool vs Man United</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('premier-league-2025')">Premier League 2025/26</span></td><td>Football</td><td>Jan 4, 2026</td>
+                <td>Anfield, Liverpool</td><td class="fixture-id" title="b2c3d4e5-f6a7-8901-bcde-f12345670002">b2c3d4e5</td>
                 <td><span class="badge badge-indigo">Available</span></td>
-                <td><button class="btn btn-primary btn-sm" onclick="importSingle('b8e4c5d2-1a3f-4b9c-a6d7-2e3f4a5b6c7d')">Import</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('b2c3d4e5-f6a7-8901-bcde-f12345670002', 'Liverpool vs Man United', 'Football', 'Jan 4, 2026')">Import</button></td>
               </tr>
-              <tr>
+              <tr data-group="premier-league-2025" data-type="football" data-name="Newcastle vs Aston Villa">
                 <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
-                <td><strong>World Cup Qualifier</strong></td><td>Football</td><td>Nov 18, 2025</td>
-                <td>Wembley Stadium, London</td><td class="fixture-id">c9f5d6e3</td>
-                <td><span class="badge badge-green">Imported</span></td>
-                <td><button class="btn btn-secondary btn-sm" disabled>Imported</button></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
-                <td><strong>Monaco Grand Prix</strong></td><td>MotorSport</td><td>Dec 5, 2025</td>
-                <td>Monte Carlo, Monaco</td><td class="fixture-id">d0a6e7f4</td>
+                <td><strong>Newcastle vs Aston Villa</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('premier-league-2025')">Premier League 2025/26</span></td><td>Football</td><td>Jan 25, 2026</td>
+                <td>St James' Park, Newcastle</td><td class="fixture-id" title="c3d4e5f6-a7b8-9012-cdef-123456700003">c3d4e5f6</td>
                 <td><span class="badge badge-indigo">Available</span></td>
-                <td><button class="btn btn-primary btn-sm" onclick="importSingle('d0a6e7f4-3c5b-6d1e-c8f9-4a5b6c7d8e9f')">Import</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('c3d4e5f6-a7b8-9012-cdef-123456700003', 'Newcastle vs Aston Villa', 'Football', 'Jan 25, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="premier-league-2025" data-type="football" data-name="Chelsea vs West Ham">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Chelsea vs West Ham</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('premier-league-2025')">Premier League 2025/26</span></td><td>Football</td><td>Feb 1, 2026</td>
+                <td>Stamford Bridge, London</td><td class="fixture-id" title="d4e5f6a7-b8c9-0123-defa-234567800004">d4e5f6a7</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('d4e5f6a7-b8c9-0123-defa-234567800004', 'Chelsea vs West Ham', 'Football', 'Feb 1, 2026')">Import</button></td>
+              </tr>
+
+              <!-- Champions League -->
+              <tr data-group="champions-league-2025" data-type="football" data-name="Real Madrid vs Bayern Munich">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Real Madrid vs Bayern Munich</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('champions-league-2025')">Champions League 2025/26</span></td><td>Football</td><td>Feb 12, 2026</td>
+                <td>Santiago Bernabéu, Madrid</td><td class="fixture-id" title="e5f6a7b8-c9d0-1234-efab-345678900005">e5f6a7b8</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('e5f6a7b8-c9d0-1234-efab-345678900005', 'Real Madrid vs Bayern Munich', 'Football', 'Feb 12, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="champions-league-2025" data-type="football" data-name="PSG vs Inter Milan">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>PSG vs Inter Milan</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('champions-league-2025')">Champions League 2025/26</span></td><td>Football</td><td>Feb 19, 2026</td>
+                <td>Parc des Princes, Paris</td><td class="fixture-id" title="f6a7b8c9-d0e1-2345-fabc-456789000006">f6a7b8c9</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('f6a7b8c9-d0e1-2345-fabc-456789000006', 'PSG vs Inter Milan', 'Football', 'Feb 19, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="champions-league-2025" data-type="football" data-name="Liverpool vs Dortmund">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Liverpool vs Dortmund</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('champions-league-2025')">Champions League 2025/26</span></td><td>Football</td><td>Mar 12, 2026</td>
+                <td>Anfield, Liverpool</td><td class="fixture-id" title="a7b8c9d0-e1f2-3456-abcd-567890100007">a7b8c9d0</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('a7b8c9d0-e1f2-3456-abcd-567890100007', 'Liverpool vs Dortmund', 'Football', 'Mar 12, 2026')">Import</button></td>
+              </tr>
+
+              <!-- Grand Slam -->
+              <tr data-group="grand-slam-2025" data-type="tennis" data-name="Australian Open Finals">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Australian Open Finals</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('grand-slam-2025')">Grand Slam Series 2025</span></td><td>Tennis</td><td>Jan 26, 2026</td>
+                <td>Melbourne Park, Australia</td><td class="fixture-id" title="b8c9d0e1-f2a3-4567-bcde-678901200008">b8c9d0e1</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('b8c9d0e1-f2a3-4567-bcde-678901200008', 'Australian Open Finals', 'Tennis', 'Jan 26, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="grand-slam-2025" data-type="tennis" data-name="French Open Semi-Finals">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>French Open Semi-Finals</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('grand-slam-2025')">Grand Slam Series 2025</span></td><td>Tennis</td><td>Jun 6, 2026</td>
+                <td>Roland Garros, Paris</td><td class="fixture-id" title="c9d0e1f2-a3b4-5678-cdef-789012300009">c9d0e1f2</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('c9d0e1f2-a3b4-5678-cdef-789012300009', 'French Open Semi-Finals', 'Tennis', 'Jun 6, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="grand-slam-2025" data-type="tennis" data-name="Wimbledon Finals">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Wimbledon Finals</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('grand-slam-2025')">Grand Slam Series 2025</span></td><td>Tennis</td><td>Jul 13, 2026</td>
+                <td>All England Club, London</td><td class="fixture-id" title="d0e1f2a3-b4c5-6789-defa-890123400010">d0e1f2a3</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('d0e1f2a3-b4c5-6789-defa-890123400010', 'Wimbledon Finals', 'Tennis', 'Jul 13, 2026')">Import</button></td>
+              </tr>
+
+              <!-- F1 Monaco Grand Prix -->
+              <tr data-group="f1-monaco-gp-2025" data-type="motorsport" data-name="Monaco GP - Practice 1">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Monaco GP - Practice 1</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monaco-gp-2025')">F1 Monaco Grand Prix 2025</span></td><td>Motor Sport</td><td>May 22, 2026</td>
+                <td>Circuit de Monaco</td><td class="fixture-id" title="e1f2a3b4-c5d6-7890-efab-901234500011">e1f2a3b4</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('e1f2a3b4-c5d6-7890-efab-901234500011', 'Monaco GP - Practice 1', 'Motor Sport', 'May 22, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-monaco-gp-2025" data-type="motorsport" data-name="Monaco GP - Practice 2">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Monaco GP - Practice 2</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monaco-gp-2025')">F1 Monaco Grand Prix 2025</span></td><td>Motor Sport</td><td>May 22, 2026</td>
+                <td>Circuit de Monaco</td><td class="fixture-id" title="f2a3b4c5-d6e7-8901-fabc-012345600012">f2a3b4c5</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('f2a3b4c5-d6e7-8901-fabc-012345600012', 'Monaco GP - Practice 2', 'Motor Sport', 'May 22, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-monaco-gp-2025" data-type="motorsport" data-name="Monaco GP - Practice 3">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Monaco GP - Practice 3</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monaco-gp-2025')">F1 Monaco Grand Prix 2025</span></td><td>Motor Sport</td><td>May 23, 2026</td>
+                <td>Circuit de Monaco</td><td class="fixture-id" title="a3b4c5d6-e7f8-9012-abcd-123456700013">a3b4c5d6</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('a3b4c5d6-e7f8-9012-abcd-123456700013', 'Monaco GP - Practice 3', 'Motor Sport', 'May 23, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-monaco-gp-2025" data-type="motorsport" data-name="Monaco GP - Race">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Monaco GP - Race</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monaco-gp-2025')">F1 Monaco Grand Prix 2025</span></td><td>Motor Sport</td><td>May 24, 2026</td>
+                <td>Circuit de Monaco</td><td class="fixture-id" title="b4c5d6e7-f8a9-0123-bcde-234567800014">b4c5d6e7</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('b4c5d6e7-f8a9-0123-bcde-234567800014', 'Monaco GP - Race', 'Motor Sport', 'May 24, 2026')">Import</button></td>
+              </tr>
+
+              <!-- F1 British Grand Prix -->
+              <tr data-group="f1-silverstone-gp-2025" data-type="motorsport" data-name="British GP - Practice 1">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>British GP - Practice 1</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-silverstone-gp-2025')">F1 British Grand Prix 2025</span></td><td>Motor Sport</td><td>Jul 4, 2026</td>
+                <td>Silverstone Circuit, UK</td><td class="fixture-id" title="c5d6e7f8-a9b0-1234-cdef-345678900015">c5d6e7f8</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('c5d6e7f8-a9b0-1234-cdef-345678900015', 'British GP - Practice 1', 'Motor Sport', 'Jul 4, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-silverstone-gp-2025" data-type="motorsport" data-name="British GP - Qualifying">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>British GP - Qualifying</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-silverstone-gp-2025')">F1 British Grand Prix 2025</span></td><td>Motor Sport</td><td>Jul 5, 2026</td>
+                <td>Silverstone Circuit, UK</td><td class="fixture-id" title="d6e7f8a9-b0c1-2345-defa-456789000016">d6e7f8a9</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('d6e7f8a9-b0c1-2345-defa-456789000016', 'British GP - Qualifying', 'Motor Sport', 'Jul 5, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-silverstone-gp-2025" data-type="motorsport" data-name="British GP - Race">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>British GP - Race</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-silverstone-gp-2025')">F1 British Grand Prix 2025</span></td><td>Motor Sport</td><td>Jul 6, 2026</td>
+                <td>Silverstone Circuit, UK</td><td class="fixture-id" title="e7f8a9b0-c1d2-3456-efab-567890100017">e7f8a9b0</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('e7f8a9b0-c1d2-3456-efab-567890100017', 'British GP - Race', 'Motor Sport', 'Jul 6, 2026')">Import</button></td>
+              </tr>
+
+              <!-- F1 Italian Grand Prix -->
+              <tr data-group="f1-monza-gp-2025" data-type="motorsport" data-name="Italian GP - Practice 1">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Italian GP - Practice 1</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monza-gp-2025')">F1 Italian Grand Prix 2025</span></td><td>Motor Sport</td><td>Sep 5, 2026</td>
+                <td>Autodromo di Monza, Italy</td><td class="fixture-id" title="f8a9b0c1-d2e3-4567-fabc-678901200018">f8a9b0c1</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('f8a9b0c1-d2e3-4567-fabc-678901200018', 'Italian GP - Practice 1', 'Motor Sport', 'Sep 5, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-monza-gp-2025" data-type="motorsport" data-name="Italian GP - Qualifying">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Italian GP - Qualifying</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monza-gp-2025')">F1 Italian Grand Prix 2025</span></td><td>Motor Sport</td><td>Sep 6, 2026</td>
+                <td>Autodromo di Monza, Italy</td><td class="fixture-id" title="a9b0c1d2-e3f4-5678-abcd-789012300019">a9b0c1d2</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('a9b0c1d2-e3f4-5678-abcd-789012300019', 'Italian GP - Qualifying', 'Motor Sport', 'Sep 6, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="f1-monza-gp-2025" data-type="motorsport" data-name="Italian GP - Race">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Italian GP - Race</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('f1-monza-gp-2025')">F1 Italian Grand Prix 2025</span></td><td>Motor Sport</td><td>Sep 7, 2026</td>
+                <td>Autodromo di Monza, Italy</td><td class="fixture-id" title="b0c1d2e3-f4a5-6789-bcde-890123400020">b0c1d2e3</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('b0c1d2e3-f4a5-6789-bcde-890123400020', 'Italian GP - Race', 'Motor Sport', 'Sep 7, 2026')">Import</button></td>
+              </tr>
+
+              <!-- NBA Season -->
+              <tr data-group="nba-season-2025" data-type="basketball" data-name="Lakers vs Celtics">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Lakers vs Celtics</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('nba-season-2025')">NBA Season 2025/26</span></td><td>Basketball</td><td>Dec 25, 2025</td>
+                <td>Staples Center, Los Angeles</td><td class="fixture-id" title="c1d2e3f4-a5b6-7890-cdef-901234500021">c1d2e3f4</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('c1d2e3f4-a5b6-7890-cdef-901234500021', 'Lakers vs Celtics', 'Basketball', 'Dec 25, 2025')">Import</button></td>
+              </tr>
+              <tr data-group="nba-season-2025" data-type="basketball" data-name="Nets vs 76ers">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Nets vs 76ers</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('nba-season-2025')">NBA Season 2025/26</span></td><td>Basketball</td><td>Jan 15, 2026</td>
+                <td>Barclays Center, Brooklyn</td><td class="fixture-id" title="d2e3f4a5-b6c7-8901-defa-012345600022">d2e3f4a5</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('d2e3f4a5-b6c7-8901-defa-012345600022', 'Nets vs 76ers', 'Basketball', 'Jan 15, 2026')">Import</button></td>
+              </tr>
+
+              <!-- NFL Season -->
+              <tr data-group="nfl-season-2025" data-type="american-football" data-name="Super Bowl LX">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Super Bowl LX</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('nfl-season-2025')">NFL Season 2025/26</span></td><td>American Football</td><td>Feb 8, 2026</td>
+                <td>Levi's Stadium, Santa Clara</td><td class="fixture-id" title="e3f4a5b6-c7d8-9012-efab-123456700023">e3f4a5b6</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('e3f4a5b6-c7d8-9012-efab-123456700023', 'Super Bowl LX', 'American Football', 'Feb 8, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="nfl-season-2025" data-type="american-football" data-name="Cowboys vs Eagles">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>Cowboys vs Eagles</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('nfl-season-2025')">NFL Season 2025/26</span></td><td>American Football</td><td>Dec 28, 2025</td>
+                <td>AT&T Stadium, Arlington</td><td class="fixture-id" title="f4a5b6c7-d8e9-0123-fabc-234567800024">f4a5b6c7</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('f4a5b6c7-d8e9-0123-fabc-234567800024', 'Cowboys vs Eagles', 'American Football', 'Dec 28, 2025')">Import</button></td>
+              </tr>
+
+              <!-- The Ashes -->
+              <tr data-group="ashes-2025" data-type="cricket" data-name="1st Test - Day 1">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>1st Test - Day 1</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('ashes-2025')">The Ashes 2025</span></td><td>Cricket</td><td>Jun 18, 2026</td>
+                <td>Lord's, London</td><td class="fixture-id" title="a5b6c7d8-e9f0-1234-abcd-345678900025">a5b6c7d8</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('a5b6c7d8-e9f0-1234-abcd-345678900025', '1st Test - Day 1', 'Cricket', 'Jun 18, 2026')">Import</button></td>
+              </tr>
+              <tr data-group="ashes-2025" data-type="cricket" data-name="2nd Test - Day 1">
+                <td><input type="checkbox" class="checkbox fixture-checkbox"></td>
+                <td><strong>2nd Test - Day 1</strong></td><td><span class="badge badge-gray fixture-group-link" onclick="openGroupModal('ashes-2025')">The Ashes 2025</span></td><td>Cricket</td><td>Jul 2, 2026</td>
+                <td>Edgbaston, Birmingham</td><td class="fixture-id" title="b6c7d8e9-f0a1-2345-bcde-456789000026">b6c7d8e9</td>
+                <td><span class="badge badge-indigo">Available</span></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openImportModal('b6c7d8e9-f0a1-2345-bcde-456789000026', '2nd Test - Day 1', 'Cricket', 'Jul 2, 2026')">Import</button></td>
               </tr>
             </tbody>
           </table>
@@ -281,6 +529,164 @@
 </div>
 
 <script src="js/app.js"></script>
+
+<!-- Import Configuration Modal (Single) -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Configure Import</h3>
+      <button class="modal-close" onclick="closeImportModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <label class="modal-label">Fixture Name</label>
+        <input type="text" class="modal-input" id="importFixtureName" readonly>
+      </div>
+
+      <div class="modal-section">
+        <label class="modal-label">Title Name Preview</label>
+        <div class="title-preview" id="titlePreview">—</div>
+      </div>
+
+      <hr class="modal-divider">
+
+      <div class="modal-section">
+        <label class="modal-label">Prefix <span class="required">*</span></label>
+        <div class="modal-row">
+          <select id="prefixType" class="modal-select" onchange="updatePrefixInput(); updateTitlePreview();">
+            <option value="sport">Sport Type</option>
+            <option value="custom">Custom Text</option>
+          </select>
+          <input type="text" class="modal-input" id="prefixCustom" placeholder="Enter custom prefix…" oninput="updateTitlePreview()" style="display:none;">
+          <span class="prefix-value" id="prefixSportLabel"></span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label class="modal-label">Suffix <span class="required">*</span></label>
+        <div class="modal-row">
+          <select id="suffixType" class="modal-select" onchange="updateSuffixInput(); updateTitlePreview();">
+            <option value="date">Fixture Group Date (yyyyMMdd)</option>
+            <option value="custom">Custom Text</option>
+          </select>
+          <input type="text" class="modal-input" id="suffixCustom" placeholder="Enter custom suffix…" oninput="updateTitlePreview()" style="display:none;">
+          <span class="suffix-value" id="suffixDateLabel"></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmImport()">📥 Confirm Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Import Configuration Modal -->
+<div class="modal-overlay" id="bulkImportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Configure Bulk Import</h3>
+      <button class="modal-close" onclick="closeBulkImportModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <label class="modal-label">Selected Fixtures</label>
+        <div class="bulk-fixture-list" id="bulkFixtureList"></div>
+      </div>
+
+      <div class="modal-section">
+        <label class="modal-label">Title Name Pattern Preview</label>
+        <div class="title-preview" id="bulkTitlePreview">—</div>
+        <p class="modal-hint">Pattern: [Prefix] - {Fixture Name} - [Suffix]</p>
+      </div>
+
+      <hr class="modal-divider">
+
+      <div class="modal-section">
+        <label class="modal-label">Prefix <span class="required">*</span></label>
+        <div class="modal-row">
+          <select id="bulkPrefixType" class="modal-select" onchange="updateBulkPrefixInput(); updateBulkTitlePreview();">
+            <option value="sport">Sport Type (per fixture)</option>
+            <option value="custom">Custom Text (same for all)</option>
+          </select>
+          <input type="text" class="modal-input" id="bulkPrefixCustom" placeholder="Enter custom prefix…" oninput="updateBulkTitlePreview()" style="display:none;">
+        </div>
+        <p class="modal-hint" id="bulkPrefixHint">Each fixture will use its own Sport Type as prefix.</p>
+      </div>
+
+      <div class="modal-section">
+        <label class="modal-label">Suffix <span class="required">*</span></label>
+        <div class="modal-row">
+          <select id="bulkSuffixType" class="modal-select" onchange="updateBulkSuffixInput(); updateBulkTitlePreview();">
+            <option value="date">Fixture Group Date (yyyyMMdd, per fixture)</option>
+            <option value="custom">Custom Text (same for all)</option>
+          </select>
+          <input type="text" class="modal-input" id="bulkSuffixCustom" placeholder="Enter custom suffix…" oninput="updateBulkTitlePreview()" style="display:none;">
+        </div>
+        <p class="modal-hint" id="bulkSuffixHint">Each fixture will use its own Fixture Group Date as suffix.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeBulkImportModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmBulkImport()">📥 Confirm Bulk Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fixture Group Details Modal -->
+<div class="modal-overlay" id="groupModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3 id="groupModalTitle">Fixture Group</h3>
+        <p class="modal-subtitle" id="groupModalSubtitle"></p>
+      </div>
+      <button class="modal-close" onclick="closeGroupModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="group-details-grid" id="groupDetailsGrid"></div>
+      <hr class="modal-divider">
+      <div class="modal-section">
+        <label class="modal-label">Fixtures in this group</label>
+        <div class="group-fixtures-list" id="groupFixturesList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeGroupModal()">Close</button>
+      <button class="btn btn-primary" onclick="importAllFromGroup()">📥 Import All Available</button>
+    </div>
+  </div>
+</div>
+
+<!-- Imported Fixture Details Modal -->
+<div class="modal-overlay" id="importedFixtureModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3 id="impFixtureTitle">Fixture Details</h3>
+        <p class="modal-subtitle"><span class="badge badge-green">Imported</span></p>
+      </div>
+      <button class="modal-close" onclick="closeImportedFixtureModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="group-details-grid" id="impFixtureDetails"></div>
+      <hr class="modal-divider">
+      <div class="modal-section">
+        <label class="modal-label">Fixture Group Details</label>
+        <div class="group-details-grid" id="impGroupDetails"></div>
+      </div>
+      <hr class="modal-divider">
+      <div class="modal-section">
+        <label class="modal-label">Other Fixtures in this Group</label>
+        <div class="group-fixtures-list" id="impGroupFixturesList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeImportedFixtureModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 

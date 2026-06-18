@@ -129,7 +129,111 @@ function bindHostedPageFallbacks() {
   });
 }
 
+let fixtureIdCopyBound = false;
+let copyToastEl = null;
+let copyToastTimer = null;
+
+function getFixtureIdCopyValue(el) {
+  return (el.getAttribute('title') || el.textContent || '').trim();
+}
+
+async function copyTextToClipboard(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {}
+
+  // Fallback for non-secure contexts where Clipboard API is unavailable.
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const copied = document.execCommand('copy');
+    ta.remove();
+    return copied;
+  } catch (_) {
+    return false;
+  }
+}
+
+function showFixtureIdCopyFeedback(el, copied) {
+  const previousTitle = el.getAttribute('data-copy-title') || el.getAttribute('title') || '';
+  if (!el.getAttribute('data-copy-title')) {
+    el.setAttribute('data-copy-title', previousTitle);
+  }
+
+  el.classList.remove('copied', 'copy-failed');
+  el.classList.add(copied ? 'copied' : 'copy-failed');
+  el.setAttribute('title', copied ? 'Copied!' : 'Copy failed');
+
+  if (el.__copyResetTimer) {
+    clearTimeout(el.__copyResetTimer);
+  }
+
+  el.__copyResetTimer = setTimeout(function() {
+    el.classList.remove('copied', 'copy-failed');
+    const baseTitle = el.getAttribute('data-copy-title');
+    if (baseTitle !== null) {
+      el.setAttribute('title', baseTitle);
+    }
+    el.__copyResetTimer = null;
+  }, 1100);
+}
+
+function ensureCopyToast() {
+  if (copyToastEl) return copyToastEl;
+  const el = document.createElement('div');
+  el.className = 'copy-toast';
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  document.body.appendChild(el);
+  copyToastEl = el;
+  return copyToastEl;
+}
+
+function showCopyToast(message, isSuccess) {
+  const toast = ensureCopyToast();
+  toast.textContent = message;
+  toast.classList.remove('success', 'error', 'visible');
+  toast.classList.add(isSuccess ? 'success' : 'error');
+
+  // Force reflow so repeated clicks retrigger the transition.
+  void toast.offsetWidth;
+  toast.classList.add('visible');
+
+  if (copyToastTimer) clearTimeout(copyToastTimer);
+  copyToastTimer = setTimeout(function() {
+    toast.classList.remove('visible');
+  }, 1200);
+}
+
+function initFixtureIdCopyHandler() {
+  if (fixtureIdCopyBound) return;
+  fixtureIdCopyBound = true;
+
+  document.addEventListener('click', async function(e) {
+    const idEl = e.target.closest('.fixture-id');
+    if (!idEl) return;
+
+    e.preventDefault();
+    const value = getFixtureIdCopyValue(idEl);
+    if (!value) return;
+
+    const copied = await copyTextToClipboard(value);
+    showFixtureIdCopyFeedback(idEl, copied);
+    showCopyToast(copied ? ('Copied ID: ' + value) : 'Unable to copy ID', copied);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  initFixtureIdCopyHandler();
   if (!probeInlineHandlersAvailable()) {
     bindHostedPageFallbacks();
   }
@@ -725,7 +829,7 @@ function viewImportedFixture(name, groupId, sport, importDate, titleId, venue, i
   detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">Sport Type</span><span class="group-detail-value">' + sport + '</span></div>';
   detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">Venue</span><span class="group-detail-value">' + venue + '</span></div>';
   detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">Import Date</span><span class="group-detail-value">' + importDate + '</span></div>';
-  detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">RightsLogic Title ID</span><span class="group-detail-value fixture-id" style="cursor:text" title="' + titleId + '">' + titleId.substring(0, 8) + '</span></div>';
+  detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">RightsLogic Title ID</span><span class="group-detail-value fixture-id" title="' + titleId + '">' + titleId.substring(0, 7) + '</span></div>';
   detailsHtml += '<div class="group-detail-item"><span class="group-detail-label">Imported By</span><span class="group-detail-value">' + importedBy + '</span></div>';
   document.getElementById('impFixtureDetails').innerHTML = detailsHtml;
 

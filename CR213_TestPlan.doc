@@ -1,0 +1,664 @@
+Date: Tue, 30 Jun 2026 09:07:32 +0000 (UTC)
+Message-ID: <572993576.11.1782810452311@c718e71932db>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_10_1513295727.1782810452311"
+
+------=_Part_10_1513295727.1782810452311
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>CR213 - Test Plan</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font: var(--ds-font-body-small, Arial, Helvetica, FreeSans, sans-se=
+rif);
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: var(--ds-surface, #fff) !important;
+        color: var(--ds-text, #000) !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: var(--ds-text, #000);
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        page-break-after: avoid;
+    }
+
+    pre {
+        font: var(--ds-font-code, Monaco, "Courier New", monospace);
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>CR213 - Test Plan</h1>
+    <div class=3D"Section1">
+        <style type=3D"text/css">/*<![CDATA[*/
+div.rbtoc1782810452289 {padding: 0px;}
+div.rbtoc1782810452289 ul {list-style: none;margin-left: 0px;}
+div.rbtoc1782810452289 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style>
+<div class=3D"toc-macro rbtoc1782810452289">
+<style>[data-colorid=3Dws15tgk267]{color:#403294} html[data-color-mode=3Dda=
+rk] [data-colorid=3Dws15tgk267]{color:#796bcd}[data-colorid=3Dafpuq3px57]{c=
+olor:#403294} html[data-color-mode=3Ddark] [data-colorid=3Dafpuq3px57]{colo=
+r:#796bcd}[data-colorid=3Db5yjx3ex2n]{color:#403294} html[data-color-mode=
+=3Ddark] [data-colorid=3Db5yjx3ex2n]{color:#796bcd}[data-colorid=3Deimuu2st=
+pw]{color:#403294} html[data-color-mode=3Ddark] [data-colorid=3Deimuu2stpw]=
+{color:#796bcd}[data-colorid=3Dwjcst9fscz]{color:#403294} html[data-color-m=
+ode=3Ddark] [data-colorid=3Dwjcst9fscz]{color:#796bcd}[data-colorid=3Dlrdwb=
+wdtda]{color:#403294} html[data-color-mode=3Ddark] [data-colorid=3Dlrdwbwdt=
+da]{color:#796bcd}[data-colorid=3Dx5kxu2znr1]{color:#403294} html[data-colo=
+r-mode=3Ddark] [data-colorid=3Dx5kxu2znr1]{color:#796bcd}[data-colorid=3Dbb=
+4a6ix3bt]{color:#403294} html[data-color-mode=3Ddark] [data-colorid=3Dbb4a6=
+ix3bt]{color:#796bcd}[data-colorid=3Dbyqa7jyuhl]{color:#403294} html[data-c=
+olor-mode=3Ddark] [data-colorid=3Dbyqa7jyuhl]{color:#796bcd}</style>
+<ul class=3D"toc-indentation">
+<li><a href=3D"#CR213-TestPlan-Purpose">Purpose</a></li>
+<li><a href=3D"#CR213-TestPlan-Scope">Scope</a>
+<ul class=3D"toc-indentation">
+<li><a href=3D"#CR213-TestPlan-InScope">In Scope</a></li>
+<li><a href=3D"#CR213-TestPlan-OutofScope">Out of Scope</a></li>
+</ul></li>
+<li><a href=3D"#CR213-TestPlan-TestEnvironment">Test Environment</a></li>
+<li><a href=3D"#CR213-TestPlan-RightsLogicPatches">RightsLogic Patches</a><=
+/li>
+<li><a href=3D"#CR213-TestPlan-TestData">Test Data</a></li>
+<li><a href=3D"#CR213-TestPlan-TestScenarios&amp;TestCases">Test Scenarios =
+&amp; Test Cases</a>
+<ul class=3D"toc-indentation">
+<li><a href=3D"#CR213-TestPlan-Movies24-TransactionDictionaryG/LCodes">Movi=
+es 24 - Transaction Dictionary G/L Codes</a></li>
+<li><a href=3D"#CR213-TestPlan-Movies24-SAPProfitCentreUpdate">Movies 24 - =
+SAP Profit Centre Update</a></li>
+<li><a href=3D"#CR213-TestPlan-Syfy-TransactionDictionaryG/LCodes">Syfy - T=
+ransaction Dictionary G/L Codes</a></li>
+</ul></li>
+<li><a href=3D"#CR213-TestPlan-RegressionTesting">Regression Testing</a></l=
+i>
+<li><a href=3D"#CR213-TestPlan-Entry&amp;ExitCriteria">Entry &amp; Exit Cri=
+teria</a></li>
+<li><a href=3D"#CR213-TestPlan-Risks&amp;Dependencies">Risks &amp; Dependen=
+cies</a></li>
+</ul>
+</div>
+<h2 local-id=3D"104ac63c2f87" id=3D"CR213-TestPlan-Purpose"><span data-colo=
+rid=3D"ws15tgk267">Purpose</span></h2>
+<p local-id=3D"501a7900d70e">The purpose of this test plan is to validate t=
+he configuration changes introduced by <strong>CR213 - New Movies 24 &amp; =
+Syfy Budget Lines</strong>, ensuring that:</p>
+<ul local-id=3D"1cc506da-e101-4fb4-bcf6-a339f470d59f">
+<li local-id=3D"6a602019-401d-4628-92e6-e153a923921c">
+<p local-id=3D"bb75af0e3cb9">Correct <strong>G/L Codes</strong> are used fo=
+r Movies 24 and Syfy.</p></li>
+<li local-id=3D"76aaaa66-95a0-4529-b9a7-83033f40b622">
+<p local-id=3D"3a5dab320e62">Correct <strong>SAP Profit Centres</strong> ar=
+e applied.</p></li>
+<li local-id=3D"aa9a79fa-f1f1-491f-992f-8d566bdfca77">
+<p local-id=3D"49d2ee683bca">New <strong>WBS instructions</strong> sent fro=
+m RightsLogic to SAP use <strong>Company Code 2000</strong>.</p></li>
+<li local-id=3D"3acfda6c-acb1-4e44-92c4-2d38a8abf33c">
+<p local-id=3D"2d1e9245b2f5">No regression is introduced to existing Rights=
+=E2=80=91In=E2=80=91Finance functionality.</p></li>
+</ul>
+<h2 local-id=3D"1bcf97cf7fb1" id=3D"CR213-TestPlan-Scope"><span data-colori=
+d=3D"b5yjx3ex2n">Scope</span></h2>
+<h4 local-id=3D"de5c9e2b5357" id=3D"CR213-TestPlan-InScope">In Scope</h4>
+<ul local-id=3D"5ef2723b-878c-4b79-8cd3-62a4211db383">
+<li local-id=3D"4e1d1d6b-2d2f-43ca-be33-c5e79a20dc31">
+<p local-id=3D"3dc05ff11409">RightsLogic <strong>Rights=E2=80=91In=E2=80=91=
+Finance</strong></p></li>
+<li local-id=3D"b99fa876-34c9-47cf-8a13-514c12b222b9">
+<p local-id=3D"d5d0e5d4ee1c">Maintenance =E2=86=92 <strong>Transaction Dict=
+ionary</strong></p></li>
+<li local-id=3D"cadc92c4-d799-45c5-838c-bb29e7fe6417">
+<p local-id=3D"c79668de8994"><strong>Contract Status Mapping, Budget &amp; =
+COA</strong></p></li>
+<li local-id=3D"a6ae636b-6038-4c28-954b-2b5b78b8b8fd">
+<p local-id=3D"6be9654441a0">SAP WBS instruction generation for:</p>
+<ul local-id=3D"b025a796-9435-4ed1-92ac-4d56273f50bc">
+<li local-id=3D"0345acd8-4031-42af-b090-a117d59da6e3">
+<p local-id=3D"e13acdf0294d">Movies 24</p></li>
+<li local-id=3D"35f9fba9-50ad-4db7-9a4e-6f0e0bdf908d">
+<p local-id=3D"6814cbfbb0e9">Syfy</p></li>
+</ul></li>
+</ul>
+<h4 local-id=3D"5cd85e4820b3" id=3D"CR213-TestPlan-OutofScope">Out of Scope=
+</h4>
+<ul local-id=3D"823d1638-57da-4cf6-8d57-b301b87cea5f">
+<li local-id=3D"794a4dd7-f712-4b6a-a5aa-c284aa70c6e2">
+<p local-id=3D"e25397c5e873">Migration of existing WBS codes in SAP (manual=
+ activity by Sky)</p></li>
+<li local-id=3D"bc38d89f-a035-4f4b-9021-9c5491596847">
+<p local-id=3D"75fa6ee0236f">Reallocation of historical GL postings</p></li=
+>
+<li local-id=3D"1fd3632d-7eba-4282-93cc-1490499e13ad">
+<p local-id=3D"5b48aadd8c89">Validation of SAP-side postings</p></li>
+</ul>
+<h2 local-id=3D"3463f548adb6" id=3D"CR213-TestPlan-TestEnvironment"><span d=
+ata-colorid=3D"x5kxu2znr1">Test Environment</span></h2>
+<ul local-id=3D"9501b3c9-b91b-49a9-82fe-a8d3f3e96287">
+<li local-id=3D"87a8fdc1-ddb4-43bd-9212-a8055a4cf9cc">
+<p local-id=3D"030c8033fdc1">RightsLogic: <strong>6T</strong></p></li>
+<li local-id=3D"31a47059-6c7c-475d-aa87-f1429b25a234">
+<p local-id=3D"35369a9b90ab">SAP <strong>test environment</strong> (for int=
+erface message validation only)</p></li>
+</ul>
+<h2 local-id=3D"36f323359e59" id=3D"CR213-TestPlan-RightsLogicPatches"><spa=
+n data-colorid=3D"byqa7jyuhl">RightsLogic Patches</span></h2>
+<div class=3D"confluence-information-macro confluence-information-macro-inf=
+ormation">
+<span class=3D"aui-icon aui-icon-small aui-iconfont-info confluence-informa=
+tion-macro-icon"></span>
+<div class=3D"confluence-information-macro-body">
+<ul local-id=3D"e75c43d1296d">
+<li local-id=3D"ff7f24ca7d18">
+<p local-id=3D"4f8bbb0dcf63">DB Patch 01: <strong>E:\Deployment\3.x\DB\SKY_=
+Build20\B20Patch35.02_CR213</strong></p></li>
+<li local-id=3D"c7521815cc6e">
+<p local-id=3D"0a706c8b0118">DB Patch 02: <strong>E:\Deployment\3.x\DB\SKY_=
+Build20\B20Patch35.02_CR213_DataScript</strong></p></li>
+</ul>
+</div>
+</div>
+<h2 local-id=3D"f321e66d1f81" id=3D"CR213-TestPlan-TestData"><span data-col=
+orid=3D"eimuu2stpw">Test Data</span></h2>
+<ul local-id=3D"43c477c2-c1d1-45b6-8b38-90c5c36444db">
+<li local-id=3D"c3636b2d-0762-4a7c-a2d1-59ffd66b7b7a">
+<p local-id=3D"0252c272b84f">New contracts created under:</p>
+<ul local-id=3D"3cfe1826-5dd4-4b7a-83b8-010942a88f8a">
+<li local-id=3D"b134692e-a6f0-414e-a466-cfc024063020">
+<p local-id=3D"d58aab79b264"><strong>Movies 24</strong> Budget Line</p></li=
+>
+<li local-id=3D"0ea2a0e2-ba2a-49a5-9fc6-90c540fc5619">
+<p local-id=3D"22a5624378ec"><strong>Syfy</strong> Budget Line</p></li>
+</ul></li>
+<li local-id=3D"3f15b62f-ea46-4acb-9c80-ff3a76e005ef">
+<p local-id=3D"cac1f8805f38">Contracts must be created <strong>after</stron=
+g> the configuration change.</p></li>
+<li local-id=3D"60c0a5cf-9784-4349-b1db-13368374e92a">
+<p local-id=3D"4932fa2906e5">Accruals and amortisation runs executed post=
+=E2=80=91configuration.</p></li>
+</ul>
+<h2 local-id=3D"20b7038b7531" id=3D"CR213-TestPlan-TestScenarios&amp;TestCa=
+ses"><span data-colorid=3D"afpuq3px57">Test Scenarios &amp; Test Cases</spa=
+n></h2>
+<h3 local-id=3D"10f8f61ae37f" id=3D"CR213-TestPlan-Movies24-TransactionDict=
+ionaryG/LCodes">Movies 24 - Transaction Dictionary G/L Codes</h3>
+<p local-id=3D"306066a8b89b"><strong>Objective:</strong><br>
+Verify that the four transaction types for Movies 24 use the updated G/L co=
+des under <strong>Company Code 2000</strong>.</p>
+<div class=3D"table-wrap">
+<table data-table-width=3D"1232" data-layout=3D"align-start" data-local-id=
+=3D"91a337ba-d5fe-4212-a55c-1870a4d042ca" class=3D"confluenceTable">
+<colgroup>
+<col style=3D"width: 146.0px;">
+<col style=3D"width: 614.0px;">
+<col style=3D"width: 469.0px;">
+</colgroup>
+<tbody>
+<tr data-local-id=3D"4161749b-b640-430d-855b-6ac992922534">
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"87879cf1-271d-499e-a=
+343-dc49d63641fc" class=3D"confluenceTh">
+<p local-id=3D"c86a28cb9ac6">TC ID</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"fd0eaa94-3b12-42ca-a=
+6b8-79c31b14aff7" class=3D"confluenceTh">
+<p local-id=3D"427e0afb6455">Test Case</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"cb095f79-9d3b-47d9-a=
+a44-5670d796b3a0" class=3D"confluenceTh">
+<p local-id=3D"f1015366ab6f">Expected Result</p></th>
+</tr>
+<tr data-local-id=3D"2e6468ba-85ae-49f5-9ff5-3c8a0762bcb9">
+<td data-local-id=3D"1d80b9f6-ad2b-4828-9761-c6bbb008b46a" class=3D"conflue=
+nceTd">
+<p local-id=3D"56f7c1562c39">M24=E2=80=91TD=E2=80=9101</p></td>
+<td data-local-id=3D"2542bafe-a8e8-49bd-a0aa-691a180c0d77" class=3D"conflue=
+nceTd">
+<p local-id=3D"561d5c0487d9">Verify <strong>Assets Dr - Asset Value</strong=
+></p></td>
+<td data-local-id=3D"4cf3c701-0822-4544-8a3b-d9060ed44ab5" class=3D"conflue=
+nceTd">
+<p local-id=3D"0ce8c80f3652">G/L Code =3D <code>2000.15120.MOVI9</code></p>=
+</td>
+</tr>
+<tr data-local-id=3D"287d7e40-f3b8-4625-adeb-16cfa70e043c">
+<td data-local-id=3D"3f721bc6-3d2d-4330-91bf-3733a1b2c7a6" class=3D"conflue=
+nceTd">
+<p local-id=3D"5d21767fea0f">M24=E2=80=91TD=E2=80=9102</p></td>
+<td data-local-id=3D"8b762ad7-fc8e-4b27-adf6-d0da2ef2c3ac" class=3D"conflue=
+nceTd">
+<p local-id=3D"4181f4eb7b57">Verify <strong>Liabilities Cr - Liabilities</s=
+trong></p></td>
+<td data-local-id=3D"5d50b7a4-c59c-4b04-b057-996e0ed81bf2" class=3D"conflue=
+nceTd">
+<p local-id=3D"6bd51ee6b3a5">G/L Code =3D <code>2000.21520.MOVI9</code></p>=
+</td>
+</tr>
+<tr data-local-id=3D"4c06bf29-9bfc-474f-b09f-1a87a83ab10b">
+<td data-local-id=3D"3d80909f-35d0-46e4-b673-4cb81e8a7096" class=3D"conflue=
+nceTd">
+<p local-id=3D"e290cb513307">M24=E2=80=91TD=E2=80=9103</p></td>
+<td data-local-id=3D"15d6c765-9b67-4f8f-bce1-6df726d5abbd" class=3D"conflue=
+nceTd">
+<p local-id=3D"2873aab4c6df">Verify <strong>Amortisation Dr - Amortization<=
+/strong></p></td>
+<td data-local-id=3D"b0ca405e-e2ac-4d5a-8c7e-a3319270bbb5" class=3D"conflue=
+nceTd">
+<p local-id=3D"6f8a8eb91cbb">G/L Code =3D <code>225011.40010.GBPBS</code></=
+p></td>
+</tr>
+<tr data-local-id=3D"8ea60976-f0dc-4896-a05a-528401772c95">
+<td data-local-id=3D"a3566e93-a5d2-4ab7-83c0-93d97865ce33" class=3D"conflue=
+nceTd">
+<p local-id=3D"5419abee7295">M24=E2=80=91TD=E2=80=9104</p></td>
+<td data-local-id=3D"3006f76a-ba97-4eda-ab2c-4f6fd9f64932" class=3D"conflue=
+nceTd">
+<p local-id=3D"814c1cc5af62">Verify <strong>Amortisation Cr - Accumulated A=
+mortization</strong></p></td>
+<td data-local-id=3D"c5a9bcb9-314f-4a31-9e85-a62da1ff3b5b" class=3D"conflue=
+nceTd">
+<p local-id=3D"233b4cb4e342">G/L Code =3D <code>2000.15130.MOVI9</code></p>=
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 local-id=3D"e31498f5a0a6" id=3D"CR213-TestPlan-Movies24-SAPProfitCentre=
+Update">Movies 24 - SAP Profit Centre Update</h3>
+<p local-id=3D"473a18807f05"><strong>Objective:</strong><br>
+Ensure Movies 24 uses <strong>Sky Movies</strong> as the SAP Profit Centre.=
+</p>
+<div class=3D"table-wrap">
+<table data-table-width=3D"1234" data-layout=3D"align-start" data-local-id=
+=3D"00de4be9-a4be-4b94-b48b-306e70caaabd" class=3D"confluenceTable">
+<colgroup>
+<col style=3D"width: 144.0px;">
+<col style=3D"width: 626.0px;">
+<col style=3D"width: 464.0px;">
+</colgroup>
+<tbody>
+<tr data-local-id=3D"916c9e3d-e7a7-43d2-8896-70830f209680">
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"137826dc-dcb2-4149-8=
+7c1-444fb3444863" class=3D"confluenceTh">
+<p local-id=3D"d6b7a6024020">TC ID</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"577deeef-f18b-4ce7-b=
+ef0-4ed3f492ca72" class=3D"confluenceTh">
+<p local-id=3D"462440cc0438">Test Case</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"539bf227-4b58-43ac-b=
+105-1cb2962afd37" class=3D"confluenceTh">
+<p local-id=3D"8bb592b80b89">Expected Result</p></th>
+</tr>
+<tr data-local-id=3D"486fff4a-75dc-446b-a989-74230929e75c">
+<td data-local-id=3D"dd4ab902-7ae6-468f-9f40-c74c31720253" class=3D"conflue=
+nceTd">
+<p local-id=3D"5e24c2234851">M24=E2=80=91PC=E2=80=9101</p></td>
+<td data-local-id=3D"690d0e29-018a-4625-a14d-b2bbeddd33df" class=3D"conflue=
+nceTd">
+<p local-id=3D"69fda7f803c1">Check Contract Status Mapping, Budget &amp; CO=
+A</p></td>
+<td data-local-id=3D"50302f08-6303-494f-8aff-f30597ebb24e" class=3D"conflue=
+nceTd">
+<p local-id=3D"00822b952f6e">Profit Centre =3D <strong>Sky Movies</strong><=
+/p></td>
+</tr>
+<tr data-local-id=3D"1ff39722-5dd4-4fc9-b744-e899fb09eecb">
+<td data-local-id=3D"97203d45-63d2-4204-ae4d-e527dae0a635" class=3D"conflue=
+nceTd">
+<p local-id=3D"71eb3591baf8">M24=E2=80=91PC=E2=80=9102</p></td>
+<td data-local-id=3D"cf7ea95c-d9ec-4891-ae80-82df5a1bfcf3" class=3D"conflue=
+nceTd">
+<p local-id=3D"7e9520624af0">Create new Movies 24 contract</p></td>
+<td data-local-id=3D"18377663-2221-4a6c-9349-c46b436b2c5e" class=3D"conflue=
+nceTd">
+<p local-id=3D"268676899b51">Profit Centre defaults to <strong>Sky Movies</=
+strong></p></td>
+</tr>
+<tr data-local-id=3D"6ddc03a4-4cb8-4287-a39a-c29ac46ed6f9">
+<td data-local-id=3D"5baa38b8-e481-4aa9-a9ed-f7282ddc63f2" class=3D"conflue=
+nceTd">
+<p local-id=3D"28757155d158">M24=E2=80=91PC=E2=80=9103</p></td>
+<td data-local-id=3D"50607b4a-7aa8-4ade-965f-6278aa6d1005" class=3D"conflue=
+nceTd">
+<p local-id=3D"fa392e3568b0">Generate WBS instruction</p></td>
+<td data-local-id=3D"2b92b5f1-4f75-418e-bebc-e41ddab8b0d0" class=3D"conflue=
+nceTd">
+<p local-id=3D"27271dfcd9fe">SAP message contains Profit Centre =3D <strong=
+>Sky Movies</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"confluence-information-macro confluence-information-macro-inf=
+ormation">
+<span class=3D"aui-icon aui-icon-small aui-iconfont-info confluence-informa=
+tion-macro-icon"></span>
+<div class=3D"confluence-information-macro-body">
+<p local-id=3D"79cd52139573">This can be verified in the <strong>Contract S=
+tatus Mapping, Budget &amp; COA </strong>screen in <em>RightsLogic.</em></p=
+>
+<p local-id=3D"3eea6f4dbd24">Rights In Finance =E2=86=92 Maintenance =E2=86=
+=92 Contract Status Mapping, Budget &amp; COA</p>
+</div>
+</div>
+<h3 local-id=3D"4814dadfe289" id=3D"CR213-TestPlan-Syfy-TransactionDictiona=
+ryG/LCodes">Syfy - Transaction Dictionary G/L Codes</h3>
+<p local-id=3D"7060bd795cc4"><strong>Objective:</strong><br>
+Verify that Syfy uses the updated G/L codes under <strong>Company Code 2000=
+</strong>.</p>
+<div class=3D"table-wrap">
+<table data-table-width=3D"1233" data-layout=3D"align-start" data-local-id=
+=3D"c56f3fa2-b22a-4918-880e-d01cf85c901b" class=3D"confluenceTable">
+<colgroup>
+<col style=3D"width: 176.0px;">
+<col style=3D"width: 594.0px;">
+<col style=3D"width: 461.0px;">
+</colgroup>
+<tbody>
+<tr data-local-id=3D"ffb3ded3-c608-42f6-9f1a-3da3e39f58c3">
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"2e2c7122-4bae-47eb-b=
+e4d-312fb6182cf0" class=3D"confluenceTh">
+<p local-id=3D"5d7a83e91afa">TC ID</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"15ba6d11-d4fa-43c9-9=
+80d-c79d96882d1d" class=3D"confluenceTh">
+<p local-id=3D"e688e2cef68e">Test Case</p></th>
+<th data-highlight-colour=3D"#f5f5f5" data-local-id=3D"64dddb41-c674-4919-b=
+24f-16214a016143" class=3D"confluenceTh">
+<p local-id=3D"2ce1b198eed5">Expected Result</p></th>
+</tr>
+<tr data-local-id=3D"6b5ee0b1-d30d-4b37-969e-7164513c2989">
+<td data-local-id=3D"6dddb66c-f3bd-4422-af32-2d31a86d9518" class=3D"conflue=
+nceTd">
+<p local-id=3D"6aee67ef6513">SY=E2=80=9101</p></td>
+<td data-local-id=3D"2cae1d94-bcb5-4beb-8cf9-8b09d74613df" class=3D"conflue=
+nceTd">
+<p local-id=3D"10434cffca06">Verify <strong>Assets Dr - Asset Value</strong=
+></p></td>
+<td data-local-id=3D"a3afca3c-e8a7-41e8-8a4d-d022fc33c36b" class=3D"conflue=
+nceTd">
+<p local-id=3D"cc031691f543">G/L Code =3D <code>2000.UKN10.20112000</code><=
+/p></td>
+</tr>
+<tr data-local-id=3D"8421d0d6-c25f-4577-9a45-7a31ba00ded0">
+<td data-local-id=3D"17155eb9-679d-4673-881c-e7d5cecc8268" class=3D"conflue=
+nceTd">
+<p local-id=3D"8e3a85281cda">SY=E2=80=9102</p></td>
+<td data-local-id=3D"720c5c88-f6d8-4714-880d-a33ae21c3681" class=3D"conflue=
+nceTd">
+<p local-id=3D"646f1f3a1d86">Verify <strong>Liabilities Cr - Liabilities</s=
+trong></p></td>
+<td data-local-id=3D"7883db4f-e4d1-4fec-bddf-8b125823a51d" class=3D"conflue=
+nceTd">
+<p local-id=3D"850c019a7347">G/L Code =3D <code>2000.UKN10.39851300</code><=
+/p></td>
+</tr>
+<tr data-local-id=3D"88e8f613-755b-4769-9c07-bd50b510519b">
+<td data-local-id=3D"154ce8b0-3daf-4839-957d-082a9a85f587" class=3D"conflue=
+nceTd">
+<p local-id=3D"10cb4465d767">SY=E2=80=9103</p></td>
+<td data-local-id=3D"c0a9230c-5b88-4bc9-944b-8957220d2459" class=3D"conflue=
+nceTd">
+<p local-id=3D"d73bb2c00dc1">Verify <strong>Amortisation Dr - Amortization<=
+/strong></p></td>
+<td data-local-id=3D"fee97d2b-ed60-4a54-a9bd-975f74a850c9" class=3D"conflue=
+nceTd">
+<p local-id=3D"43f86e89bcba">G/L Code =3D <code>2000.2000344201.62101000</c=
+ode></p></td>
+</tr>
+<tr data-local-id=3D"775ed483-86bd-4def-bf16-48bdad6a29e7">
+<td data-local-id=3D"1da678c5-f987-4864-ae03-65d789564cbe" class=3D"conflue=
+nceTd">
+<p local-id=3D"6b6d64fe43c7">SY=E2=80=9104</p></td>
+<td data-local-id=3D"3962b088-ffb5-4fae-80c6-7c6700c8ea39" class=3D"conflue=
+nceTd">
+<p local-id=3D"914befa3efcc">Verify <strong>Amortisation Cr - Accumulated A=
+mortization</strong></p></td>
+<td data-local-id=3D"36de9494-a38f-4216-bf28-c8b9992141e0" class=3D"conflue=
+nceTd">
+<p local-id=3D"306913277af1">G/L Code =3D <code>2000.UKN10.20113000</code><=
+/p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 local-id=3D"152f8f64bd60" id=3D"CR213-TestPlan-RegressionTesting"><span=
+ data-colorid=3D"lrdwbwdtda">Regression Testing</span></h2>
+<ul local-id=3D"7c084991-ed4e-4124-8a0c-4e41265bbe50">
+<li local-id=3D"aa3bf978-190f-4162-86a1-5c551852f6d8">
+<p local-id=3D"dd6da1b558ab">Validate unrelated budget lines are unaffected=
+.</p></li>
+<li local-id=3D"615a20d2-77e5-4624-b8ce-6a505c743941">
+<p local-id=3D"12c6948c0e03">Validate existing interfaces still function.</=
+p></li>
+<li local-id=3D"86b9c36a-5d95-4d82-8c09-a77a91ef0fe0">
+<p local-id=3D"3bfc36eb53b1">Validate no errors in Rights=E2=80=91In=E2=80=
+=91Finance batch jobs.</p></li>
+</ul>
+<h2 local-id=3D"c6fc1ea1c5b3" id=3D"CR213-TestPlan-Entry&amp;ExitCriteria">=
+<span data-colorid=3D"wjcst9fscz">Entry &amp; Exit Criteria</span></h2>
+<p local-id=3D"b82e733d4217"><strong>Entry Criteria</strong></p>
+<ul local-id=3D"9ae7fe31-9532-42cd-ad3c-976983576c59">
+<li local-id=3D"2e94c615-9fce-447c-8e91-07f686e745f6">
+<p local-id=3D"4e1ca98c75dc">CR213 configuration deployed to test environme=
+nt.</p></li>
+<li local-id=3D"d8d9cc00-e4cf-4409-a4fc-56396971e1d5">
+<p local-id=3D"515e5bfd31f6">SAP test environment available.</p></li>
+</ul>
+<p local-id=3D"56ef0c394a8f"><strong>Exit Criteria</strong></p>
+<ul local-id=3D"847e48dd-1efc-4947-bec2-7c32a4aa4e5b">
+<li local-id=3D"70808a01-ea68-4ca2-b7c2-2b114243280b">
+<p local-id=3D"62e35dae8827">All test cases passed.</p></li>
+<li local-id=3D"5fea88df-284e-4ab7-8e72-15c475745c72">
+<p local-id=3D"70e902dbcc48">No critical or high=E2=80=91severity defects o=
+pen.</p></li>
+<li local-id=3D"141a65a2-c73d-41da-80a4-73b51bda538d">
+<p local-id=3D"fa2753a08e4e">Business sign=E2=80=91off obtained.</p></li>
+</ul>
+<h2 local-id=3D"90835d08d12a" id=3D"CR213-TestPlan-Risks&amp;Dependencies">=
+<span data-colorid=3D"bb4a6ix3bt">Risks &amp; Dependencies</span></h2>
+<ul local-id=3D"3d7cdfc2-17f5-46fa-97b9-671b82122e72">
+<li local-id=3D"09781231-969d-415c-b6ba-d72871c6885c">
+<p local-id=3D"3d0da58c5cfc">Manual SAP WBS migration occurs <strong>outsid=
+e</strong> RightsLogic scope.</p></li>
+</ul>
+    </div>
+</body>
+</html>
+------=_Part_10_1513295727.1782810452311--

@@ -1,0 +1,15 @@
+{
+  "name": "fixture-import-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 4173 -d .",
+    "check:js": "node --check web/js/app.js && node --check web/js/core/helpers.js && node --check web/js/core/createFixtureImportApp.js && node --check web/js/mock/mock-data.js && node --check web/js/mock/mock-actions.js",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "test:dom": "node scripts/dom-integration-test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
+

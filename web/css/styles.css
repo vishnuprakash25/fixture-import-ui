@@ -109,6 +109,13 @@ select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rg
 }
 .bulk-bar label { font-weight:600; font-size:13px; color:var(--text); display:flex; align-items:center; gap:8px; cursor:pointer; }
 
+.empty-state {
+  padding:18px 20px;
+  color:var(--text-secondary);
+  font-size:13px;
+  text-align:center;
+}
+
 table { width:100%; border-collapse:collapse; }
 th {
   padding:12px 20px; text-align:left; font-weight:600; color:var(--text-secondary); font-size:11px;

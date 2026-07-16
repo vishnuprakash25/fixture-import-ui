@@ -38,6 +38,28 @@ export function createFixtureImportApp({ data, actions = {} }) {
     bulkImportFixtures: [],
     currentGroupId: null,
     currentImportedFixture: null,
+    expandedSubscriptionId: null,
+    subscriptionsSearch: '',
+    activityFilters: {
+      groups: new Set(),
+      action: '',
+      dateFrom: '',
+      dateTo: '',
+      groupSearch: ''
+    },
+    activityDatePicker: {
+      viewDate: new Date(),
+      start: null,
+      end: null,
+      hover: null
+    },
+    currentActivityEntry: null,
+    pagination: {
+      pageSize: 12,
+      fixturesPage: 1,
+      subscriptionsPage: 1,
+      activityPage: 1
+    },
     datePicker: {
       viewDate: new Date(),
       start: null,
@@ -98,9 +120,32 @@ export function createFixtureImportApp({ data, actions = {} }) {
       selectAll: document.getElementById('selectAll'),
       importSelectedBtn: document.getElementById('importSelectedBtn'),
       clearSelectionBtn: document.getElementById('clearSelectionBtn'),
+      fixturesPagination: document.getElementById('fixturesPagination'),
       subscriptionsBody: document.getElementById('subscriptionsTableBody'),
-      addSubscriptionBtn: document.getElementById('addSubscriptionBtn'),
+      subscriptionsSearchInput: document.getElementById('subscriptionsSearchInput'),
+      clearSubscriptionsSearchBtn: document.getElementById('clearSubscriptionsSearchBtn'),
+      subscriptionsResultCount: document.getElementById('subscriptionsResultCount'),
+      subscriptionsSummary: document.getElementById('subscriptionsSummary'),
+      subscriptionsPagination: document.getElementById('subscriptionsPagination'),
+      activityGroupMultiselect: document.getElementById('activityGroupMultiselect'),
+      activityGroupTriggerBtn: document.getElementById('activityGroupTriggerBtn'),
+      activityGroupClearBtn: document.getElementById('activityGroupClearBtn'),
+      activityGroupDropdown: document.getElementById('activityGroupDropdown'),
+      activityGroupOptions: document.getElementById('activityGroupOptions'),
+      activityGroupFilterLabel: document.getElementById('activityGroupFilterLabel'),
+      activityGroupOptionsSearch: document.getElementById('activityGroupOptionsSearch'),
+      activityActionFilter: document.getElementById('activityActionFilter'),
+      activityDateRangeWrapper: document.getElementById('activityDateRangeWrapper'),
+      activityDateTriggerBtn: document.getElementById('activityDateTriggerBtn'),
+      activityDateClearBtn: document.getElementById('activityDateClearBtn'),
+      activityDateRangeLabel: document.getElementById('activityDateRangeLabel'),
+      activityDatePickerPopup: document.getElementById('activityDatePickerPopup'),
+      activityDateRangeText: document.getElementById('activityDateRangeText'),
+      activityCalMonth1: document.getElementById('activityCalMonth1'),
+      activityCalGrid1: document.getElementById('activityCalGrid1'),
+      clearActivityFiltersBtn: document.getElementById('clearActivityFiltersBtn'),
       activityLogBody: document.getElementById('activityLogTableBody'),
+      activityPagination: document.getElementById('activityPagination'),
       exportLogBtn: document.getElementById('exportLogBtn'),
       importModal: document.getElementById('importModal'),
       importFixtureName: document.getElementById('importFixtureName'),
@@ -140,7 +185,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
       impGroupDetails: document.getElementById('impGroupDetails'),
       impGroupFixturesList: document.getElementById('impGroupFixturesList'),
       closeImportedFixtureModalBtn: document.getElementById('closeImportedFixtureModalBtn'),
-      closeImportedFixtureFooterBtn: document.getElementById('closeImportedFixtureFooterBtn')
+      closeImportedFixtureFooterBtn: document.getElementById('closeImportedFixtureFooterBtn'),
+      activityDetailsModal: document.getElementById('activityDetailsModal'),
+      activityDetailsTitle: document.getElementById('activityDetailsTitle'),
+      activityDetailsSubtitle: document.getElementById('activityDetailsSubtitle'),
+      activityDetailsGrid: document.getElementById('activityDetailsGrid'),
+      activityAuditBlock: document.getElementById('activityAuditBlock'),
+      closeActivityDetailsModalBtn: document.getElementById('closeActivityDetailsModalBtn'),
+      closeActivityDetailsFooterBtn: document.getElementById('closeActivityDetailsFooterBtn')
     });
   }
 
@@ -151,15 +203,71 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
     dom.themeToggleBtn.addEventListener('click', toggleTheme);
     dom.refreshDataBtn.addEventListener('click', () => actions.refreshData?.({ data, state }));
-    dom.viewAllBtn.addEventListener('click', () => switchPage(1));
-    dom.addSubscriptionBtn.addEventListener('click', () => actions.addSubscription?.({ data, state }));
+    dom.viewAllBtn.addEventListener('click', () => switchPage(2));
     dom.exportLogBtn.addEventListener('click', () => actions.exportLog?.({ data, state }));
+    dom.subscriptionsSearchInput.addEventListener('input', (event) => {
+      state.subscriptionsSearch = event.target.value;
+      state.pagination.subscriptionsPage = 1;
+      renderSubscriptions();
+    });
+    dom.clearSubscriptionsSearchBtn.addEventListener('click', clearSubscriptionsSearch);
+    dom.fixturesPagination.addEventListener('click', handlePaginationClick);
+    dom.subscriptionsPagination.addEventListener('click', handlePaginationClick);
+    dom.activityPagination.addEventListener('click', handlePaginationClick);
+    dom.activityGroupTriggerBtn.addEventListener('click', () => toggleActivityGroupDropdown());
+    dom.activityGroupClearBtn.addEventListener('click', clearActivityGroupFilter);
+    dom.activityGroupOptionsSearch.addEventListener('input', (event) => {
+      state.activityFilters.groupSearch = event.target.value;
+      renderActivityGroupOptions();
+    });
+    dom.activityGroupOptions.addEventListener('change', (event) => {
+      if (!event.target.matches('input[type="checkbox"]')) return;
+      if (event.target.checked) state.activityFilters.groups.add(event.target.value);
+      else state.activityFilters.groups.delete(event.target.value);
+      state.pagination.activityPage = 1;
+      syncActivityGroupLabel();
+      renderActivityGroupOptions();
+      renderActivityLog();
+    });
+    document.getElementById('clearActivityGroupOptionsBtn').addEventListener('click', clearActivityGroupFilter);
+    dom.activityActionFilter.addEventListener('change', () => {
+      state.activityFilters.action = dom.activityActionFilter.value;
+      state.pagination.activityPage = 1;
+      renderActivityLog();
+    });
+    dom.activityDateTriggerBtn.addEventListener('click', toggleActivityDatePicker);
+    dom.activityDateClearBtn.addEventListener('click', clearActivityDateRange);
+    document.querySelectorAll('[data-activity-date-preset]').forEach((button) => {
+      button.addEventListener('click', () => selectActivityDatePreset(button.dataset.activityDatePreset));
+    });
+    document.getElementById('activityDatePickerPrevBtn').addEventListener('click', () => changeActivityMonth(-1));
+    document.getElementById('activityDatePickerNextBtn').addEventListener('click', () => changeActivityMonth(1));
+    document.getElementById('clearActivityDatePickerBtn').addEventListener('click', clearActivityDateRange);
+    document.getElementById('applyActivityDatePickerBtn').addEventListener('click', applyActivityDatePicker);
+    dom.activityCalGrid1.addEventListener('click', (event) => {
+      const cell = event.target.closest('.cal-day');
+      if (!cell) return;
+      // Prevent document click handler from closing the picker during range selection.
+      event.stopPropagation();
+      selectActivityCalendarDate(new Date(cell.dataset.date));
+    });
+    dom.activityCalGrid1.addEventListener('mouseover', (event) => {
+      const cell = event.target.closest('.cal-day');
+      if (!cell) return;
+      state.activityDatePicker.hover = new Date(cell.dataset.date);
+      updateActivityHoverStyles();
+    });
+    dom.clearActivityFiltersBtn.addEventListener('click', clearActivityFilters);
 
     dom.searchInput.addEventListener('input', (event) => {
       state.filters.search = event.target.value;
+      state.pagination.fixturesPage = 1;
       renderFixturesTable();
     });
-    dom.searchBtn.addEventListener('click', renderFixturesTable);
+    dom.searchBtn.addEventListener('click', () => {
+      state.pagination.fixturesPage = 1;
+      renderFixturesTable();
+    });
 
     dom.sportTriggerBtn.addEventListener('click', () => toggleDropdown(dom.sportDropdown));
     dom.sportClearBtn.addEventListener('click', clearSportFilter);
@@ -173,6 +281,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       else state.filters.sports.delete(event.target.value);
       syncFilterLabels();
       renderSportOptions();
+      state.pagination.fixturesPage = 1;
       renderFixturesTable();
     });
     document.getElementById('clearSportOptionsBtn').addEventListener('click', clearSportFilter);
@@ -189,6 +298,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       else state.filters.groups.delete(event.target.value);
       syncFilterLabels();
       renderGroupOptions();
+      state.pagination.fixturesPage = 1;
       renderFixturesTable();
     });
     document.getElementById('clearGroupOptionsBtn').addEventListener('click', clearGroupFilter);
@@ -205,6 +315,8 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.calGrid1.addEventListener('click', (event) => {
       const cell = event.target.closest('.cal-day');
       if (!cell) return;
+      // Keep picker open while selecting start and end dates.
+      event.stopPropagation();
       selectCalendarDate(new Date(cell.dataset.date));
     });
     dom.calGrid1.addEventListener('mouseover', (event) => {
@@ -264,6 +376,8 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
     dom.closeImportedFixtureModalBtn.addEventListener('click', closeImportedFixtureModal);
     dom.closeImportedFixtureFooterBtn.addEventListener('click', closeImportedFixtureModal);
+    dom.closeActivityDetailsModalBtn.addEventListener('click', closeActivityDetailsModal);
+    dom.closeActivityDetailsFooterBtn.addEventListener('click', closeActivityDetailsModal);
 
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('click', handleFixtureIdCopyClick);
@@ -274,6 +388,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
         if (overlay === dom.bulkImportModal) closeBulkImportModal();
         if (overlay === dom.groupModal) closeGroupModal();
         if (overlay === dom.importedFixtureModal) closeImportedFixtureModal();
+        if (overlay === dom.activityDetailsModal) closeActivityDetailsModal();
       });
     });
   }
@@ -284,6 +399,57 @@ export function createFixtureImportApp({ data, actions = {} }) {
     if (!dom.sportTypeMultiselect.contains(target)) dom.sportDropdown.classList.remove('open');
     if (!document.getElementById('fixtureGroupMultiselect').contains(target)) dom.groupDropdown.classList.remove('open');
     if (!dom.dateRangeWrapper.contains(target)) dom.datePickerPopup.classList.remove('open');
+    if (!dom.activityGroupMultiselect.contains(target)) dom.activityGroupDropdown.classList.remove('open');
+    if (!dom.activityDateRangeWrapper.contains(target)) dom.activityDatePickerPopup.classList.remove('open');
+  }
+
+  function handlePaginationClick(event) {
+    const button = event.target.closest('[data-page-target]');
+    if (!button || button.disabled) return;
+
+    const target = button.dataset.pageTarget;
+    const action = button.dataset.pageAction || (button.dataset.pageDirection === 'next' ? 'next' : 'prev');
+    const { page, totalPages } = getPaginationMeta(target);
+
+    if (action === 'prev') setPageByTarget(target, page - 1);
+    else if (action === 'next') setPageByTarget(target, page + 1);
+    else if (action === 'first') setPageByTarget(target, 1);
+    else if (action === 'last') setPageByTarget(target, totalPages);
+    else if (action === 'go') {
+      const input = button.parentElement?.querySelector(`[data-page-input-target="${target}"]`);
+      const requestedPage = Number(input?.value || page);
+      setPageByTarget(target, requestedPage);
+    }
+  }
+
+  function setPageByTarget(target, page) {
+    if (target === 'fixtures') {
+      state.pagination.fixturesPage = Math.max(1, page);
+      renderFixturesTable();
+      return;
+    }
+    if (target === 'subscriptions') {
+      state.pagination.subscriptionsPage = Math.max(1, page);
+      renderSubscriptions();
+      return;
+    }
+    if (target === 'activity') {
+      state.pagination.activityPage = Math.max(1, page);
+      renderActivityLog();
+    }
+  }
+
+  function getPaginationMeta(target) {
+    if (target === 'fixtures') {
+      const totalPages = Math.max(1, Math.ceil(getFilteredFixtures().length / state.pagination.pageSize));
+      return { page: state.pagination.fixturesPage, totalPages };
+    }
+    if (target === 'subscriptions') {
+      const totalPages = Math.max(1, Math.ceil(getFilteredSubscriptions().length / state.pagination.pageSize));
+      return { page: state.pagination.subscriptionsPage, totalPages };
+    }
+    const totalPages = Math.max(1, Math.ceil(activityLog.length / state.pagination.pageSize));
+    return { page: state.pagination.activityPage, totalPages };
   }
 
   function handleFixturesTableClick(event) {
@@ -309,21 +475,20 @@ export function createFixtureImportApp({ data, actions = {} }) {
     const button = event.target.closest('[data-action]');
     if (!button) return;
     event.preventDefault();
-    const subscription = subscriptions[Number(button.dataset.subscriptionIndex)];
+    const subscription = getFilteredSubscriptions()[Number(button.dataset.subscriptionIndex)];
     if (!subscription) return;
 
-    if (button.dataset.action === 'show-activity') actions.showActivity?.(subscription);
-    if (button.dataset.action === 'edit-subscription') actions.editSubscription?.(subscription);
-    if (button.dataset.action === 'remove-subscription') actions.unsubscribe?.(subscription);
+    if (button.dataset.action === 'toggle-subscription-details') toggleSubscriptionDetails(subscription.id);
+    if (button.dataset.action === 'show-activity') openSubscriptionActivity(subscription);
   }
 
   function handleActivityLogClick(event) {
     const link = event.target.closest('[data-action="view-activity-details"]');
     if (!link) return;
     event.preventDefault();
-    const entry = activityLog[Number(link.dataset.activityIndex)];
+    const entry = activityLog.find((item) => String(item.id) === String(link.dataset.activityId));
     if (!entry) return;
-    actions.viewActivityDetails?.(entry);
+    openActivityDetailsModal(entry);
   }
 
   async function handleFixtureIdCopyClick(event) {
@@ -346,12 +511,13 @@ export function createFixtureImportApp({ data, actions = {} }) {
     renderGroupOptions();
     renderFixturesTable();
     renderSubscriptions();
+    renderActivityFilters();
     renderActivityLog();
     renderCalendar();
   }
 
   function renderStats() {
-    dom.dashboardStats.innerHTML = data.dashboardStats.map((stat) => `
+    dom.dashboardStats.innerHTML = data.dashboardStats.filter((stat) => !stat.hidden).map((stat) => `
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon ${escapeHtml(stat.iconClass)}">${escapeHtml(stat.icon)}</div>
@@ -364,16 +530,22 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderRecentlyImported() {
-    dom.recentlyImportedBody.innerHTML = recentlyImported.map((item, index) => `
+    dom.recentlyImportedBody.innerHTML = recentlyImported.map((item, index) => {
+      const importStatus = item.importStatus || 'Processed';
+      const importStatusBadge = importStatus === 'Processed' ? 'badge-green' : 'badge-indigo';
+      const canShowTitleId = importStatus === 'Processed' && item.titleId;
+      return `
       <tr>
         <td><strong>${escapeHtml(item.name)}</strong></td>
         <td><span class="badge badge-gray">${escapeHtml(fixtureGroups[item.groupId]?.name || item.groupId)}</span></td>
         <td>${escapeHtml(item.sport)}</td>
         <td>${escapeHtml(item.importDate)}</td>
-        <td class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId)}</td>
-        <td><button type="button" class="btn btn-ghost btn-sm" data-action="view-imported" data-imported-index="${index}">View</button></td>
+        <td>${canShowTitleId ? `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId)}</span>` : '<span class="muted">Not available</span>'}</td>
+        <td><span class="badge ${importStatusBadge}">${escapeHtml(importStatus)}</span></td>
+        <td><button type="button" class="btn btn-secondary btn-sm" data-action="view-imported" data-imported-index="${index}">Details</button></td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   }
 
   function renderSportOptions() {
@@ -404,10 +576,40 @@ export function createFixtureImportApp({ data, actions = {} }) {
     return filterFixtures(importableFixtures, state.filters, fixtureGroups);
   }
 
+  function getPaginatedItems(items, page) {
+    const pageSize = state.pagination.pageSize;
+    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+    const safePage = Math.min(Math.max(1, page), totalPages);
+    const start = (safePage - 1) * pageSize;
+    return {
+      pageItems: items.slice(start, start + pageSize),
+      totalPages,
+      page: safePage,
+      totalItems: items.length,
+      from: items.length ? start + 1 : 0,
+      to: Math.min(start + pageSize, items.length)
+    };
+  }
+
+  function renderPagination(container, target, pagedData) {
+    container.innerHTML = `
+      <span class="pagination-info">${pagedData.from}-${pagedData.to} of ${pagedData.totalItems}</span>
+      <button type="button" class="pagination-btn" data-page-target="${target}" data-page-action="first" ${pagedData.page <= 1 ? 'disabled' : ''}>First</button>
+      <button type="button" class="pagination-btn" data-page-target="${target}" data-page-direction="prev" ${pagedData.page <= 1 ? 'disabled' : ''}>Prev</button>
+      <span class="pagination-info">Page ${pagedData.page} / ${pagedData.totalPages}</span>
+      <input type="number" class="pagination-input" data-page-input-target="${target}" min="1" max="${pagedData.totalPages}" value="${pagedData.page}">
+      <button type="button" class="pagination-btn" data-page-target="${target}" data-page-action="go">Go</button>
+      <button type="button" class="pagination-btn" data-page-target="${target}" data-page-direction="next" ${pagedData.page >= pagedData.totalPages ? 'disabled' : ''}>Next</button>
+      <button type="button" class="pagination-btn" data-page-target="${target}" data-page-action="last" ${pagedData.page >= pagedData.totalPages ? 'disabled' : ''}>Last</button>
+    `;
+  }
+
   function renderFixturesTable() {
     const fixtures = getFilteredFixtures();
+    const paged = getPaginatedItems(fixtures, state.pagination.fixturesPage);
+    state.pagination.fixturesPage = paged.page;
 
-    dom.fixturesBody.innerHTML = fixtures.length ? fixtures.map((fixture) => `
+    dom.fixturesBody.innerHTML = paged.pageItems.length ? paged.pageItems.map((fixture) => `
       <tr>
         <td><input type="checkbox" class="checkbox fixture-checkbox" data-fixture-id="${escapeHtml(fixture.id)}" ${state.selectedFixtureIds.has(fixture.id) ? 'checked' : ''}></td>
         <td><strong>${escapeHtml(fixture.name)}</strong></td>
@@ -425,41 +627,416 @@ export function createFixtureImportApp({ data, actions = {} }) {
       </tr>
     `;
 
+    renderPagination(dom.fixturesPagination, 'fixtures', paged);
+
     syncSelectAllState();
   }
 
   function renderSubscriptions() {
-    dom.subscriptionsBody.innerHTML = subscriptions.map((subscription, index) => {
-      const autoImportClass = subscription.autoImport === 'Enabled' ? 'badge-green' : 'badge-gray';
+    const filtered = getFilteredSubscriptions();
+    const paged = getPaginatedItems(filtered, state.pagination.subscriptionsPage);
+    state.pagination.subscriptionsPage = paged.page;
+    dom.subscriptionsResultCount.textContent = `${filtered.length} of ${subscriptions.length} groups`;
+    renderSubscriptionsSummary(filtered);
+
+    dom.subscriptionsBody.innerHTML = paged.pageItems.length ? paged.pageItems.map((subscription, index) => {
+      const isExpanded = state.expandedSubscriptionId === subscription.id;
+      const sourceIndex = filtered.findIndex((item) => item.id === subscription.id);
       return `
-        <tr>
-          <td><strong>${escapeHtml(subscription.fixture)}</strong></td>
-          <td>${escapeHtml(subscription.type)}</td>
-          <td>${escapeHtml(subscription.subscribed)}</td>
-          <td><span class="badge ${autoImportClass}">${escapeHtml(subscription.autoImport)}</span></td>
-          <td><a href="#" class="link" data-action="show-activity" data-subscription-index="${index}">${escapeHtml(subscription.activityLabel)}</a></td>
-          <td>
-            <div style="display:flex;gap:6px">
-              <button type="button" class="btn btn-ghost btn-sm" data-action="edit-subscription" data-subscription-index="${index}">⚙ Settings</button>
-              <button type="button" class="btn btn-danger btn-sm" data-action="remove-subscription" data-subscription-index="${index}">Remove</button>
+      <tr class="subscription-row${isExpanded ? ' open' : ''}">
+        <td>
+          <button type="button" class="expand-toggle" data-action="toggle-subscription-details" data-subscription-index="${sourceIndex}" aria-expanded="${isExpanded ? 'true' : 'false'}" title="${isExpanded ? 'Hide fixtures' : 'View fixtures'}">
+            <span class="expand-toggle-icon" aria-hidden="true">${isExpanded ? '−' : '+'}</span>
+            <span class="expand-toggle-label">${isExpanded ? 'Hide fixtures' : 'View fixtures'}</span>
+          </button>
+        </td>
+        <td>
+          <div class="subscription-group-cell">
+            <strong>${escapeHtml(subscription.groupName)}</strong>
+            <span class="subscription-subtext">${escapeHtml(subscription.queueStatus)}</span>
+          </div>
+        </td>
+        <td>${escapeHtml(subscription.type)}</td>
+        <td><span class="badge badge-indigo">${escapeHtml(String(subscription.importedFixtures.length))}</span></td>
+        <td>${escapeHtml(subscription.importedSince)}</td>
+        <td>${escapeHtml(subscription.lastSyncedAt)}</td>
+        <td><a href="#" class="link" data-action="show-activity" data-subscription-index="${sourceIndex}">${escapeHtml(subscription.activityLabel)}</a></td>
+      </tr>
+      ${isExpanded ? buildSubscriptionDetailsRowHtml(subscription) : ''}
+    `;
+    }).join('') : `
+      <tr>
+        <td colspan="7"><div class="empty-state">No imported fixture groups match the current search.</div></td>
+      </tr>
+    `;
+
+    renderPagination(dom.subscriptionsPagination, 'subscriptions', paged);
+  }
+
+  function toggleSubscriptionDetails(subscriptionId) {
+    state.expandedSubscriptionId = state.expandedSubscriptionId === subscriptionId ? null : subscriptionId;
+    renderSubscriptions();
+  }
+
+  function buildSubscriptionDetailsRowHtml(subscription) {
+    return `
+      <tr class="subscription-details-row">
+        <td colspan="7">
+          <div class="subscription-details-panel">
+            <div class="subscription-details-header">
+              <span><strong>Type:</strong> ${escapeHtml(subscription.type)}</span>
+              <span><strong>Imported Since:</strong> ${escapeHtml(subscription.importedSince)}</span>
             </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
+            <div class="group-fixtures-list">${buildSubscriptionFixturesHtml(subscription.importedFixtures || [])}</div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+
+  function clearSubscriptionsSearch() {
+    state.subscriptionsSearch = '';
+    state.pagination.subscriptionsPage = 1;
+    dom.subscriptionsSearchInput.value = '';
+    renderSubscriptions();
+  }
+
+  function renderSubscriptionsSummary(filteredSubscriptions) {
+    const allImportedCount = subscriptions.reduce((count, subscription) => count + (subscription.importedFixtures || []).length, 0);
+    const filteredImportedCount = filteredSubscriptions.reduce((count, subscription) => count + (subscription.importedFixtures || []).length, 0);
+    const latestSync = filteredSubscriptions.reduce((latest, subscription) => {
+      const label = subscription.lastSyncedAt;
+      const timestamp = label ? new Date(label).getTime() : Number.NaN;
+      if (Number.isNaN(timestamp)) return latest;
+      if (!latest || timestamp > latest.timestamp) return { timestamp, label };
+      return latest;
+    }, null);
+    const lastSyncedAt = latestSync?.label || 'N/A';
+
+    dom.subscriptionsSummary.innerHTML = `
+      <div class="subscription-summary-item">
+        <span class="subscription-summary-label">Visible Groups</span>
+        <span class="subscription-summary-value">${escapeHtml(String(filteredSubscriptions.length))}</span>
+      </div>
+      <div class="subscription-summary-item">
+        <span class="subscription-summary-label">Imported Fixtures</span>
+        <span class="subscription-summary-value">${escapeHtml(String(filteredImportedCount))} <small>/ ${escapeHtml(String(allImportedCount))}</small></span>
+      </div>
+      <div class="subscription-summary-item">
+        <span class="subscription-summary-label">Latest Sync (Visible)</span>
+        <span class="subscription-summary-value">${escapeHtml(lastSyncedAt)}</span>
+      </div>
+    `;
+  }
+
+  function getFilteredSubscriptions() {
+    const query = state.subscriptionsSearch.trim().toLowerCase();
+    if (!query) return subscriptions;
+
+    return subscriptions.filter((subscription) => {
+      const fixtureNames = (subscription.importedFixtures || []).map((fixture) => fixture.name).join(' ');
+      const fixtureTypes = (subscription.importedFixtures || []).map((fixture) => fixture.type).join(' ');
+      const fixtureDates = (subscription.importedFixtures || []).map((fixture) => fixture.importedOn).join(' ');
+      const searchText = [
+        subscription.groupName,
+        subscription.fixtureManagerRecordId,
+        subscription.type,
+        subscription.importedSince,
+        fixtureNames,
+        fixtureTypes,
+        fixtureDates
+      ].join(' ').toLowerCase();
+
+      return searchText.includes(query);
+    });
+  }
+
+  function toggleActivityDatePicker() {
+    [dom.sportDropdown, dom.groupDropdown, dom.datePickerPopup, dom.activityGroupDropdown].forEach((element) => element.classList.remove('open'));
+    dom.activityDatePickerPopup.classList.toggle('open');
+    if (dom.activityDatePickerPopup.classList.contains('open')) renderActivityCalendar();
+  }
+
+  function changeActivityMonth(direction) {
+    state.activityDatePicker.viewDate.setMonth(state.activityDatePicker.viewDate.getMonth() + direction);
+    renderActivityCalendar();
+  }
+
+  function selectActivityDatePreset(preset) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (preset === 'today') {
+      state.activityDatePicker.start = new Date(now);
+      state.activityDatePicker.end = new Date(now);
+    } else if (preset === 'week') {
+      const dayOfWeek = now.getDay();
+      state.activityDatePicker.start = new Date(now);
+      state.activityDatePicker.start.setDate(now.getDate() - dayOfWeek);
+      state.activityDatePicker.end = new Date(state.activityDatePicker.start);
+      state.activityDatePicker.end.setDate(state.activityDatePicker.start.getDate() + 6);
+    } else if (preset === 'month') {
+      state.activityDatePicker.start = new Date(now.getFullYear(), now.getMonth(), 1);
+      state.activityDatePicker.end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    } else if (preset === 'quarter') {
+      const qStart = Math.floor(now.getMonth() / 3) * 3;
+      state.activityDatePicker.start = new Date(now.getFullYear(), qStart, 1);
+      state.activityDatePicker.end = new Date(now.getFullYear(), qStart + 3, 0);
+    }
+
+    state.activityDatePicker.viewDate = new Date(state.activityDatePicker.start);
+    renderActivityCalendar();
+  }
+
+  function selectActivityCalendarDate(date) {
+    if (!state.activityDatePicker.start || state.activityDatePicker.end) {
+      state.activityDatePicker.start = date;
+      state.activityDatePicker.end = null;
+    } else if (date.toDateString() === state.activityDatePicker.start.toDateString()) {
+      state.activityDatePicker.end = date;
+    } else if (date < state.activityDatePicker.start) {
+      state.activityDatePicker.end = state.activityDatePicker.start;
+      state.activityDatePicker.start = date;
+    } else {
+      state.activityDatePicker.end = date;
+    }
+
+    renderActivityCalendar();
+  }
+
+  function renderActivityCalendar() {
+    const viewDate = state.activityDatePicker.viewDate;
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    dom.activityCalMonth1.textContent = `${MONTHS[month]} ${year}`;
+
+    let html = '<div class="cal-row cal-header">';
+    DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
+    html += '</div>';
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let day = 1;
+    for (let week = 0; week < 6; week++) {
+      if (day > daysInMonth) break;
+      html += '<div class="cal-row">';
+      for (let weekday = 0; weekday < 7; weekday++) {
+        if ((week === 0 && weekday < firstDay) || day > daysInMonth) {
+          html += '<div class="cal-cell"></div>';
+          continue;
+        }
+
+        const date = new Date(year, month, day);
+        const dateKey = date.toDateString();
+        let classes = 'cal-cell cal-day';
+
+        if (state.activityDatePicker.start && dateKey === state.activityDatePicker.start.toDateString()) classes += ' cal-start';
+        if (state.activityDatePicker.end && dateKey === state.activityDatePicker.end.toDateString()) classes += ' cal-end';
+        if (state.activityDatePicker.start && state.activityDatePicker.end && date > state.activityDatePicker.start && date < state.activityDatePicker.end) classes += ' cal-in-range';
+        if (date.getTime() === today.getTime()) classes += ' cal-today';
+
+        html += `<div class="${classes}" data-date="${escapeHtml(date.toDateString())}">${day}</div>`;
+        day++;
+      }
+      html += '</div>';
+    }
+
+    dom.activityCalGrid1.innerHTML = html;
+    updateActivityDatePickerText();
+    updateActivityHoverStyles();
+  }
+
+  function updateActivityDatePickerText() {
+    if (!state.activityDatePicker.start) {
+      dom.activityDateRangeText.textContent = 'Select start date';
+      return;
+    }
+    if (!state.activityDatePicker.end) {
+      dom.activityDateRangeText.textContent = `${formatDisplayDate(state.activityDatePicker.start)} → select end date`;
+      return;
+    }
+    dom.activityDateRangeText.textContent = `${formatDisplayDate(state.activityDatePicker.start)} → ${formatDisplayDate(state.activityDatePicker.end)}`;
+  }
+
+  function updateActivityHoverStyles() {
+    if (!state.activityDatePicker.start || state.activityDatePicker.end || !state.activityDatePicker.hover) return;
+
+    dom.activityCalGrid1.querySelectorAll('.cal-day').forEach((cell) => {
+      cell.classList.remove('cal-hover-range');
+      const date = new Date(cell.dataset.date);
+      if ((date > state.activityDatePicker.start && date <= state.activityDatePicker.hover) || (date < state.activityDatePicker.start && date >= state.activityDatePicker.hover)) {
+        cell.classList.add('cal-hover-range');
+      }
+    });
+  }
+
+  function applyActivityDatePicker() {
+    state.activityFilters.dateFrom = state.activityDatePicker.start ? state.activityDatePicker.start.toISOString().slice(0, 10) : '';
+    const endDate = state.activityDatePicker.end || state.activityDatePicker.start;
+    state.activityFilters.dateTo = endDate ? endDate.toISOString().slice(0, 10) : '';
+    dom.activityDatePickerPopup.classList.remove('open');
+    state.pagination.activityPage = 1;
+    syncActivityFilterInputs();
+    renderActivityLog();
+  }
+
+  function clearActivityDateRange() {
+    state.activityFilters.dateFrom = '';
+    state.activityFilters.dateTo = '';
+    state.activityDatePicker.start = null;
+    state.activityDatePicker.end = null;
+    state.activityDatePicker.hover = null;
+    dom.activityDatePickerPopup.classList.remove('open');
+    state.pagination.activityPage = 1;
+    syncActivityFilterInputs();
+    renderActivityCalendar();
+    renderActivityLog();
+  }
+
+  function getFilteredActivityLog() {
+    return activityLog.filter((entry) => {
+      if (state.activityFilters.groups.size > 0 && !state.activityFilters.groups.has(entry.groupId)) return false;
+      if (state.activityFilters.action && entry.action !== state.activityFilters.action) return false;
+      if (state.activityFilters.dateFrom || state.activityFilters.dateTo) {
+        const entryDate = new Date(entry.timestamp);
+        if (Number.isNaN(entryDate.getTime())) return false;
+        const entryDay = entryDate.toISOString().slice(0, 10);
+        if (state.activityFilters.dateFrom && entryDay < state.activityFilters.dateFrom) return false;
+        if (state.activityFilters.dateTo && entryDay > state.activityFilters.dateTo) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderActivityFilters() {
+    const actionOptions = Array.from(new Set(activityLog.map((entry) => entry.action).filter(Boolean))).sort();
+    dom.activityActionFilter.innerHTML = `<option value="">All Actions</option>${actionOptions.map((action) => `<option value="${escapeHtml(action)}">${escapeHtml(action)}</option>`).join('')}`;
+    renderActivityGroupOptions();
+    syncActivityFilterInputs();
+  }
+
+  function renderActivityGroupOptions() {
+    const search = state.activityFilters.groupSearch.trim().toLowerCase();
+    const allGroupIds = Array.from(new Set(activityLog.map((entry) => entry.groupId).filter(Boolean))).sort();
+    const visible = search ? allGroupIds.filter((id) => {
+      const label = fixtureGroups[id]?.name || id;
+      return label.toLowerCase().includes(search);
+    }) : allGroupIds;
+
+    dom.activityGroupOptions.innerHTML = visible.map((groupId) => {
+      const label = fixtureGroups[groupId]?.name || groupId;
+      return `<label class="multiselect-option"><input type="checkbox" value="${escapeHtml(groupId)}" ${state.activityFilters.groups.has(groupId) ? 'checked' : ''}>${escapeHtml(label)}</label>`;
+    }).join('') || '<div class="multiselect-option">No groups match.</div>';
+  }
+
+  function toggleActivityGroupDropdown() {
+    dom.activityGroupDropdown.classList.toggle('open');
+  }
+
+  function clearActivityGroupFilter() {
+    state.activityFilters.groups.clear();
+    state.activityFilters.groupSearch = '';
+    dom.activityGroupOptionsSearch.value = '';
+    state.pagination.activityPage = 1;
+    syncActivityGroupLabel();
+    renderActivityGroupOptions();
+    renderActivityLog();
+  }
+
+  function syncActivityGroupLabel() {
+    const count = state.activityFilters.groups.size;
+    if (!count) {
+      dom.activityGroupFilterLabel.textContent = 'All Fixture Groups';
+      dom.activityGroupClearBtn.style.display = 'none';
+    } else if (count === 1) {
+      const id = Array.from(state.activityFilters.groups)[0];
+      dom.activityGroupFilterLabel.textContent = fixtureGroups[id]?.name || id;
+      dom.activityGroupClearBtn.style.display = '';
+    } else {
+      dom.activityGroupFilterLabel.textContent = `${count} groups selected`;
+      dom.activityGroupClearBtn.style.display = '';
+    }
+  }
+
+  function syncActivityFilterInputs() {
+    syncActivityGroupLabel();
+    dom.activityActionFilter.value = state.activityFilters.action;
+    state.activityDatePicker.start = state.activityFilters.dateFrom ? new Date(state.activityFilters.dateFrom) : null;
+    state.activityDatePicker.end = state.activityFilters.dateTo ? new Date(state.activityFilters.dateTo) : null;
+    if (!state.activityFilters.dateFrom) {
+      dom.activityDateRangeLabel.textContent = 'All Dates';
+      dom.activityDateClearBtn.style.display = 'none';
+      dom.activityDateRangeText.textContent = 'Select start date';
+    } else if (!state.activityFilters.dateTo || state.activityFilters.dateFrom === state.activityFilters.dateTo) {
+      const date = new Date(state.activityFilters.dateFrom);
+      dom.activityDateRangeLabel.textContent = formatDisplayDate(date);
+      dom.activityDateClearBtn.style.display = '';
+      dom.activityDateRangeText.textContent = `${formatDisplayDate(date)} → select end date`;
+    } else {
+      const from = new Date(state.activityFilters.dateFrom);
+      const to = new Date(state.activityFilters.dateTo);
+      dom.activityDateRangeLabel.textContent = `${formatDisplayDate(from)} – ${formatDisplayDate(to)}`;
+      dom.activityDateClearBtn.style.display = '';
+      dom.activityDateRangeText.textContent = `${formatDisplayDate(from)} → ${formatDisplayDate(to)}`;
+    }
   }
 
   function renderActivityLog() {
-    dom.activityLogBody.innerHTML = activityLog.map((entry, index) => `
+    const filtered = getFilteredActivityLog();
+    const paged = getPaginatedItems(filtered, state.pagination.activityPage);
+    state.pagination.activityPage = paged.page;
+
+    dom.activityLogBody.innerHTML = paged.pageItems.length ? paged.pageItems.map((entry) => `
       <tr>
         <td>${escapeHtml(entry.timestamp)}</td>
         <td><span class="badge ${escapeHtml(entry.actionBadge)}">${escapeHtml(entry.action)}</span></td>
-        <td>${escapeHtml(entry.fixture)}</td>
-        <td>${escapeHtml(entry.user)}</td>
-        <td><span class="badge ${escapeHtml(entry.statusBadge)}">${escapeHtml(entry.status)}</span></td>
-        <td><a href="#" class="link" data-action="view-activity-details" data-activity-index="${index}">Details</a></td>
+        <td>
+          <div><strong>${escapeHtml(entry.fixture)}</strong></div>
+          <div class="activity-change">${escapeHtml(entry.detailType || 'Update')} · ${escapeHtml(entry.oldValue || 'N/A')} → ${escapeHtml(entry.newValue || 'N/A')}</div>
+        </td>
+        <td>${escapeHtml(entry.updatedBy || entry.user)}</td>
+        <td><a href="#" class="link" data-action="view-activity-details" data-activity-id="${escapeHtml(String(entry.id))}">Details</a></td>
       </tr>
-    `).join('');
+    `).join('') : `
+      <tr>
+        <td colspan="5"><div class="empty-state">No activity records match the current filters.</div></td>
+      </tr>
+    `;
+
+    renderPagination(dom.activityPagination, 'activity', paged);
+  }
+
+  function clearActivityFilters() {
+    state.activityFilters.groups.clear();
+    state.activityFilters.groupSearch = '';
+    state.activityFilters.action = '';
+    state.activityFilters.dateFrom = '';
+    state.activityFilters.dateTo = '';
+    state.activityDatePicker.start = null;
+    state.activityDatePicker.end = null;
+    state.activityDatePicker.hover = null;
+    state.pagination.activityPage = 1;
+    dom.activityGroupOptionsSearch.value = '';
+    renderActivityGroupOptions();
+    syncActivityFilterInputs();
+    renderActivityLog();
+  }
+
+  function openSubscriptionActivity(subscription) {
+    state.activityFilters.groups.clear();
+    if (subscription.groupId) state.activityFilters.groups.add(subscription.groupId);
+    state.pagination.activityPage = 1;
+    dom.activityGroupDropdown.classList.remove('open');
+    dom.activityDatePickerPopup.classList.remove('open');
+    syncActivityGroupLabel();
+    renderActivityGroupOptions();
+    renderActivityLog();
+    switchPage(3);
+    actions.showActivity?.(subscription);
   }
 
   function syncFilterLabels() {
@@ -494,6 +1071,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function clearSportFilter() {
     state.filters.sports.clear();
     state.optionSearch.sport = '';
+    state.pagination.fixturesPage = 1;
     dom.sportOptionsSearch.value = '';
     syncFilterLabels();
     renderSportOptions();
@@ -503,6 +1081,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function clearGroupFilter() {
     state.filters.groups.clear();
     state.optionSearch.group = '';
+    state.pagination.fixturesPage = 1;
     dom.groupOptionsSearch.value = '';
     syncFilterLabels();
     renderGroupOptions();
@@ -641,6 +1220,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.filters.dateFrom = cloneDate(state.datePicker.start);
     state.filters.dateTo = cloneDate(state.datePicker.end || state.datePicker.start);
     dom.datePickerPopup.classList.remove('open');
+    state.pagination.fixturesPage = 1;
     syncFilterLabels();
     renderFixturesTable();
   }
@@ -652,13 +1232,15 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.datePicker.end = null;
     state.datePicker.hover = null;
     dom.datePickerPopup.classList.remove('open');
+    state.pagination.fixturesPage = 1;
     syncFilterLabels();
     renderCalendar();
     renderFixturesTable();
   }
 
   function toggleSelectAll(checked) {
-    getFilteredFixtures().forEach((fixture) => {
+    const visibleFixtures = getPaginatedItems(getFilteredFixtures(), state.pagination.fixturesPage).pageItems;
+    visibleFixtures.forEach((fixture) => {
       if (checked) state.selectedFixtureIds.add(fixture.id);
       else state.selectedFixtureIds.delete(fixture.id);
     });
@@ -671,7 +1253,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function syncSelectAllState() {
-    const visibleFixtures = getFilteredFixtures();
+    const visibleFixtures = getPaginatedItems(getFilteredFixtures(), state.pagination.fixturesPage).pageItems;
     const selectedVisibleCount = visibleFixtures.filter((fixture) => state.selectedFixtureIds.has(fixture.id)).length;
     dom.selectAll.checked = visibleFixtures.length > 0 && selectedVisibleCount === visibleFixtures.length;
     dom.selectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleFixtures.length;
@@ -866,13 +1448,15 @@ export function createFixtureImportApp({ data, actions = {} }) {
     const groupId = item.groupId || normalizeGroupKey(item.groupName, fixtureGroups);
     const group = fixtureGroups[groupId];
 
+    const importStatus = item.importStatus || 'Processed';
+    const canShowTitleId = importStatus === 'Processed' && item.titleId;
     dom.impFixtureTitle.textContent = item.name;
     dom.impFixtureDetails.innerHTML = [
       detailCell('Fixture Name', item.name),
       detailCell('Sport Type', item.sport),
       detailCell('Venue', item.venue),
       detailCell('Import Date', item.importDate),
-      detailCell('RightsLogic Title ID', `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId.slice(0, 7))}</span>`, true),
+      detailCell('RightsLogic Title ID', canShowTitleId ? `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId.slice(0, 7))}</span>` : 'Not available until processed', canShowTitleId),
       detailCell('Imported By', item.importedBy)
     ].join('');
 
@@ -884,6 +1468,43 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function closeImportedFixtureModal() {
     dom.importedFixtureModal.classList.remove('visible');
     state.currentImportedFixture = null;
+  }
+
+  function openActivityDetailsModal(entry) {
+    state.currentActivityEntry = entry;
+    const groupName = fixtureGroups[entry.groupId]?.name || entry.groupName || 'Unknown Group';
+    dom.activityDetailsTitle.textContent = entry.fixture;
+    dom.activityDetailsSubtitle.textContent = `${entry.action} · ${entry.timestamp}`;
+    dom.activityDetailsGrid.innerHTML = [
+      detailCell('Fixture Group', groupName),
+      detailCell('Action', entry.action),
+      detailCell('Status', entry.status),
+      detailCell('Updated By', entry.updatedBy || entry.user),
+      detailCell('Source', entry.source || 'Manual'),
+      detailCell('Timestamp', entry.timestamp)
+    ].join('');
+
+    dom.activityAuditBlock.innerHTML = `
+      <div class="group-detail-item" style="margin-bottom:10px;">
+        <span class="group-detail-label">Change Type</span>
+        <span class="group-detail-value">${escapeHtml(entry.detailType || 'N/A')}</span>
+      </div>
+      <div class="group-detail-item" style="margin-bottom:10px;">
+        <span class="group-detail-label">Old Value</span>
+        <span class="group-detail-value">${escapeHtml(entry.oldValue || 'N/A')}</span>
+      </div>
+      <div class="group-detail-item">
+        <span class="group-detail-label">New Value</span>
+        <span class="group-detail-value">${escapeHtml(entry.newValue || 'N/A')}</span>
+      </div>
+    `;
+
+    dom.activityDetailsModal.classList.add('visible');
+  }
+
+  function closeActivityDetailsModal() {
+    dom.activityDetailsModal.classList.remove('visible');
+    state.currentActivityEntry = null;
   }
 
   function buildGroupDetailsHtml(group) {
@@ -925,6 +1546,21 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }).join('');
   }
 
+  function buildSubscriptionFixturesHtml(fixtures) {
+    if (!fixtures.length) return '<p class="empty-state">No imported fixtures in this record.</p>';
+
+    return fixtures.map((fixture) => `
+      <div class="group-fixture-row imported-subscription-fixture">
+        <div class="group-fixture-name">
+          <strong>${escapeHtml(fixture.name)}</strong>
+          <div class="group-fixture-meta">${escapeHtml(fixture.type)} · Imported ${escapeHtml(fixture.importedOn)}</div>
+        </div>
+        <div class="group-fixture-meta">Title ID: <span class="fixture-id" title="${escapeHtml(fixture.titleId)}" data-copy-value="${escapeHtml(fixture.titleId)}">${escapeHtml(fixture.titleId)}</span></div>
+        <div class="group-fixture-status"><span class="badge badge-green">${escapeHtml(fixture.status)}</span></div>
+      </div>
+    `).join('');
+  }
+
   function detailCell(label, value, rawValue = false, style = '') {
     return `
       <div class="group-detail-item"${style ? ` style="${style}"` : ''}>
@@ -947,8 +1583,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   function updateThemeToggle() {
     const isDark = document.body.classList.contains('dark');
-    dom.themeToggleBtn.querySelector('.icon').textContent = isDark ? '🌞' : '🌙';
-    dom.themeToggleBtn.querySelector('.theme-toggle-label').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    dom.themeToggleBtn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
   }
 
   async function copyTextToClipboard(text) {
@@ -1018,4 +1653,3 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   return { init };
 }
-

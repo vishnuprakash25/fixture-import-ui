@@ -18,26 +18,51 @@
     <div class="nav-section">
       <div class="nav-section-label">Main</div>
       <div class="nav-item active" data-page-index="0">
-        <span class="icon">📊</span><span>Dashboard</span>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 14a8 8 0 1 1 16 0"></path>
+            <line x1="12" y1="14" x2="16" y2="10"></line>
+            <circle cx="12" cy="14" r="1.2"></circle>
+          </svg>
+        </span><span>Dashboard</span>
       </div>
       <div class="nav-item" data-page-index="1">
-        <span class="icon">📥</span><span>Import Fixtures</span>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+            <path d="M12 8v7"></path>
+            <path d="m9 12 3 3 3-3"></path>
+          </svg>
+        </span><span>Import Fixtures</span>
       </div>
     </div>
     <div class="nav-section">
       <div class="nav-section-label">Manage</div>
       <div class="nav-item" data-page-index="2">
-        <span class="icon">⭐</span><span>Subscriptions</span>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="5" width="14" height="4" rx="1.5"></rect>
+            <rect x="5" y="10" width="14" height="4" rx="1.5"></rect>
+            <rect x="5" y="15" width="14" height="4" rx="1.5"></rect>
+          </svg>
+        </span><span>Published Fixtures</span>
       </div>
       <div class="nav-item" data-page-index="3">
-        <span class="icon">🕐</span><span>Activity Log</span>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 16c1.7-3.2 3.6-4.8 5.8-4.8 2 0 3.5 1.4 5.1 1.4 1.2 0 2.3-.7 3.1-2"></path>
+            <path d="M4 20h16"></path>
+            <circle cx="9.8" cy="11.2" r="1"></circle>
+            <circle cx="14.9" cy="12.6" r="1"></circle>
+          </svg>
+        </span><span>Activity Log</span>
       </div>
     </div>
     <div class="sidebar-footer">
       <p>v1.0.0 · © Sky 2026</p>
     </div>
-    <button type="button" class="theme-toggle" id="themeToggleBtn">
-      <span class="icon">🌙</span><span class="theme-toggle-label">Dark Mode</span>
+    <button type="button" class="theme-toggle" id="themeToggleBtn" title="Toggle theme">
+      <span class="icon">◐</span>
     </button>
   </aside>
 
@@ -48,18 +73,20 @@
           <h2>Dashboard</h2>
           <p>Overview of your fixture management activity</p>
         </div>
-        <button type="button" class="btn btn-secondary" id="refreshDataBtn">🔄 Refresh</button>
+        <button type="button" class="btn-icon-refresh" id="refreshDataBtn" title="Refresh data">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
       </div>
       <div class="stats" id="dashboardStats"></div>
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Recently Imported</h3>
+          <h3 class="card-title">Recently Imported Fixtures</h3>
           <button type="button" class="btn btn-ghost btn-sm" id="viewAllBtn">View all →</button>
         </div>
         <div class="card-body">
           <table id="recentlyImportedTable">
             <thead>
-              <tr><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Import Date</th><th>RightsLogic Title ID</th><th></th></tr>
+              <tr><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Import Date</th><th>RightsLogic Title ID</th><th>Import Status</th><th></th></tr>
             </thead>
             <tbody id="recentlyImportedBody"></tbody>
           </table>
@@ -152,6 +179,7 @@
             </thead>
             <tbody id="fixturesTableBody"></tbody>
           </table>
+          <div class="table-pagination" id="fixturesPagination"></div>
         </div>
       </div>
     </div>
@@ -159,19 +187,28 @@
     <div class="page" data-page-index="2">
       <div class="page-header">
         <div>
-          <h2>Subscriptions</h2>
-          <p>Manage your fixture subscriptions and auto-import settings</p>
+          <h2>Published Fixtures</h2>
+          <p>Published fixture groups and their imported fixture details</p>
         </div>
-        <button type="button" class="btn btn-primary" id="addSubscriptionBtn">+ Add Subscription</button>
       </div>
       <div class="card">
+        <div class="toolbar">
+          <input type="text" id="subscriptionsSearchInput" class="search-input" placeholder="Search by fixture group, fixture name, type, or import date…">
+          <button type="button" class="btn btn-ghost" id="clearSubscriptionsSearchBtn">Clear</button>
+          <span class="subscriptions-result-count" id="subscriptionsResultCount"></span>
+        </div>
+        <div class="subscription-queue-note">
+          <strong>Auto-update listener:</strong> Fixture Hub event queue updates imported fixtures in RightsLogic automatically.
+        </div>
+        <div class="subscriptions-summary" id="subscriptionsSummary"></div>
         <div class="card-body">
           <table>
             <thead>
-              <tr><th>Fixture</th><th>Type</th><th>Subscribed</th><th>Auto-Import</th><th>Activity</th><th></th></tr>
+              <tr><th style="width:56px"></th><th>Fixture Group</th><th>Type</th><th>Imported Fixtures</th><th>Imported Since</th><th>Last Synced</th><th>Activity</th></tr>
             </thead>
             <tbody id="subscriptionsTableBody"></tbody>
           </table>
+          <div class="table-pagination" id="subscriptionsPagination"></div>
         </div>
       </div>
     </div>
@@ -182,16 +219,73 @@
           <h2>Activity Log</h2>
           <p>Track all fixture import and transformation activities</p>
         </div>
-        <button type="button" class="btn btn-secondary" id="exportLogBtn">📤 Export CSV</button>
+        <button type="button" class="btn btn-secondary" id="exportLogBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export CSV
+        </button>
       </div>
       <div class="card">
+        <div class="toolbar">
+          <div class="multiselect-wrapper" id="activityGroupMultiselect">
+            <button type="button" class="multiselect-trigger" id="activityGroupTriggerBtn">
+              <span id="activityGroupFilterLabel">All Fixture Groups</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button type="button" class="multiselect-clear" id="activityGroupClearBtn" style="display:none;" title="Clear selection">✕</button>
+            <div class="multiselect-dropdown" id="activityGroupDropdown">
+              <input type="text" id="activityGroupOptionsSearch" class="multiselect-search" placeholder="Search fixture groups…">
+              <div class="multiselect-options" id="activityGroupOptions"></div>
+              <div class="multiselect-actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="clearActivityGroupOptionsBtn">Clear All</button>
+              </div>
+            </div>
+          </div>
+          <select id="activityActionFilter">
+            <option value="">All Actions</option>
+          </select>
+          <div class="daterange-wrapper" id="activityDateRangeWrapper">
+            <button type="button" class="multiselect-trigger" id="activityDateTriggerBtn">
+              <span id="activityDateRangeLabel">All Dates</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button type="button" class="multiselect-clear" id="activityDateClearBtn" style="display:none;" title="Clear dates">✕</button>
+            <div class="datepicker-popup" id="activityDatePickerPopup">
+              <div class="datepicker-presets">
+                <button type="button" class="preset-btn" data-activity-date-preset="today">Today</button>
+                <button type="button" class="preset-btn" data-activity-date-preset="week">This Week</button>
+                <button type="button" class="preset-btn" data-activity-date-preset="month">This Month</button>
+                <button type="button" class="preset-btn" data-activity-date-preset="quarter">This Quarter</button>
+              </div>
+              <div class="datepicker-divider"></div>
+              <div class="datepicker-calendars">
+                <div class="datepicker-cal">
+                  <div class="cal-nav">
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerPrevBtn">‹</button>
+                    <span class="cal-month" id="activityCalMonth1"></span>
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerNextBtn">›</button>
+                  </div>
+                  <div class="cal-grid" id="activityCalGrid1"></div>
+                </div>
+              </div>
+              <div class="datepicker-footer">
+                <span class="datepicker-range-text" id="activityDateRangeText">Select start date</span>
+                <div class="datepicker-actions">
+                  <button type="button" class="btn btn-ghost btn-sm" id="clearActivityDatePickerBtn">Clear</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="applyActivityDatePickerBtn">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost" id="clearActivityFiltersBtn">Clear</button>
+        </div>
         <div class="card-body">
           <table>
             <thead>
-              <tr><th>Timestamp</th><th>Action</th><th>Fixture</th><th>User</th><th>Status</th><th></th></tr>
+              <tr><th>Timestamp</th><th>Action</th><th>Fixture</th><th>Updated By</th><th></th></tr>
             </thead>
             <tbody id="activityLogTableBody"></tbody>
           </table>
+          <div class="table-pagination" id="activityPagination"></div>
         </div>
       </div>
     </div>
@@ -339,6 +433,29 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" id="closeImportedFixtureFooterBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="activityDetailsModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3 id="activityDetailsTitle">Activity Details</h3>
+        <p class="modal-subtitle" id="activityDetailsSubtitle"></p>
+      </div>
+      <button type="button" class="modal-close" id="closeActivityDetailsModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="group-details-grid" id="activityDetailsGrid"></div>
+      <hr class="modal-divider">
+      <div class="modal-section">
+        <label class="modal-label">Audit Trail</label>
+        <div class="activity-audit-block" id="activityAuditBlock"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="closeActivityDetailsFooterBtn">Close</button>
     </div>
   </div>
 </div>

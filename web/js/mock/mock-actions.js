@@ -18,7 +18,8 @@ export const mockActions = {
     window.alert('Opening subscription dialog…');
   },
   showActivity(subscription) {
-    window.alert('Activity log for: ' + subscription.activityKey);
+    // Activity drill-down is handled in core UI by switching to Activity Log with filters.
+    void subscription;
   },
   editSubscription(subscription) {
     window.alert('Settings for: ' + subscription.activityKey);
@@ -32,7 +33,8 @@ export const mockActions = {
     window.alert('Exporting activity log to CSV…');
   },
   viewActivityDetails(entry) {
-    window.alert('Details for activity #' + entry.id);
+    // Details are rendered in the Activity details modal by core UI.
+    void entry;
   }
 };
 

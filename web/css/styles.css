@@ -539,6 +539,16 @@ body.dark .expand-toggle-icon { background:rgba(165,180,252,.2); }
   font-size:15px; font-weight:600; color:var(--accent); min-height:44px; display:flex; align-items:center;
 }
 
+.confirm-copy {
+  margin:0 0 12px;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  color:var(--text);
+  font-weight:600;
+}
+
 .modal-footer {
   display:flex; justify-content:flex-end; gap:10px; padding:16px 24px;
   border-top:1px solid var(--border); background:var(--bg); border-radius:0 0 var(--radius) var(--radius);

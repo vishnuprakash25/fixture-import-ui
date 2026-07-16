@@ -13,7 +13,7 @@ const sportTypes = [
   { id: 'fishing', label: 'Fishing' },
   { id: 'football', label: 'Football' },
   { id: 'golf', label: 'Golf' },
-  { id: 'motorsport', label: 'Motor Sport' },
+  { id: 'motorsport', label: 'Formula 1' },
   { id: 'racing-horse', label: 'Racing (Horse)' },
   { id: 'rugby', label: 'Rugby (Union League)' },
   { id: 'snooker-pool', label: 'Snooker/Pool' },
@@ -21,276 +21,832 @@ const sportTypes = [
   { id: 'watersports', label: 'Watersports' }
 ];
 
-const dashboardStats = [
-  { icon: '📦', iconClass: 'purple', trend: '↑ 12%', trendDirection: 'up', value: '247', label: 'Total Fixtures' },
-  { icon: '⭐', iconClass: 'rose', trend: '+2', trendDirection: 'up', value: '12', label: 'Active Subscriptions' },
-  { icon: '⏳', iconClass: 'sky', trend: '↓ 5', trendDirection: 'down', value: '34', label: 'Pending Imports' }
-];
-
-const fixtureGroups = {
-  'premier-league-2025': {
+const groupCatalog = [
+  {
+    id: 'premier-league-2025',
     name: 'Premier League 2025/26',
     sport: 'Football',
     season: '2025/26',
     organiser: 'English Premier League',
     startDate: 'Aug 16, 2025',
     endDate: 'May 24, 2026',
-    totalFixtures: 380,
+    venue: 'Various (England)',
     fixtures: [
-      { name: 'Arsenal vs Chelsea', date: 'Dec 22, 2025', venue: 'Emirates Stadium, London', status: 'Available' },
-      { name: 'Liverpool vs Man United', date: 'Jan 4, 2026', venue: 'Anfield, Liverpool', status: 'Available' },
-      { name: 'Man City vs Tottenham', date: 'Jan 18, 2026', venue: 'Etihad Stadium, Manchester', status: 'Imported' },
-      { name: 'Newcastle vs Aston Villa', date: 'Jan 25, 2026', venue: 'St James\' Park, Newcastle', status: 'Available' },
-      { name: 'Chelsea vs West Ham', date: 'Feb 1, 2026', venue: 'Stamford Bridge, London', status: 'Available' },
-      { name: 'Everton vs Brighton', date: 'Feb 8, 2026', venue: 'Goodison Park, Liverpool', status: 'Imported' },
-      { name: 'Wolves vs Crystal Palace', date: 'Feb 15, 2026', venue: 'Molineux, Wolverhampton', status: 'Imported' },
-      { name: 'Tottenham vs Arsenal', date: 'Feb 22, 2026', venue: 'Tottenham Hotspur Stadium, London', status: 'Available' },
-      { name: 'Man United vs Liverpool', date: 'Mar 1, 2026', venue: 'Old Trafford, Manchester', status: 'Available' },
-      { name: 'Leicester vs Nottingham Forest', date: 'Mar 8, 2026', venue: 'King Power Stadium, Leicester', status: 'Imported' },
-      { name: 'West Ham vs Fulham', date: 'Mar 15, 2026', venue: 'London Stadium, London', status: 'Available' },
-      { name: 'Aston Villa vs Man City', date: 'Mar 22, 2026', venue: 'Villa Park, Birmingham', status: 'Available' },
-      { name: 'Brighton vs Brentford', date: 'Mar 29, 2026', venue: 'Amex Stadium, Brighton', status: 'Imported' },
-      { name: 'Bournemouth vs Southampton', date: 'Apr 5, 2026', venue: 'Vitality Stadium, Bournemouth', status: 'Available' },
-      { name: 'Crystal Palace vs Ipswich', date: 'Apr 12, 2026', venue: 'Selhurst Park, London', status: 'Available' },
-      { name: 'Chelsea vs Arsenal', date: 'Apr 19, 2026', venue: 'Stamford Bridge, London', status: 'Available' },
-      { name: 'Liverpool vs Man City', date: 'Apr 26, 2026', venue: 'Anfield, Liverpool', status: 'Available' },
-      { name: 'Man City vs Arsenal', date: 'May 3, 2026', venue: 'Etihad Stadium, Manchester', status: 'Available' },
-      { name: 'Tottenham vs Chelsea', date: 'May 10, 2026', venue: 'Tottenham Hotspur Stadium, London', status: 'Available' },
-      { name: 'Newcastle vs Liverpool', date: 'May 17, 2026', venue: 'St James\' Park, Newcastle', status: 'Available' }
+      { name: 'Arsenal vs Chelsea', date: 'Dec 22, 2025', venue: 'Emirates Stadium, London' },
+      { name: 'Liverpool vs Man United', date: 'Jan 4, 2026', venue: 'Anfield, Liverpool' },
+      { name: 'Tottenham vs Newcastle', date: 'Jan 18, 2026', venue: 'Tottenham Hotspur Stadium, London' }
     ]
   },
-  'champions-league-2025': {
-    name: 'Champions League 2025/26',
+  {
+    id: 'champions-league-2025',
+    name: 'UEFA Champions League 2025/26',
     sport: 'Football',
     season: '2025/26',
     organiser: 'UEFA',
     startDate: 'Sep 16, 2025',
     endDate: 'May 30, 2026',
-    totalFixtures: 189,
+    venue: 'Various (Europe)',
     fixtures: [
-      { name: 'Real Madrid vs Bayern Munich', date: 'Feb 12, 2026', venue: 'Santiago Bernabéu, Madrid', status: 'Available' },
-      { name: 'PSG vs Inter Milan', date: 'Feb 19, 2026', venue: 'Parc des Princes, Paris', status: 'Available' },
-      { name: 'Barcelona vs Man City', date: 'Mar 5, 2026', venue: 'Camp Nou, Barcelona', status: 'Imported' },
-      { name: 'Liverpool vs Dortmund', date: 'Mar 12, 2026', venue: 'Anfield, Liverpool', status: 'Available' },
-      { name: 'Juventus vs Atletico Madrid', date: 'Mar 19, 2026', venue: 'Allianz Stadium, Turin', status: 'Imported' },
-      { name: 'Bayern Munich vs PSG', date: 'Mar 26, 2026', venue: 'Allianz Arena, Munich', status: 'Available' },
-      { name: 'Man City vs Real Madrid', date: 'Apr 2, 2026', venue: 'Etihad Stadium, Manchester', status: 'Available' },
-      { name: 'Inter Milan vs Liverpool', date: 'Apr 9, 2026', venue: 'San Siro, Milan', status: 'Imported' },
-      { name: 'Dortmund vs Barcelona', date: 'Apr 16, 2026', venue: 'Signal Iduna Park, Dortmund', status: 'Available' },
-      { name: 'Atletico Madrid vs Bayern Munich', date: 'Apr 23, 2026', venue: 'Wanda Metropolitano, Madrid', status: 'Available' },
-      { name: 'Semi-Final 1 (Leg 1)', date: 'Apr 30, 2026', venue: 'TBD', status: 'Available' },
-      { name: 'Semi-Final 1 (Leg 2)', date: 'May 7, 2026', venue: 'TBD', status: 'Available' },
-      { name: 'Semi-Final 2 (Leg 1)', date: 'May 1, 2026', venue: 'TBD', status: 'Available' },
-      { name: 'Semi-Final 2 (Leg 2)', date: 'May 8, 2026', venue: 'TBD', status: 'Available' },
-      { name: 'Final', date: 'May 30, 2026', venue: 'Allianz Arena, Munich', status: 'Available' },
-      { name: 'Group A - Matchday 1', date: 'Sep 16, 2025', venue: 'Various', status: 'Imported' },
-      { name: 'Group A - Matchday 2', date: 'Oct 1, 2025', venue: 'Various', status: 'Imported' },
-      { name: 'Group B - Matchday 1', date: 'Sep 17, 2025', venue: 'Various', status: 'Imported' },
-      { name: 'Group B - Matchday 2', date: 'Oct 2, 2025', venue: 'Various', status: 'Imported' },
-      { name: 'Group C - Matchday 1', date: 'Sep 16, 2025', venue: 'Various', status: 'Imported' }
+      { name: 'Real Madrid vs Bayern Munich', date: 'Feb 12, 2026', venue: 'Santiago Bernabeu, Madrid' },
+      { name: 'PSG vs Inter Milan', date: 'Feb 19, 2026', venue: 'Parc des Princes, Paris' },
+      { name: 'Barcelona vs Man City', date: 'Mar 5, 2026', venue: 'Camp Nou, Barcelona' }
     ]
   },
-  'grand-slam-2025': {
-    name: 'Grand Slam Series 2025',
-    sport: 'Tennis',
+  {
+    id: 'europa-league-2025',
+    name: 'UEFA Europa League 2025/26',
+    sport: 'Football',
     season: '2025/26',
-    organiser: 'ITF / Grand Slam Board',
-    startDate: 'Jan 12, 2026',
-    endDate: 'Sep 13, 2026',
-    totalFixtures: 56,
+    organiser: 'UEFA',
+    startDate: 'Sep 18, 2025',
+    endDate: 'May 22, 2026',
+    venue: 'Various (Europe)',
     fixtures: [
-      { name: 'Australian Open Finals', date: 'Jan 26, 2026', venue: 'Melbourne Park, Australia', status: 'Available' },
-      { name: 'Australian Open Semi-Finals', date: 'Jan 24, 2026', venue: 'Melbourne Park, Australia', status: 'Imported' },
-      { name: 'French Open Semi-Finals', date: 'Jun 6, 2026', venue: 'Roland Garros, Paris', status: 'Available' },
-      { name: 'French Open Finals', date: 'Jun 8, 2026', venue: 'Roland Garros, Paris', status: 'Available' },
-      { name: 'Wimbledon Quarter-Finals', date: 'Jul 9, 2026', venue: 'All England Club, London', status: 'Imported' },
-      { name: 'Wimbledon Semi-Finals', date: 'Jul 11, 2026', venue: 'All England Club, London', status: 'Available' },
-      { name: 'Wimbledon Finals', date: 'Jul 13, 2026', venue: 'All England Club, London', status: 'Available' },
-      { name: 'US Open Semi-Finals', date: 'Sep 11, 2026', venue: 'Flushing Meadows, New York', status: 'Available' },
-      { name: 'US Open Finals', date: 'Sep 13, 2026', venue: 'Flushing Meadows, New York', status: 'Available' }
+      { name: 'Roma vs Sevilla', date: 'Feb 6, 2026', venue: 'Stadio Olimpico, Rome' },
+      { name: 'Leverkusen vs Benfica', date: 'Feb 13, 2026', venue: 'BayArena, Leverkusen' },
+      { name: 'Sporting vs Marseille', date: 'Feb 20, 2026', venue: 'Jose Alvalade, Lisbon' }
     ]
   },
-  'f1-monaco-gp-2025': {
-    name: 'F1 Monaco Grand Prix 2025',
-    sport: 'Motor Sport',
-    season: '2025',
+  {
+    id: 'serie-a-2025',
+    name: 'Serie A 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'Lega Serie A',
+    startDate: 'Aug 24, 2025',
+    endDate: 'May 24, 2026',
+    venue: 'Various (Italy)',
+    fixtures: [
+      { name: 'Inter vs Juventus', date: 'Nov 30, 2025', venue: 'San Siro, Milan' },
+      { name: 'Milan vs Napoli', date: 'Dec 14, 2025', venue: 'San Siro, Milan' },
+      { name: 'Atalanta vs Lazio', date: 'Jan 11, 2026', venue: 'Gewiss Stadium, Bergamo' }
+    ]
+  },
+  {
+    id: 'la-liga-2025',
+    name: 'La Liga 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'LALIGA',
+    startDate: 'Aug 17, 2025',
+    endDate: 'May 24, 2026',
+    venue: 'Various (Spain)',
+    fixtures: [
+      { name: 'Barcelona vs Atletico Madrid', date: 'Dec 7, 2025', venue: 'Camp Nou, Barcelona' },
+      { name: 'Real Madrid vs Sevilla', date: 'Dec 21, 2025', venue: 'Santiago Bernabeu, Madrid' },
+      { name: 'Valencia vs Villarreal', date: 'Jan 18, 2026', venue: 'Mestalla, Valencia' }
+    ]
+  },
+  {
+    id: 'bundesliga-2025',
+    name: 'Bundesliga 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'DFL',
+    startDate: 'Aug 22, 2025',
+    endDate: 'May 16, 2026',
+    venue: 'Various (Germany)',
+    fixtures: [
+      { name: 'Bayern Munich vs Dortmund', date: 'Dec 6, 2025', venue: 'Allianz Arena, Munich' },
+      { name: 'Leipzig vs Leverkusen', date: 'Dec 14, 2025', venue: 'Red Bull Arena, Leipzig' },
+      { name: 'Stuttgart vs Frankfurt', date: 'Jan 17, 2026', venue: 'MHPArena, Stuttgart' }
+    ]
+  },
+  {
+    id: 'ligue-1-2025',
+    name: 'Ligue 1 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'LFP',
+    startDate: 'Aug 15, 2025',
+    endDate: 'May 23, 2026',
+    venue: 'Various (France)',
+    fixtures: [
+      { name: 'PSG vs Marseille', date: 'Nov 23, 2025', venue: 'Parc des Princes, Paris' },
+      { name: 'Lyon vs Monaco', date: 'Dec 13, 2025', venue: 'Groupama Stadium, Lyon' },
+      { name: 'Lille vs Nice', date: 'Jan 10, 2026', venue: 'Pierre-Mauroy Stadium, Lille' }
+    ]
+  },
+  {
+    id: 'fa-cup-2025',
+    name: 'FA Cup 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'The FA',
+    startDate: 'Nov 1, 2025',
+    endDate: 'May 16, 2026',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'FA Cup Third Round Draw', date: 'Jan 3, 2026', venue: 'Various' },
+      { name: 'FA Cup Quarter Final 1', date: 'Mar 14, 2026', venue: 'Wembley, London' },
+      { name: 'FA Cup Semi Final', date: 'Apr 18, 2026', venue: 'Wembley, London' }
+    ]
+  },
+  {
+    id: 'copa-del-rey-2025',
+    name: 'Copa del Rey 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'RFEF',
+    startDate: 'Oct 28, 2025',
+    endDate: 'Apr 25, 2026',
+    venue: 'Various (Spain)',
+    fixtures: [
+      { name: 'Quarter Final Leg 1', date: 'Jan 21, 2026', venue: 'Various' },
+      { name: 'Quarter Final Leg 2', date: 'Jan 28, 2026', venue: 'Various' },
+      { name: 'Final', date: 'Apr 25, 2026', venue: 'La Cartuja, Seville' }
+    ]
+  },
+  {
+    id: 'eredvisie-2025',
+    name: 'Eredivisie 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'KNVB',
+    startDate: 'Aug 8, 2025',
+    endDate: 'May 17, 2026',
+    venue: 'Various (Netherlands)',
+    fixtures: [
+      { name: 'Ajax vs PSV', date: 'Nov 9, 2025', venue: 'Johan Cruyff Arena, Amsterdam' },
+      { name: 'Feyenoord vs AZ', date: 'Dec 14, 2025', venue: 'De Kuip, Rotterdam' },
+      { name: 'Twente vs Utrecht', date: 'Jan 24, 2026', venue: 'De Grolsch Veste, Enschede' }
+    ]
+  },
+  {
+    id: 'championship-2025',
+    name: 'EFL Championship 2025/26',
+    sport: 'Football',
+    season: '2025/26',
+    organiser: 'EFL',
+    startDate: 'Aug 9, 2025',
+    endDate: 'May 2, 2026',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'Leeds vs Sunderland', date: 'Nov 1, 2025', venue: 'Elland Road, Leeds' },
+      { name: 'Burnley vs Norwich', date: 'Dec 20, 2025', venue: 'Turf Moor, Burnley' },
+      { name: 'Middlesbrough vs Coventry', date: 'Jan 17, 2026', venue: 'Riverside Stadium, Middlesbrough' }
+    ]
+  },
+  {
+    id: 'mls-cup-2026',
+    name: 'MLS 2026',
+    sport: 'Football',
+    season: '2026',
+    organiser: 'Major League Soccer',
+    startDate: 'Feb 21, 2026',
+    endDate: 'Dec 6, 2026',
+    venue: 'Various (USA)',
+    fixtures: [
+      { name: 'LA Galaxy vs Seattle Sounders', date: 'Mar 7, 2026', venue: 'Dignity Health Sports Park, Carson' },
+      { name: 'Inter Miami vs Atlanta United', date: 'Apr 12, 2026', venue: 'DRV PNK Stadium, Fort Lauderdale' },
+      { name: 'NYCFC vs Columbus Crew', date: 'May 16, 2026', venue: 'Yankee Stadium, New York' }
+    ]
+  },
+  {
+    id: 'australian-open-2026',
+    name: 'Australian Open 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'Tennis Australia',
+    startDate: 'Jan 12, 2026',
+    endDate: 'Jan 26, 2026',
+    venue: 'Melbourne Park, Australia',
+    fixtures: [
+      { name: 'Australian Open Round 1', date: 'Jan 12, 2026', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Semi Final', date: 'Jan 24, 2026', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Final', date: 'Jan 26, 2026', venue: 'Rod Laver Arena, Melbourne' }
+    ]
+  },
+  {
+    id: 'french-open-2026',
+    name: 'French Open 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'FFT',
+    startDate: 'May 24, 2026',
+    endDate: 'Jun 8, 2026',
+    venue: 'Roland Garros, Paris',
+    fixtures: [
+      { name: 'French Open Round 1', date: 'May 24, 2026', venue: 'Court Philippe-Chatrier, Paris' },
+      { name: 'French Open Semi Final', date: 'Jun 6, 2026', venue: 'Court Philippe-Chatrier, Paris' },
+      { name: 'French Open Final', date: 'Jun 8, 2026', venue: 'Court Philippe-Chatrier, Paris' }
+    ]
+  },
+  {
+    id: 'wimbledon-2026',
+    name: 'Wimbledon 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'All England Lawn Tennis Club',
+    startDate: 'Jun 29, 2026',
+    endDate: 'Jul 12, 2026',
+    venue: 'All England Club, London',
+    fixtures: [
+      { name: 'Wimbledon Round 1', date: 'Jun 29, 2026', venue: 'Centre Court, London' },
+      { name: 'Wimbledon Semi Final', date: 'Jul 10, 2026', venue: 'Centre Court, London' },
+      { name: 'Wimbledon Final', date: 'Jul 12, 2026', venue: 'Centre Court, London' }
+    ]
+  },
+  {
+    id: 'us-open-2026',
+    name: 'US Open 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'USTA',
+    startDate: 'Aug 31, 2026',
+    endDate: 'Sep 13, 2026',
+    venue: 'Flushing Meadows, New York',
+    fixtures: [
+      { name: 'US Open Round 1', date: 'Aug 31, 2026', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Semi Final', date: 'Sep 11, 2026', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Final', date: 'Sep 13, 2026', venue: 'Arthur Ashe Stadium, New York' }
+    ]
+  },
+  {
+    id: 'atp-masters-indian-wells-2026',
+    name: 'ATP Masters Indian Wells 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'ATP',
+    startDate: 'Mar 9, 2026',
+    endDate: 'Mar 22, 2026',
+    venue: 'Indian Wells Tennis Garden, California',
+    fixtures: [
+      { name: 'Indian Wells Round of 32', date: 'Mar 13, 2026', venue: 'Stadium 1, Indian Wells' },
+      { name: 'Indian Wells Quarter Final', date: 'Mar 19, 2026', venue: 'Stadium 1, Indian Wells' },
+      { name: 'Indian Wells Final', date: 'Mar 22, 2026', venue: 'Stadium 1, Indian Wells' }
+    ]
+  },
+  {
+    id: 'atp-masters-miami-2026',
+    name: 'ATP Masters Miami 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'ATP',
+    startDate: 'Mar 23, 2026',
+    endDate: 'Apr 5, 2026',
+    venue: 'Hard Rock Stadium, Miami',
+    fixtures: [
+      { name: 'Miami Open Round of 32', date: 'Mar 27, 2026', venue: 'Center Court, Miami Gardens' },
+      { name: 'Miami Open Semi Final', date: 'Apr 3, 2026', venue: 'Center Court, Miami Gardens' },
+      { name: 'Miami Open Final', date: 'Apr 5, 2026', venue: 'Center Court, Miami Gardens' }
+    ]
+  },
+  {
+    id: 'atp-masters-madrid-2026',
+    name: 'ATP Masters Madrid 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'ATP',
+    startDate: 'Apr 27, 2026',
+    endDate: 'May 10, 2026',
+    venue: 'Caja Magica, Madrid',
+    fixtures: [
+      { name: 'Madrid Open Round of 16', date: 'May 4, 2026', venue: 'Manolo Santana Stadium, Madrid' },
+      { name: 'Madrid Open Semi Final', date: 'May 8, 2026', venue: 'Manolo Santana Stadium, Madrid' },
+      { name: 'Madrid Open Final', date: 'May 10, 2026', venue: 'Manolo Santana Stadium, Madrid' }
+    ]
+  },
+  {
+    id: 'atp-masters-rome-2026',
+    name: 'ATP Masters Rome 2026',
+    sport: 'Tennis',
+    season: '2026',
+    organiser: 'ATP',
+    startDate: 'May 11, 2026',
+    endDate: 'May 24, 2026',
+    venue: 'Foro Italico, Rome',
+    fixtures: [
+      { name: 'Rome Masters Round of 16', date: 'May 18, 2026', venue: 'Campo Centrale, Rome' },
+      { name: 'Rome Masters Semi Final', date: 'May 22, 2026', venue: 'Campo Centrale, Rome' },
+      { name: 'Rome Masters Final', date: 'May 24, 2026', venue: 'Campo Centrale, Rome' }
+    ]
+  },
+  {
+    id: 'f1-bahrain-gp-2026',
+    name: 'Formula 1 Bahrain Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Mar 6, 2026',
+    endDate: 'Mar 8, 2026',
+    venue: 'Bahrain International Circuit, Sakhir',
+    fixtures: [
+      { name: 'Bahrain GP - Practice 1', date: 'Mar 6, 2026', venue: 'Bahrain International Circuit' },
+      { name: 'Bahrain GP - Qualifying', date: 'Mar 7, 2026', venue: 'Bahrain International Circuit' },
+      { name: 'Bahrain GP - Race', date: 'Mar 8, 2026', venue: 'Bahrain International Circuit' }
+    ]
+  },
+  {
+    id: 'f1-saudi-gp-2026',
+    name: 'Formula 1 Saudi Arabian Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Mar 13, 2026',
+    endDate: 'Mar 15, 2026',
+    venue: 'Jeddah Corniche Circuit, Jeddah',
+    fixtures: [
+      { name: 'Saudi GP - Practice 1', date: 'Mar 13, 2026', venue: 'Jeddah Corniche Circuit' },
+      { name: 'Saudi GP - Qualifying', date: 'Mar 14, 2026', venue: 'Jeddah Corniche Circuit' },
+      { name: 'Saudi GP - Race', date: 'Mar 15, 2026', venue: 'Jeddah Corniche Circuit' }
+    ]
+  },
+  {
+    id: 'f1-australian-gp-2026',
+    name: 'Formula 1 Australian Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Mar 20, 2026',
+    endDate: 'Mar 22, 2026',
+    venue: 'Albert Park, Melbourne',
+    fixtures: [
+      { name: 'Australian GP - Practice 1', date: 'Mar 20, 2026', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Qualifying', date: 'Mar 21, 2026', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Race', date: 'Mar 22, 2026', venue: 'Albert Park Circuit' }
+    ]
+  },
+  {
+    id: 'f1-japanese-gp-2026',
+    name: 'Formula 1 Japanese Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Apr 3, 2026',
+    endDate: 'Apr 5, 2026',
+    venue: 'Suzuka Circuit, Japan',
+    fixtures: [
+      { name: 'Japanese GP - Practice 1', date: 'Apr 3, 2026', venue: 'Suzuka Circuit' },
+      { name: 'Japanese GP - Qualifying', date: 'Apr 4, 2026', venue: 'Suzuka Circuit' },
+      { name: 'Japanese GP - Race', date: 'Apr 5, 2026', venue: 'Suzuka Circuit' }
+    ]
+  },
+  {
+    id: 'f1-miami-gp-2026',
+    name: 'Formula 1 Miami Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'May 1, 2026',
+    endDate: 'May 3, 2026',
+    venue: 'Miami International Autodrome, Miami Gardens',
+    fixtures: [
+      { name: 'Miami GP - Practice 1', date: 'May 1, 2026', venue: 'Miami International Autodrome' },
+      { name: 'Miami GP - Qualifying', date: 'May 2, 2026', venue: 'Miami International Autodrome' },
+      { name: 'Miami GP - Race', date: 'May 3, 2026', venue: 'Miami International Autodrome' }
+    ]
+  },
+  {
+    id: 'f1-emilia-romagna-gp-2026',
+    name: 'Formula 1 Emilia Romagna Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
+    organiser: 'FIA / Formula 1',
+    startDate: 'May 15, 2026',
+    endDate: 'May 17, 2026',
+    venue: 'Imola Circuit, Italy',
+    fixtures: [
+      { name: 'Emilia Romagna GP - Practice 1', date: 'May 15, 2026', venue: 'Imola Circuit' },
+      { name: 'Emilia Romagna GP - Qualifying', date: 'May 16, 2026', venue: 'Imola Circuit' },
+      { name: 'Emilia Romagna GP - Race', date: 'May 17, 2026', venue: 'Imola Circuit' }
+    ]
+  },
+  {
+    id: 'f1-monaco-gp-2026',
+    name: 'Formula 1 Monaco Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
     organiser: 'FIA / Formula 1',
     startDate: 'May 22, 2026',
     endDate: 'May 24, 2026',
     venue: 'Circuit de Monaco, Monte Carlo',
-    totalFixtures: 5,
     fixtures: [
-      { name: 'Monaco GP - Practice 1', date: 'May 22, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-      { name: 'Monaco GP - Practice 2', date: 'May 22, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-      { name: 'Monaco GP - Practice 3', date: 'May 23, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-      { name: 'Monaco GP - Qualifying', date: 'May 23, 2026', venue: 'Circuit de Monaco', status: 'Imported' },
-      { name: 'Monaco GP - Race', date: 'May 24, 2026', venue: 'Circuit de Monaco', status: 'Available' }
+      { name: 'Monaco GP - Practice 1', date: 'May 22, 2026', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Qualifying', date: 'May 23, 2026', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Race', date: 'May 24, 2026', venue: 'Circuit de Monaco' }
     ]
   },
-  'f1-silverstone-gp-2025': {
-    name: 'F1 British Grand Prix 2025',
-    sport: 'Motor Sport',
-    season: '2025',
+  {
+    id: 'f1-british-gp-2026',
+    name: 'Formula 1 British Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
     organiser: 'FIA / Formula 1',
-    startDate: 'Jul 4, 2026',
-    endDate: 'Jul 6, 2026',
+    startDate: 'Jul 3, 2026',
+    endDate: 'Jul 5, 2026',
     venue: 'Silverstone Circuit, UK',
-    totalFixtures: 5,
     fixtures: [
-      { name: 'British GP - Practice 1', date: 'Jul 4, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-      { name: 'British GP - Practice 2', date: 'Jul 4, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-      { name: 'British GP - Practice 3', date: 'Jul 5, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-      { name: 'British GP - Qualifying', date: 'Jul 5, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-      { name: 'British GP - Race', date: 'Jul 6, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' }
+      { name: 'British GP - Practice 1', date: 'Jul 3, 2026', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Qualifying', date: 'Jul 4, 2026', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Race', date: 'Jul 5, 2026', venue: 'Silverstone Circuit' }
     ]
   },
-  'f1-monza-gp-2025': {
-    name: 'F1 Italian Grand Prix 2025',
-    sport: 'Motor Sport',
-    season: '2025',
+  {
+    id: 'f1-italian-gp-2026',
+    name: 'Formula 1 Italian Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
     organiser: 'FIA / Formula 1',
-    startDate: 'Sep 5, 2026',
-    endDate: 'Sep 7, 2026',
+    startDate: 'Sep 4, 2026',
+    endDate: 'Sep 6, 2026',
     venue: 'Autodromo di Monza, Italy',
-    totalFixtures: 5,
     fixtures: [
-      { name: 'Italian GP - Practice 1', date: 'Sep 5, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-      { name: 'Italian GP - Practice 2', date: 'Sep 5, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-      { name: 'Italian GP - Practice 3', date: 'Sep 6, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-      { name: 'Italian GP - Qualifying', date: 'Sep 6, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-      { name: 'Italian GP - Race', date: 'Sep 7, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' }
+      { name: 'Italian GP - Practice 1', date: 'Sep 4, 2026', venue: 'Autodromo di Monza' },
+      { name: 'Italian GP - Qualifying', date: 'Sep 5, 2026', venue: 'Autodromo di Monza' },
+      { name: 'Italian GP - Race', date: 'Sep 6, 2026', venue: 'Autodromo di Monza' }
     ]
   },
-  'f1-spa-gp-2025': {
-    name: 'F1 Belgian Grand Prix 2025',
-    sport: 'Motor Sport',
-    season: '2025',
+  {
+    id: 'f1-abu-dhabi-gp-2026',
+    name: 'Formula 1 Abu Dhabi Grand Prix 2026',
+    sport: 'Formula 1',
+    season: '2026',
     organiser: 'FIA / Formula 1',
-    startDate: 'Jul 25, 2026',
-    endDate: 'Jul 27, 2026',
-    venue: 'Circuit de Spa-Francorchamps, Belgium',
-    totalFixtures: 5,
+    startDate: 'Dec 4, 2026',
+    endDate: 'Dec 6, 2026',
+    venue: 'Yas Marina Circuit, Abu Dhabi',
     fixtures: [
-      { name: 'Belgian GP - Practice 1', date: 'Jul 25, 2026', venue: 'Spa-Francorchamps, Belgium', status: 'Available' },
-      { name: 'Belgian GP - Practice 2', date: 'Jul 25, 2026', venue: 'Spa-Francorchamps, Belgium', status: 'Available' },
-      { name: 'Belgian GP - Practice 3', date: 'Jul 26, 2026', venue: 'Spa-Francorchamps, Belgium', status: 'Available' },
-      { name: 'Belgian GP - Qualifying', date: 'Jul 26, 2026', venue: 'Spa-Francorchamps, Belgium', status: 'Available' },
-      { name: 'Belgian GP - Race', date: 'Jul 27, 2026', venue: 'Spa-Francorchamps, Belgium', status: 'Available' }
-    ]
-  },
-  'nba-season-2025': {
-    name: 'NBA Season 2025/26',
-    sport: 'Basketball',
-    season: '2025/26',
-    organiser: 'National Basketball Association',
-    startDate: 'Oct 21, 2025',
-    endDate: 'Jun 15, 2026',
-    totalFixtures: 1230,
-    fixtures: [
-      { name: 'Lakers vs Celtics', date: 'Dec 25, 2025', venue: 'Staples Center, Los Angeles', status: 'Available' },
-      { name: 'Warriors vs Bucks', date: 'Jan 10, 2026', venue: 'Chase Center, San Francisco', status: 'Imported' },
-      { name: 'Nets vs 76ers', date: 'Jan 15, 2026', venue: 'Barclays Center, Brooklyn', status: 'Available' },
-      { name: 'Heat vs Nuggets', date: 'Jan 22, 2026', venue: 'FTX Arena, Miami', status: 'Imported' },
-      { name: 'Suns vs Mavericks', date: 'Feb 5, 2026', venue: 'Footprint Center, Phoenix', status: 'Available' },
-      { name: 'Celtics vs Warriors', date: 'Feb 14, 2026', venue: 'TD Garden, Boston', status: 'Available' }
-    ]
-  },
-  'nfl-season-2025': {
-    name: 'NFL Season 2025/26',
-    sport: 'American Football',
-    season: '2025/26',
-    organiser: 'National Football League',
-    startDate: 'Sep 4, 2025',
-    endDate: 'Feb 8, 2026',
-    totalFixtures: 272,
-    fixtures: [
-      { name: 'Super Bowl LX', date: 'Feb 8, 2026', venue: 'Levi\'s Stadium, Santa Clara', status: 'Available' },
-      { name: 'Cowboys vs Eagles', date: 'Dec 28, 2025', venue: 'AT&T Stadium, Arlington', status: 'Available' },
-      { name: 'Chiefs vs Bills', date: 'Jan 11, 2026', venue: 'Arrowhead Stadium, Kansas City', status: 'Imported' },
-      { name: '49ers vs Seahawks', date: 'Jan 18, 2026', venue: 'Levi\'s Stadium, Santa Clara', status: 'Imported' },
-      { name: 'NFC Championship', date: 'Jan 25, 2026', venue: 'TBD', status: 'Available' },
-      { name: 'AFC Championship', date: 'Jan 25, 2026', venue: 'TBD', status: 'Available' }
-    ]
-  },
-  'ashes-2025': {
-    name: 'The Ashes 2025',
-    sport: 'Cricket',
-    season: '2025/26',
-    organiser: 'ECB / Cricket Australia',
-    startDate: 'Jun 18, 2026',
-    endDate: 'Aug 10, 2026',
-    venue: 'Various (England)',
-    totalFixtures: 25,
-    fixtures: [
-      { name: '1st Test - Day 1', date: 'Jun 18, 2026', venue: 'Lord\'s, London', status: 'Available' },
-      { name: '1st Test - Day 2', date: 'Jun 19, 2026', venue: 'Lord\'s, London', status: 'Available' },
-      { name: '1st Test - Day 3', date: 'Jun 20, 2026', venue: 'Lord\'s, London', status: 'Available' },
-      { name: '1st Test - Day 4', date: 'Jun 21, 2026', venue: 'Lord\'s, London', status: 'Available' },
-      { name: '1st Test - Day 5', date: 'Jun 22, 2026', venue: 'Lord\'s, London', status: 'Available' },
-      { name: '2nd Test - Day 1', date: 'Jul 2, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' },
-      { name: '2nd Test - Day 2', date: 'Jul 3, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' },
-      { name: '2nd Test - Day 3', date: 'Jul 4, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' },
-      { name: '2nd Test - Day 4', date: 'Jul 5, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' },
-      { name: '2nd Test - Day 5', date: 'Jul 6, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' },
-      { name: '3rd Test - Day 1', date: 'Jul 16, 2026', venue: 'Headingley, Leeds', status: 'Imported' },
-      { name: '3rd Test - Day 2', date: 'Jul 17, 2026', venue: 'Headingley, Leeds', status: 'Imported' },
-      { name: '3rd Test - Day 3', date: 'Jul 18, 2026', venue: 'Headingley, Leeds', status: 'Imported' },
-      { name: '4th Test - Day 1', date: 'Jul 30, 2026', venue: 'Old Trafford, Manchester', status: 'Available' },
-      { name: '4th Test - Day 2', date: 'Jul 31, 2026', venue: 'Old Trafford, Manchester', status: 'Available' },
-      { name: '5th Test - Day 1', date: 'Aug 6, 2026', venue: 'The Oval, London', status: 'Available' },
-      { name: '5th Test - Day 2', date: 'Aug 7, 2026', venue: 'The Oval, London', status: 'Available' }
+      { name: 'Abu Dhabi GP - Practice 1', date: 'Dec 4, 2026', venue: 'Yas Marina Circuit' },
+      { name: 'Abu Dhabi GP - Qualifying', date: 'Dec 5, 2026', venue: 'Yas Marina Circuit' },
+      { name: 'Abu Dhabi GP - Race', date: 'Dec 6, 2026', venue: 'Yas Marina Circuit' }
     ]
   }
+];
+
+const publishedFixturesSeed = [
+  { groupId: 'premier-league-2025', name: 'Arsenal vs Chelsea', importedOn: 'Nov 10, 2025', titleId: '10001', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'premier-league-2025', name: 'Liverpool vs Man United', importedOn: 'Nov 12, 2025', titleId: '10002', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'champions-league-2025', name: 'Real Madrid vs Bayern Munich', importedOn: 'Nov 7, 2025', titleId: '10011', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'champions-league-2025', name: 'Barcelona vs Man City', importedOn: 'Nov 9, 2025', titleId: '10012', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'la-liga-2025', name: 'Real Madrid vs Sevilla', importedOn: 'Nov 19, 2025', titleId: '10021', importedBy: 'ops@sky.uk' },
+  { groupId: 'bundesliga-2025', name: 'Bayern Munich vs Dortmund', importedOn: 'Nov 20, 2025', titleId: '10031', importedBy: 'ops@sky.uk' },
+  { groupId: 'ligue-1-2025', name: 'PSG vs Marseille', importedOn: 'Nov 22, 2025', titleId: '10041', importedBy: 'ops@sky.uk' },
+  { groupId: 'australian-open-2026', name: 'Australian Open Semi Final', importedOn: 'Nov 8, 2025', titleId: '20011', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'australian-open-2026', name: 'Australian Open Final', importedOn: 'Nov 9, 2025', titleId: '20012', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'wimbledon-2026', name: 'Wimbledon Final', importedOn: 'Nov 8, 2025', titleId: '20021', importedBy: 'vishnu.prakash@sky.uk' },
+  { groupId: 'us-open-2026', name: 'US Open Final', importedOn: 'Nov 14, 2025', titleId: '20031', importedBy: 'rightsbot@sky.uk' },
+  { groupId: 'atp-masters-rome-2026', name: 'Rome Masters Final', importedOn: 'Nov 15, 2025', titleId: '20041', importedBy: 'rightsbot@sky.uk' },
+  { groupId: 'f1-bahrain-gp-2026', name: 'Bahrain GP - Race', importedOn: 'Nov 5, 2025', titleId: '30011', importedBy: 'Event Hub' },
+  { groupId: 'f1-saudi-gp-2026', name: 'Saudi GP - Race', importedOn: 'Nov 6, 2025', titleId: '30012', importedBy: 'Event Hub' },
+  { groupId: 'f1-australian-gp-2026', name: 'Australian GP - Race', importedOn: 'Nov 7, 2025', titleId: '30013', importedBy: 'Event Hub' },
+  { groupId: 'f1-japanese-gp-2026', name: 'Japanese GP - Race', importedOn: 'Nov 8, 2025', titleId: '30014', importedBy: 'Event Hub' },
+  { groupId: 'f1-miami-gp-2026', name: 'Miami GP - Race', importedOn: 'Nov 9, 2025', titleId: '30015', importedBy: 'Event Hub' },
+  { groupId: 'f1-monaco-gp-2026', name: 'Monaco GP - Qualifying', importedOn: 'Nov 10, 2025', titleId: '30016', importedBy: 'Event Hub' },
+  { groupId: 'f1-british-gp-2026', name: 'British GP - Race', importedOn: 'Nov 11, 2025', titleId: '30017', importedBy: 'Event Hub' },
+  { groupId: 'f1-italian-gp-2026', name: 'Italian GP - Race', importedOn: 'Nov 12, 2025', titleId: '30018', importedBy: 'Event Hub' },
+  { groupId: 'f1-abu-dhabi-gp-2026', name: 'Abu Dhabi GP - Race', importedOn: 'Nov 13, 2025', titleId: '30019', importedBy: 'Event Hub' }
+];
+
+const publishedKeySet = new Set(publishedFixturesSeed.map((item) => `${item.groupId}::${item.name}`));
+
+const fixtureGroups = groupCatalog.reduce((acc, group) => {
+  acc[group.id] = {
+    name: group.name,
+    sport: group.sport,
+    season: group.season,
+    organiser: group.organiser,
+    startDate: group.startDate,
+    endDate: group.endDate,
+    venue: group.venue,
+    totalFixtures: group.fixtures.length,
+    fixtures: group.fixtures.map((fixture) => ({
+      ...fixture,
+      status: publishedKeySet.has(`${group.id}::${fixture.name}`) ? 'Imported' : 'Available'
+    }))
+  };
+  return acc;
+}, {});
+
+const sportTypeBySport = {
+  Football: { typeId: 'football', sportType: 'Football' },
+  Tennis: { typeId: 'tennis', sportType: 'Tennis' },
+  'Formula 1': { typeId: 'motorsport', sportType: 'Formula 1' }
 };
 
-const importableFixtures = [
-  { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567001', name: 'Arsenal vs Chelsea', groupId: 'premier-league-2025', typeId: 'football', sportType: 'Football', date: 'Dec 22, 2025', venue: 'Emirates Stadium, London', status: 'Available' },
-  { id: 'b2c3d4e5-f6a7-8901-bcde-f12345670002', name: 'Liverpool vs Man United', groupId: 'premier-league-2025', typeId: 'football', sportType: 'Football', date: 'Jan 4, 2026', venue: 'Anfield, Liverpool', status: 'Available' },
-  { id: 'c3d4e5f6-a7b8-9012-cdef-123456700003', name: 'Newcastle vs Aston Villa', groupId: 'premier-league-2025', typeId: 'football', sportType: 'Football', date: 'Jan 25, 2026', venue: 'St James\' Park, Newcastle', status: 'Available' },
-  { id: 'd4e5f6a7-b8c9-0123-defa-234567800004', name: 'Chelsea vs West Ham', groupId: 'premier-league-2025', typeId: 'football', sportType: 'Football', date: 'Feb 1, 2026', venue: 'Stamford Bridge, London', status: 'Available' },
-  { id: 'e5f6a7b8-c9d0-1234-efab-345678900005', name: 'Real Madrid vs Bayern Munich', groupId: 'champions-league-2025', typeId: 'football', sportType: 'Football', date: 'Feb 12, 2026', venue: 'Santiago Bernabéu, Madrid', status: 'Available' },
-  { id: 'f6a7b8c9-d0e1-2345-fabc-456789000006', name: 'PSG vs Inter Milan', groupId: 'champions-league-2025', typeId: 'football', sportType: 'Football', date: 'Feb 19, 2026', venue: 'Parc des Princes, Paris', status: 'Available' },
-  { id: 'a7b8c9d0-e1f2-3456-abcd-567890100007', name: 'Liverpool vs Dortmund', groupId: 'champions-league-2025', typeId: 'football', sportType: 'Football', date: 'Mar 12, 2026', venue: 'Anfield, Liverpool', status: 'Available' },
-  { id: 'b8c9d0e1-f2a3-4567-bcde-678901200008', name: 'Australian Open Finals', groupId: 'grand-slam-2025', typeId: 'tennis', sportType: 'Tennis', date: 'Jan 26, 2026', venue: 'Melbourne Park, Australia', status: 'Available' },
-  { id: 'c9d0e1f2-a3b4-5678-cdef-789012300009', name: 'French Open Semi-Finals', groupId: 'grand-slam-2025', typeId: 'tennis', sportType: 'Tennis', date: 'Jun 6, 2026', venue: 'Roland Garros, Paris', status: 'Available' },
-  { id: 'd0e1f2a3-b4c5-6789-defa-890123400010', name: 'Wimbledon Finals', groupId: 'grand-slam-2025', typeId: 'tennis', sportType: 'Tennis', date: 'Jul 13, 2026', venue: 'All England Club, London', status: 'Available' },
-  { id: 'e1f2a3b4-c5d6-7890-efab-901234500011', name: 'Monaco GP - Practice 1', groupId: 'f1-monaco-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'May 22, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-  { id: 'f2a3b4c5-d6e7-8901-fabc-012345600012', name: 'Monaco GP - Practice 2', groupId: 'f1-monaco-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'May 22, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-  { id: 'a3b4c5d6-e7f8-9012-abcd-123456700013', name: 'Monaco GP - Practice 3', groupId: 'f1-monaco-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'May 23, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-  { id: 'b4c5d6e7-f8a9-0123-bcde-234567800014', name: 'Monaco GP - Race', groupId: 'f1-monaco-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'May 24, 2026', venue: 'Circuit de Monaco', status: 'Available' },
-  { id: 'c5d6e7f8-a9b0-1234-cdef-345678900015', name: 'British GP - Practice 1', groupId: 'f1-silverstone-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Jul 4, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-  { id: 'd6e7f8a9-b0c1-2345-defa-456789000016', name: 'British GP - Qualifying', groupId: 'f1-silverstone-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Jul 5, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-  { id: 'e7f8a9b0-c1d2-3456-efab-567890100017', name: 'British GP - Race', groupId: 'f1-silverstone-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Jul 6, 2026', venue: 'Silverstone Circuit, UK', status: 'Available' },
-  { id: 'f8a9b0c1-d2e3-4567-fabc-678901200018', name: 'Italian GP - Practice 1', groupId: 'f1-monza-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Sep 5, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-  { id: 'a9b0c1d2-e3f4-5678-abcd-789012300019', name: 'Italian GP - Qualifying', groupId: 'f1-monza-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Sep 6, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-  { id: 'b0c1d2e3-f4a5-6789-bcde-890123400020', name: 'Italian GP - Race', groupId: 'f1-monza-gp-2025', typeId: 'motorsport', sportType: 'Motor Sport', date: 'Sep 7, 2026', venue: 'Autodromo di Monza, Italy', status: 'Available' },
-  { id: 'c1d2e3f4-a5b6-7890-cdef-901234500021', name: 'Lakers vs Celtics', groupId: 'nba-season-2025', typeId: 'basketball', sportType: 'Basketball', date: 'Dec 25, 2025', venue: 'Staples Center, Los Angeles', status: 'Available' },
-  { id: 'd2e3f4a5-b6c7-8901-defa-012345600022', name: 'Nets vs 76ers', groupId: 'nba-season-2025', typeId: 'basketball', sportType: 'Basketball', date: 'Jan 15, 2026', venue: 'Barclays Center, Brooklyn', status: 'Available' },
-  { id: 'e3f4a5b6-c7d8-9012-efab-123456700023', name: 'Super Bowl LX', groupId: 'nfl-season-2025', typeId: 'american-football', sportType: 'American Football', date: 'Feb 8, 2026', venue: 'Levi\'s Stadium, Santa Clara', status: 'Available' },
-  { id: 'f4a5b6c7-d8e9-0123-fabc-234567800024', name: 'Cowboys vs Eagles', groupId: 'nfl-season-2025', typeId: 'american-football', sportType: 'American Football', date: 'Dec 28, 2025', venue: 'AT&T Stadium, Arlington', status: 'Available' },
-  { id: 'a5b6c7d8-e9f0-1234-abcd-345678900025', name: '1st Test - Day 1', groupId: 'ashes-2025', typeId: 'cricket', sportType: 'Cricket', date: 'Jun 18, 2026', venue: 'Lord\'s, London', status: 'Available' },
-  { id: 'b6c7d8e9-f0a1-2345-bcde-456789000026', name: '2nd Test - Day 1', groupId: 'ashes-2025', typeId: 'cricket', sportType: 'Cricket', date: 'Jul 2, 2026', venue: 'Edgbaston, Birmingham', status: 'Available' }
-].map((fixture) => ({ ...fixture, shortId: getFixtureShortId(fixture.id) }));
+let fixtureCounter = 1;
+const importableFixtures = Object.entries(fixtureGroups).flatMap(([groupId, group]) => {
+  const sportInfo = sportTypeBySport[group.sport] || { typeId: '', sportType: group.sport };
+  return group.fixtures.map((fixture) => {
+    const id = `${String(fixtureCounter).padStart(4, '0')}-fx-${groupId}`;
+    fixtureCounter += 1;
+    const imported = publishedKeySet.has(`${groupId}::${fixture.name}`);
+    return {
+      id,
+      name: fixture.name,
+      groupId,
+      typeId: sportInfo.typeId,
+      sportType: sportInfo.sportType,
+      date: fixture.date,
+      venue: fixture.venue,
+      status: imported ? 'Imported' : 'Available'
+    };
+  });
+}).map((fixture) => ({ ...fixture, shortId: getFixtureShortId(fixture.id) }));
 
-const recentlyImported = [
-  { name: 'Manchester Derby', groupId: 'premier-league-2025', sport: 'Football', importDate: 'Nov 10, 2025', titleId: '1698332', venue: 'Old Trafford, Manchester', importedBy: 'admin@sky.uk' },
-  { name: 'Wimbledon Finals', groupId: 'grand-slam-2025', sport: 'Tennis', importDate: 'Nov 8, 2025', titleId: '1638382', venue: 'All England Club, London', importedBy: 'admin@sky.uk' },
-  { name: 'Champions League Final', groupId: 'champions-league-2025', sport: 'Football', importDate: 'Nov 7, 2025', titleId: '1674259', venue: 'Allianz Arena, Munich', importedBy: 'admin@sky.uk' },
-  { name: 'Monaco GP - Qualifying', groupId: 'f1-monaco-gp-2025', sport: 'Motor Sport', importDate: 'Nov 5, 2025', titleId: '1619047', venue: 'Circuit de Monaco, Monte Carlo', importedBy: 'system@sky.uk' }
-];
+const subscriptions = Object.entries(
+  publishedFixturesSeed.reduce((acc, entry) => {
+    const current = acc[entry.groupId] || [];
+    current.push(entry);
+    acc[entry.groupId] = current;
+    return acc;
+  }, {})
+).map(([groupId, fixtures], index) => {
+  const group = fixtureGroups[groupId];
+  const sortedByImportedDate = fixtures.slice().sort((a, b) => new Date(a.importedOn) - new Date(b.importedOn));
+  const latestDate = fixtures.slice().sort((a, b) => new Date(b.importedOn) - new Date(a.importedOn))[0]?.importedOn || 'Nov 1, 2025';
 
-const subscriptions = [
-  { id: 'sub-f1', fixture: 'F1 Grand Prix', type: 'MotorSport', subscribed: 'Sep 20, 2023', autoImport: 'Enabled', activityLabel: '23 updates', activityKey: 'F1' },
-  { id: 'sub-nba', fixture: 'NBA Finals', type: 'Basketball', subscribed: 'Aug 30, 2023', autoImport: 'Enabled', activityLabel: '15 updates', activityKey: 'NBA' },
-  { id: 'sub-pl', fixture: 'Premier League', type: 'Football', subscribed: 'Jul 15, 2023', autoImport: 'Disabled', activityLabel: '41 updates', activityKey: 'PL' }
-];
+  return {
+    id: `sub-${groupId}`,
+    groupId,
+    groupName: group.name,
+    fixtureManagerRecordId: `FM-${groupId}`,
+    type: group.sport,
+    importedSince: sortedByImportedDate[0]?.importedOn || 'Nov 1, 2025',
+    lastSyncedAt: `${latestDate} ${String(10 + (index % 10)).padStart(2, '0')}:2${index % 6}`,
+    queueStatus: 'Fixture Hub event queue listener active',
+    activityLabel: `${fixtures.length * 3 + 7} updates`,
+    activityKey: groupId.toUpperCase().replace(/-/g, '_'),
+    importedFixtures: fixtures.map((fixture) => ({
+      name: fixture.name,
+      type: group.sport,
+      importedOn: fixture.importedOn,
+      titleId: fixture.titleId,
+      status: 'Imported'
+    }))
+  };
+});
+
+const recentlyImported = publishedFixturesSeed
+  .slice()
+  .sort((a, b) => new Date(b.importedOn) - new Date(a.importedOn))
+  .slice(0, 8)
+  .map((entry, idx) => ({
+    name: entry.name,
+    groupId: entry.groupId,
+    sport: fixtureGroups[entry.groupId]?.sport || 'Unknown',
+    importDate: entry.importedOn,
+    titleId: idx < 2 ? '' : entry.titleId,
+    importStatus: idx < 2 ? 'In Progress' : 'Processed',
+    venue: fixtureGroups[entry.groupId]?.fixtures.find((fixture) => fixture.name === entry.name)?.venue || 'Various',
+    importedBy: entry.importedBy
+  }));
 
 const activityLog = [
-  { id: 1, timestamp: 'Nov 13, 2025 14:23', action: 'Import', actionBadge: 'badge-blue', fixture: 'Manchester Derby', user: 'admin@sky.uk', status: 'Success', statusBadge: 'badge-green' },
-  { id: 2, timestamp: 'Nov 13, 2025 13:15', action: 'Auto Update', actionBadge: 'badge-indigo', fixture: 'F1 Grand Prix - Monaco', user: 'System', status: 'Success', statusBadge: 'badge-green' },
-  { id: 3, timestamp: 'Nov 13, 2025 12:08', action: 'Import', actionBadge: 'badge-blue', fixture: 'Wimbledon Finals', user: 'admin@sky.uk', status: 'Success', statusBadge: 'badge-green' },
-  { id: 4, timestamp: 'Nov 13, 2025 10:45', action: 'Subscribe', actionBadge: 'badge-amber', fixture: 'NBA Eastern Finals', user: 'admin@sky.uk', status: 'Success', statusBadge: 'badge-green' },
-  { id: 5, timestamp: 'Nov 12, 2025 16:30', action: 'Unsubscribe', actionBadge: 'badge-red', fixture: 'Champions League', user: 'user@sky.uk', status: 'Success', statusBadge: 'badge-green' }
+  {
+    id: 1,
+    timestamp: 'Nov 13, 2025 14:23',
+    action: 'Manual Import',
+    actionBadge: 'badge-blue',
+    fixture: 'Arsenal vs Chelsea',
+    groupId: 'premier-league-2025',
+    groupName: 'Premier League 2025/26',
+    user: 'vishnu.prakash@sky.uk',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Initial import',
+    oldValue: 'N/A',
+    newValue: 'Created RightsLogic title 10001',
+    updatedBy: 'vishnu.prakash@sky.uk',
+    source: 'Manual import'
+  },
+  {
+    id: 2,
+    timestamp: 'Nov 13, 2025 14:41',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Bahrain GP - Race',
+    groupId: 'f1-bahrain-gp-2026',
+    groupName: 'Formula 1 Bahrain Grand Prix 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture name update',
+    oldValue: 'Bahrain GP - Race',
+    newValue: 'Bahrain GP - Race (Night Race)',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 3,
+    timestamp: 'Nov 13, 2025 13:55',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'UEFA Champions League 2025/26',
+    groupId: 'champions-league-2025',
+    groupName: 'UEFA Champions League 2025/26',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture group name update',
+    oldValue: 'Champions League 2025/26',
+    newValue: 'UEFA Champions League 2025/26',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 4,
+    timestamp: 'Nov 13, 2025 13:22',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Monaco GP - Qualifying',
+    groupId: 'f1-monaco-gp-2026',
+    groupName: 'Formula 1 Monaco Grand Prix 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Type update',
+    oldValue: 'Motor Sport',
+    newValue: 'Formula 1',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 5,
+    timestamp: 'Nov 13, 2025 12:58',
+    action: 'Manual Import',
+    actionBadge: 'badge-blue',
+    fixture: 'Wimbledon Final',
+    groupId: 'wimbledon-2026',
+    groupName: 'Wimbledon 2026',
+    user: 'vishnu.prakash@sky.uk',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Initial import',
+    oldValue: 'N/A',
+    newValue: 'Created RightsLogic title 20021',
+    updatedBy: 'vishnu.prakash@sky.uk',
+    source: 'Manual import'
+  },
+  {
+    id: 6,
+    timestamp: 'Nov 13, 2025 12:19',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'US Open Final',
+    groupId: 'us-open-2026',
+    groupName: 'US Open 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture name update',
+    oldValue: 'US Open Final',
+    newValue: 'US Open Finals',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 7,
+    timestamp: 'Nov 13, 2025 11:45',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Formula 1 British Grand Prix 2026',
+    groupId: 'f1-british-gp-2026',
+    groupName: 'Formula 1 British Grand Prix 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture group name update',
+    oldValue: 'F1 British Grand Prix 2026',
+    newValue: 'Formula 1 British Grand Prix 2026',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 8,
+    timestamp: 'Nov 13, 2025 11:21',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Italian GP - Race',
+    groupId: 'f1-italian-gp-2026',
+    groupName: 'Formula 1 Italian Grand Prix 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Type update',
+    oldValue: 'Formula 1',
+    newValue: 'Formula 1',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync (no material change)'
+  },
+  {
+    id: 9,
+    timestamp: 'Nov 13, 2025 10:52',
+    action: 'Manual Import',
+    actionBadge: 'badge-blue',
+    fixture: 'Real Madrid vs Bayern Munich',
+    groupId: 'champions-league-2025',
+    groupName: 'UEFA Champions League 2025/26',
+    user: 'vishnu.prakash@sky.uk',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Initial import',
+    oldValue: 'N/A',
+    newValue: 'Created RightsLogic title 10011',
+    updatedBy: 'vishnu.prakash@sky.uk',
+    source: 'Manual import'
+  },
+  {
+    id: 10,
+    timestamp: 'Nov 13, 2025 10:06',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Roma vs Sevilla',
+    groupId: 'europa-league-2025',
+    groupName: 'UEFA Europa League 2025/26',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture name update',
+    oldValue: 'Roma v Sevilla',
+    newValue: 'Roma vs Sevilla',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 11,
+    timestamp: 'Nov 13, 2025 09:24',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'ATP Masters Rome 2026',
+    groupId: 'atp-masters-rome-2026',
+    groupName: 'ATP Masters Rome 2026',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Fixture group name update',
+    oldValue: 'Rome Masters 2026',
+    newValue: 'ATP Masters Rome 2026',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync'
+  },
+  {
+    id: 12,
+    timestamp: 'Nov 13, 2025 08:41',
+    action: 'Auto Update',
+    actionBadge: 'badge-indigo',
+    fixture: 'Arsenal vs Chelsea',
+    groupId: 'premier-league-2025',
+    groupName: 'Premier League 2025/26',
+    user: 'Fixture Hub Queue',
+    status: 'Success',
+    statusBadge: 'badge-green',
+    detailType: 'Type update',
+    oldValue: 'Football',
+    newValue: 'Football',
+    updatedBy: 'Event Hub',
+    source: 'Event notification sync (classification verified)'
+  }
+];
+
+const eventNotificationUpdates = activityLog.filter(
+  (entry) => entry.action === 'Auto Update' && String(entry.source || '').toLowerCase().includes('event notification')
+);
+const latestUpdateTimestamp = eventNotificationUpdates.reduce((latest, entry) => {
+  const ts = new Date(entry.timestamp).getTime();
+  return Number.isNaN(ts) || ts < latest ? latest : ts;
+}, 0);
+const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
+const recentWeekUpdatesCount = eventNotificationUpdates.filter((entry) => {
+  const ts = new Date(entry.timestamp).getTime();
+  return !Number.isNaN(ts) && latestUpdateTimestamp - ts <= oneWeekMs;
+}).length;
+const recentMonthUpdatesCount = eventNotificationUpdates.filter((entry) => {
+  const ts = new Date(entry.timestamp).getTime();
+  return !Number.isNaN(ts) && latestUpdateTimestamp - ts <= oneMonthMs;
+}).length;
+
+const importQueueCount = recentlyImported.filter((item) => item.importStatus === 'In Progress').length;
+const updateQueueCount = 6;
+const hasProcessingQueue = importQueueCount > 0 || updateQueueCount > 0;
+
+const dashboardStats = [
+  {
+    icon: 'RL',
+    iconClass: 'rose',
+    trend: `${subscriptions.length} groups`,
+    trendDirection: 'up',
+    value: String(publishedFixturesSeed.length),
+    label: 'Published Fixtures'
+  },
+  {
+    icon: 'UP',
+    iconClass: 'sky',
+    trend: `Week: ${recentWeekUpdatesCount} | Month: ${recentMonthUpdatesCount}`,
+    trendDirection: 'up',
+    value: String(eventNotificationUpdates.length),
+    label: 'Published Updates'
+  },
+  {
+    icon: 'PQ',
+    iconClass: 'purple',
+    trend: `Imports: ${importQueueCount} | Updates: ${updateQueueCount}`,
+    trendDirection: 'up',
+    value: String(importQueueCount + updateQueueCount),
+    label: 'Processing Queue',
+    hidden: !hasProcessingQueue
+  }
 ];
 
 export const mockData = {
@@ -302,4 +858,3 @@ export const mockData = {
   subscriptions,
   activityLog
 };
-

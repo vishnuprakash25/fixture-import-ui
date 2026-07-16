@@ -1,12 +1,10 @@
 import {
-  buildFixtureTitle,
   cloneDate,
   escapeHtml,
   filterFixtures,
   formatDisplayDate,
   getGroupOptions,
-  normalizeGroupKey,
-  toYYYYMMDD
+  normalizeGroupKey
 } from './helpers.js';
 
 export function createFixtureImportApp({ data, actions = {} }) {
@@ -148,26 +146,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
       activityPagination: document.getElementById('activityPagination'),
       exportLogBtn: document.getElementById('exportLogBtn'),
       importModal: document.getElementById('importModal'),
-      importFixtureName: document.getElementById('importFixtureName'),
-      titlePreview: document.getElementById('titlePreview'),
-      prefixType: document.getElementById('prefixType'),
-      prefixCustom: document.getElementById('prefixCustom'),
-      prefixSportLabel: document.getElementById('prefixSportLabel'),
-      suffixType: document.getElementById('suffixType'),
-      suffixCustom: document.getElementById('suffixCustom'),
-      suffixDateLabel: document.getElementById('suffixDateLabel'),
+      importConfirmMessage: document.getElementById('importConfirmMessage'),
+      importFixtureSummary: document.getElementById('importFixtureSummary'),
       closeImportModalBtn: document.getElementById('closeImportModalBtn'),
       cancelImportBtn: document.getElementById('cancelImportBtn'),
       confirmImportBtn: document.getElementById('confirmImportBtn'),
       bulkImportModal: document.getElementById('bulkImportModal'),
       bulkFixtureList: document.getElementById('bulkFixtureList'),
-      bulkTitlePreview: document.getElementById('bulkTitlePreview'),
-      bulkPrefixType: document.getElementById('bulkPrefixType'),
-      bulkPrefixCustom: document.getElementById('bulkPrefixCustom'),
-      bulkPrefixHint: document.getElementById('bulkPrefixHint'),
-      bulkSuffixType: document.getElementById('bulkSuffixType'),
-      bulkSuffixCustom: document.getElementById('bulkSuffixCustom'),
-      bulkSuffixHint: document.getElementById('bulkSuffixHint'),
+      bulkConfirmMessage: document.getElementById('bulkConfirmMessage'),
       closeBulkImportModalBtn: document.getElementById('closeBulkImportModalBtn'),
       cancelBulkImportBtn: document.getElementById('cancelBulkImportBtn'),
       confirmBulkImportBtn: document.getElementById('confirmBulkImportBtn'),
@@ -327,7 +313,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     });
 
     dom.selectAll.addEventListener('change', (event) => toggleSelectAll(event.target.checked));
-    dom.importSelectedBtn.addEventListener('click', openBulkImportModalFromSelection);
+    dom.importSelectedBtn.addEventListener('click', requestBulkImportConfirmationFromSelection);
     dom.clearSelectionBtn.addEventListener('click', clearSelection);
 
     dom.fixturesBody.addEventListener('change', (event) => {
@@ -342,30 +328,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.subscriptionsBody.addEventListener('click', handleSubscriptionClick);
     dom.activityLogBody.addEventListener('click', handleActivityLogClick);
 
-    dom.prefixType.addEventListener('change', () => {
-      updateSingleImportInputs();
-      updateTitlePreview();
-    });
-    dom.prefixCustom.addEventListener('input', updateTitlePreview);
-    dom.suffixType.addEventListener('change', () => {
-      updateSingleImportInputs();
-      updateTitlePreview();
-    });
-    dom.suffixCustom.addEventListener('input', updateTitlePreview);
     dom.closeImportModalBtn.addEventListener('click', closeImportModal);
     dom.cancelImportBtn.addEventListener('click', closeImportModal);
     dom.confirmImportBtn.addEventListener('click', confirmImport);
 
-    dom.bulkPrefixType.addEventListener('change', () => {
-      updateBulkImportInputs();
-      updateBulkTitlePreview();
-    });
-    dom.bulkPrefixCustom.addEventListener('input', updateBulkTitlePreview);
-    dom.bulkSuffixType.addEventListener('change', () => {
-      updateBulkImportInputs();
-      updateBulkTitlePreview();
-    });
-    dom.bulkSuffixCustom.addEventListener('input', updateBulkTitlePreview);
     dom.closeBulkImportModalBtn.addEventListener('click', closeBulkImportModal);
     dom.cancelBulkImportBtn.addEventListener('click', closeBulkImportModal);
     dom.confirmBulkImportBtn.addEventListener('click', confirmBulkImport);
@@ -455,7 +421,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function handleFixturesTableClick(event) {
     const importButton = event.target.closest('[data-action="open-import"]');
     if (importButton) {
-      openImportModal(importButton.dataset.fixtureId);
+      requestSingleImportConfirmation(importButton.dataset.fixtureId);
       return;
     }
 
@@ -1259,154 +1225,76 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.selectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleFixtures.length;
   }
 
-  function openImportModal(fixtureId) {
+  function requestSingleImportConfirmation(fixtureId) {
     const fixture = fixturesById.get(fixtureId);
     if (!fixture) return;
 
     state.currentImport = fixture;
-    dom.importFixtureName.value = fixture.name;
-    dom.prefixType.value = 'sport';
-    dom.suffixType.value = 'date';
-    dom.prefixCustom.value = '';
-    dom.suffixCustom.value = '';
-    updateSingleImportInputs();
-    updateTitlePreview();
+    dom.importConfirmMessage.textContent = getImportConfirmationMessage(1);
+    dom.importFixtureSummary.textContent = fixture.name;
     dom.importModal.classList.add('visible');
+  }
+
+  function getImportConfirmationMessage(count) {
+    const noun = count === 1 ? 'fixture' : 'fixtures';
+    return `Are you sure you want to import the selected ${noun}?`;
   }
 
   function closeImportModal() {
     dom.importModal.classList.remove('visible');
     state.currentImport = null;
-  }
-
-  function updateSingleImportInputs() {
-    const fixture = state.currentImport;
-    if (!fixture) return;
-
-    const prefixIsCustom = dom.prefixType.value === 'custom';
-    const suffixIsCustom = dom.suffixType.value === 'custom';
-
-    dom.prefixCustom.style.display = prefixIsCustom ? '' : 'none';
-    dom.prefixSportLabel.style.display = prefixIsCustom ? 'none' : '';
-    dom.prefixSportLabel.textContent = `→ ${fixture.sportType}`;
-
-    dom.suffixCustom.style.display = suffixIsCustom ? '' : 'none';
-    dom.suffixDateLabel.style.display = suffixIsCustom ? 'none' : '';
-    dom.suffixDateLabel.textContent = `→ ${toYYYYMMDD(fixture.date)}`;
-  }
-
-  function getSingleImportPrefix() {
-    if (!state.currentImport) return '';
-    return dom.prefixType.value === 'custom' ? dom.prefixCustom.value.trim() : state.currentImport.sportType;
-  }
-
-  function getSingleImportSuffix() {
-    if (!state.currentImport) return '';
-    return dom.suffixType.value === 'custom' ? dom.suffixCustom.value.trim() : toYYYYMMDD(state.currentImport.date);
-  }
-
-  function updateTitlePreview() {
-    if (!state.currentImport) return;
-    dom.titlePreview.textContent = buildFixtureTitle({
-      fixtureName: state.currentImport.name,
-      prefix: getSingleImportPrefix(),
-      suffix: getSingleImportSuffix()
-    }) || '—';
+    dom.importFixtureSummary.textContent = '';
   }
 
   function confirmImport() {
     if (!state.currentImport) return;
 
-    const prefix = getSingleImportPrefix();
-    const suffix = getSingleImportSuffix();
-
-    if (!prefix) {
-      notify('Prefix is mandatory. Please select a prefix option.');
-      return;
-    }
-    if (!suffix) {
-      notify('Suffix is mandatory. Please enter a suffix value.');
-      return;
-    }
-
-    const title = buildFixtureTitle({ fixtureName: state.currentImport.name, prefix, suffix });
-    actions.confirmSingleImport?.({ fixture: state.currentImport, title, prefix, suffix, data, state });
+    actions.confirmSingleImport?.({
+      fixture: state.currentImport,
+      title: state.currentImport.name,
+      titles: [state.currentImport.name],
+      data,
+      state
+    });
     closeImportModal();
   }
 
-  function openBulkImportModalFromSelection() {
+  function requestBulkImportConfirmationFromSelection() {
     state.bulkImportFixtures = importableFixtures.filter((fixture) => state.selectedFixtureIds.has(fixture.id));
     if (!state.bulkImportFixtures.length) {
       notify('No fixtures selected.');
       return;
     }
 
+    dom.bulkConfirmMessage.textContent = getImportConfirmationMessage(state.bulkImportFixtures.length);
     dom.bulkFixtureList.innerHTML = state.bulkImportFixtures.map((fixture) => `
       <div class="bulk-fixture-item"><strong>${escapeHtml(fixture.name)}</strong> <span class="badge badge-gray">${escapeHtml(fixture.sportType)}</span> <span>${escapeHtml(fixture.date)}</span></div>
     `).join('');
-
-    dom.bulkPrefixType.value = 'sport';
-    dom.bulkSuffixType.value = 'date';
-    dom.bulkPrefixCustom.value = '';
-    dom.bulkSuffixCustom.value = '';
-    updateBulkImportInputs();
-    updateBulkTitlePreview();
     dom.bulkImportModal.classList.add('visible');
   }
 
   function closeBulkImportModal() {
     dom.bulkImportModal.classList.remove('visible');
-  }
-
-  function updateBulkImportInputs() {
-    const prefixIsCustom = dom.bulkPrefixType.value === 'custom';
-    const suffixIsCustom = dom.bulkSuffixType.value === 'custom';
-
-    dom.bulkPrefixCustom.style.display = prefixIsCustom ? '' : 'none';
-    dom.bulkSuffixCustom.style.display = suffixIsCustom ? '' : 'none';
-    dom.bulkPrefixHint.textContent = prefixIsCustom
-      ? 'This custom prefix will be applied to all selected fixtures.'
-      : 'Each fixture will use its own Sport Type as prefix.';
-    dom.bulkSuffixHint.textContent = suffixIsCustom
-      ? 'This custom suffix will be applied to all selected fixtures.'
-      : 'Each fixture will use its own Fixture Group Date (yyyyMMdd) as suffix.';
-  }
-
-  function updateBulkTitlePreview() {
-    if (!state.bulkImportFixtures.length) {
-      dom.bulkTitlePreview.textContent = '—';
-      return;
-    }
-
-    const sample = state.bulkImportFixtures[0];
-    const prefix = dom.bulkPrefixType.value === 'custom' ? dom.bulkPrefixCustom.value.trim() : sample.sportType;
-    const suffix = dom.bulkSuffixType.value === 'custom' ? dom.bulkSuffixCustom.value.trim() : toYYYYMMDD(sample.date);
-    const title = buildFixtureTitle({ fixtureName: sample.name, prefix, suffix });
-    dom.bulkTitlePreview.textContent = state.bulkImportFixtures.length === 1 ? title : `${title}  (+ ${state.bulkImportFixtures.length - 1} more)`;
+    state.bulkImportFixtures = [];
+    dom.bulkFixtureList.innerHTML = '';
   }
 
   function confirmBulkImport() {
-    const customPrefix = dom.bulkPrefixCustom.value.trim();
-    const customSuffix = dom.bulkSuffixCustom.value.trim();
+    if (!state.bulkImportFixtures.length) return;
 
-    if (dom.bulkPrefixType.value === 'custom' && !customPrefix) {
-      notify('Prefix is mandatory. Please enter a custom prefix.');
-      return;
-    }
-    if (dom.bulkSuffixType.value === 'custom' && !customSuffix) {
-      notify('Suffix is mandatory. Please enter a custom suffix.');
-      return;
-    }
-
-    const titles = state.bulkImportFixtures.map((fixture) => {
-      const prefix = dom.bulkPrefixType.value === 'custom' ? customPrefix : fixture.sportType;
-      const suffix = dom.bulkSuffixType.value === 'custom' ? customSuffix : toYYYYMMDD(fixture.date);
-      return buildFixtureTitle({ fixtureName: fixture.name, prefix, suffix });
+    actions.confirmBulkImport?.({
+      fixtures: state.bulkImportFixtures,
+      titles: state.bulkImportFixtures.map((fixture) => fixture.name),
+      data,
+      state
     });
 
-    actions.confirmBulkImport?.({ fixtures: state.bulkImportFixtures, titles, data, state });
+    state.selectedFixtureIds.clear();
+    renderFixturesTable();
     closeBulkImportModal();
   }
+
+  // Legacy import modals are kept in markup for now, but import actions now use direct confirmation.
 
   function openGroupModal(groupId) {
     state.currentGroupId = groupId;
@@ -1437,7 +1325,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     groupFixtures.forEach((fixture) => state.selectedFixtureIds.add(fixture.id));
     closeGroupModal();
     renderFixturesTable();
-    openBulkImportModalFromSelection();
+    requestBulkImportConfirmationFromSelection();
   }
 
   function openImportedFixtureModal(importedIndex) {

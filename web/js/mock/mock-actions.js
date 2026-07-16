@@ -7,12 +7,15 @@ export const mockActions = {
   },
   confirmSingleImport({ title, fixture }) {
     window.alert(
-      'Importing fixture as:\n\n"' + title + '"\n\nFixture ID: ' + fixture.id +
-      '\n\n1. Fetch from Fixture Manager\n2. Transform to RightsLogic format\n3. Create Title/Programme'
+      'Queued 1 fixture for import:\n\nTitle: "' + title + '"\nFixture ID: ' + fixture.id +
+      '\n\nThe fixture will be processed automatically by the queue.'
     );
   },
   confirmBulkImport({ titles }) {
-    window.alert('Importing ' + titles.length + ' fixtures:\n\n' + titles.map((title, index) => `${index + 1}. ${title}`).join('\n'));
+    window.alert(
+      'Queued ' + titles.length + ' fixtures for import:\n\n' + titles.map((title, index) => `${index + 1}. ${title}`).join('\n') +
+      '\n\nThe fixtures will be processed automatically by the queue.'
+    );
   },
   addSubscription() {
     window.alert('Opening subscription dialog…');

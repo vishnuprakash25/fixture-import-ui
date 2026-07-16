@@ -79,11 +79,11 @@ assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'fix
 click(document.querySelector('.nav-item[data-page-index="2"]'));
 assert.ok(document.querySelector('.page[data-page-index="2"]').classList.contains('active'), 'subscriptions page becomes active');
 click(document.getElementById('viewAllBtn'));
-assert.ok(document.querySelector('.page[data-page-index="1"]').classList.contains('active'), 'view all navigates to import fixtures');
+assert.ok(document.querySelector('.page[data-page-index="2"]').classList.contains('active'), 'view all keeps published fixtures view active');
 
 click(document.getElementById('themeToggleBtn'));
 assert.ok(document.body.classList.contains('dark'), 'dark theme toggles on');
-assert.equal(document.querySelector('#themeToggleBtn .theme-toggle-label').textContent, 'Light Mode', 'theme label updates');
+assert.match(document.getElementById('themeToggleBtn').title, /light mode/i, 'theme toggle tooltip updates in dark mode');
 click(document.getElementById('themeToggleBtn'));
 assert.ok(!document.body.classList.contains('dark'), 'dark theme toggles off');
 
@@ -134,21 +134,12 @@ click(document.getElementById('dateClearBtn'));
 assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'date filter clears');
 
 click(document.querySelector('[data-action="open-import"]'));
-assert.ok(document.getElementById('importModal').classList.contains('visible'), 'single import modal opens');
-assert.equal(document.getElementById('importFixtureName').value, 'Arsenal vs Chelsea', 'single import loads fixture name');
-assert.equal(document.getElementById('titlePreview').textContent, 'Football - Arsenal vs Chelsea - 20251222', 'default single import title preview renders');
-document.getElementById('prefixType').value = 'custom';
-change(document.getElementById('prefixType'));
-document.getElementById('prefixCustom').value = 'Sky';
-input(document.getElementById('prefixCustom'));
-document.getElementById('suffixType').value = 'custom';
-change(document.getElementById('suffixType'));
-document.getElementById('suffixCustom').value = 'Promo';
-input(document.getElementById('suffixCustom'));
-assert.equal(document.getElementById('titlePreview').textContent, 'Sky - Arsenal vs Chelsea - Promo', 'single import preview reacts to custom values');
+assert.ok(document.getElementById('importModal').classList.contains('visible'), 'single import confirmation modal opens');
+assert.equal(document.getElementById('importConfirmMessage').textContent.trim(), 'Are you sure you want to import the selected fixture?', 'single import confirmation copy renders');
+assert.equal(document.getElementById('importFixtureSummary').textContent.trim(), 'Arsenal vs Chelsea', 'single import confirmation shows selected fixture');
 click(document.getElementById('confirmImportBtn'));
 assert.equal(calls.confirmSingleImport.length, 1, 'single import action is invoked');
-assert.equal(calls.confirmSingleImport[0].title, 'Sky - Arsenal vs Chelsea - Promo', 'single import action receives correct title');
+assert.equal(calls.confirmSingleImport[0].title, 'Arsenal vs Chelsea', 'single import action uses fixture name as title');
 
 const boxes = document.querySelectorAll('.fixture-checkbox');
 boxes[0].checked = true;
@@ -156,20 +147,13 @@ change(boxes[0]);
 boxes[1].checked = true;
 change(boxes[1]);
 click(document.getElementById('importSelectedBtn'));
-assert.ok(document.getElementById('bulkImportModal').classList.contains('visible'), 'bulk import modal opens');
-assert.equal(document.querySelectorAll('#bulkFixtureList .bulk-fixture-item').length, 2, 'bulk import lists selected fixtures');
-assert.match(document.getElementById('bulkTitlePreview').textContent, /\(\+ 1 more\)/, 'bulk preview shows +N more');
-document.getElementById('bulkPrefixType').value = 'custom';
-change(document.getElementById('bulkPrefixType'));
-document.getElementById('bulkPrefixCustom').value = 'Batch';
-input(document.getElementById('bulkPrefixCustom'));
-document.getElementById('bulkSuffixType').value = 'custom';
-change(document.getElementById('bulkSuffixType'));
-document.getElementById('bulkSuffixCustom').value = 'July';
-input(document.getElementById('bulkSuffixCustom'));
+assert.ok(document.getElementById('bulkImportModal').classList.contains('visible'), 'bulk import confirmation modal opens');
+assert.equal(document.getElementById('bulkConfirmMessage').textContent.trim(), 'Are you sure you want to import the selected fixtures?', 'bulk import confirmation copy renders');
+assert.equal(document.querySelectorAll('#bulkFixtureList .bulk-fixture-item').length, 2, 'bulk confirmation lists selected fixtures');
 click(document.getElementById('confirmBulkImportBtn'));
 assert.equal(calls.confirmBulkImport.length, 1, 'bulk import action is invoked');
 assert.equal(calls.confirmBulkImport[0].titles.length, 2, 'bulk import receives two titles');
+assert.deepEqual(calls.confirmBulkImport[0].titles, ['Arsenal vs Chelsea', 'Liverpool vs Man United'], 'bulk import uses fixture names as titles');
 
 click(document.querySelector('[data-action="open-group"]'));
 assert.ok(document.getElementById('groupModal').classList.contains('visible'), 'group modal opens');

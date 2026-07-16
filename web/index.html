@@ -295,45 +295,17 @@
 <div class="modal-overlay" id="importModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Configure Import</h3>
+      <h3>Confirm Import</h3>
       <button type="button" class="modal-close" id="closeImportModalBtn">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="modal-section">
-        <label class="modal-label">Fixture Name</label>
-        <input type="text" class="modal-input" id="importFixtureName" readonly>
-      </div>
-      <div class="modal-section">
-        <label class="modal-label">Title Name Preview</label>
-        <div class="title-preview" id="titlePreview">—</div>
-      </div>
-      <hr class="modal-divider">
-      <div class="modal-section">
-        <label class="modal-label">Prefix <span class="required">*</span></label>
-        <div class="modal-row">
-          <select id="prefixType" class="modal-select">
-            <option value="sport">Sport Type</option>
-            <option value="custom">Custom Text</option>
-          </select>
-          <input type="text" class="modal-input" id="prefixCustom" placeholder="Enter custom prefix…" style="display:none;">
-          <span class="prefix-value" id="prefixSportLabel"></span>
-        </div>
-      </div>
-      <div class="modal-section">
-        <label class="modal-label">Suffix <span class="required">*</span></label>
-        <div class="modal-row">
-          <select id="suffixType" class="modal-select">
-            <option value="date">Fixture Group Date (yyyyMMdd)</option>
-            <option value="custom">Custom Text</option>
-          </select>
-          <input type="text" class="modal-input" id="suffixCustom" placeholder="Enter custom suffix…" style="display:none;">
-          <span class="suffix-value" id="suffixDateLabel"></span>
-        </div>
-      </div>
+      <p class="confirm-copy" id="importConfirmMessage">Are you sure you want to import the selected fixture(s)?</p>
+      <div class="title-preview" id="importFixtureSummary"></div>
+      <p class="modal-hint">The fixture name will be used as the RightsLogic title and sent to the processing queue.</p>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
-      <button type="button" class="btn btn-primary" id="confirmImportBtn">📥 Confirm Import</button>
+      <button type="button" class="btn btn-primary" id="confirmImportBtn">Queue Import</button>
     </div>
   </div>
 </div>
@@ -341,46 +313,20 @@
 <div class="modal-overlay" id="bulkImportModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Configure Bulk Import</h3>
+      <h3>Confirm Bulk Import</h3>
       <button type="button" class="modal-close" id="closeBulkImportModalBtn">&times;</button>
     </div>
     <div class="modal-body">
+      <p class="confirm-copy" id="bulkConfirmMessage">Are you sure you want to import the selected fixture(s)?</p>
       <div class="modal-section">
         <label class="modal-label">Selected Fixtures</label>
         <div class="bulk-fixture-list" id="bulkFixtureList"></div>
       </div>
-      <div class="modal-section">
-        <label class="modal-label">Title Name Pattern Preview</label>
-        <div class="title-preview" id="bulkTitlePreview">—</div>
-        <p class="modal-hint">Pattern: [Prefix] - {Fixture Name} - [Suffix]</p>
-      </div>
-      <hr class="modal-divider">
-      <div class="modal-section">
-        <label class="modal-label">Prefix <span class="required">*</span></label>
-        <div class="modal-row">
-          <select id="bulkPrefixType" class="modal-select">
-            <option value="sport">Sport Type (per fixture)</option>
-            <option value="custom">Custom Text (same for all)</option>
-          </select>
-          <input type="text" class="modal-input" id="bulkPrefixCustom" placeholder="Enter custom prefix…" style="display:none;">
-        </div>
-        <p class="modal-hint" id="bulkPrefixHint">Each fixture will use its own Sport Type as prefix.</p>
-      </div>
-      <div class="modal-section">
-        <label class="modal-label">Suffix <span class="required">*</span></label>
-        <div class="modal-row">
-          <select id="bulkSuffixType" class="modal-select">
-            <option value="date">Fixture Group Date (yyyyMMdd, per fixture)</option>
-            <option value="custom">Custom Text (same for all)</option>
-          </select>
-          <input type="text" class="modal-input" id="bulkSuffixCustom" placeholder="Enter custom suffix…" style="display:none;">
-        </div>
-        <p class="modal-hint" id="bulkSuffixHint">Each fixture will use its own Fixture Group Date as suffix.</p>
-      </div>
+      <p class="modal-hint">Each selected fixture will keep its original fixture name as the RightsLogic title.</p>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" id="cancelBulkImportBtn">Cancel</button>
-      <button type="button" class="btn btn-primary" id="confirmBulkImportBtn">📥 Confirm Bulk Import</button>
+      <button type="button" class="btn btn-primary" id="confirmBulkImportBtn">Queue Selected Fixtures</button>
     </div>
   </div>
 </div>

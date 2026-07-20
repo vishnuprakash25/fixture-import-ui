@@ -42,6 +42,18 @@ Object.assign(globalThis, {
   confirm: window.confirm
 });
 
+// ─── Derive test data from mock data to reduce hardcoding ───
+const recentlyImportedCount = mockData.recentlyImported.length;
+const pageSize = 12; // pagination.pageSize from createFixtureImportApp.js line 56
+const availableFixtures = mockData.importableFixtures.filter((f) => f.status !== 'Imported');
+const firstAvailableName = availableFixtures[0]?.name;
+const secondAvailableName = availableFixtures[1]?.name;
+const sampleGroupId = mockData.importableFixtures.find((f) => f.name.toLowerCase().includes('wimbledon'))?.groupId || 'wimbledon-2026';
+const sampleGroupName = mockData.fixtureGroups[sampleGroupId]?.name || 'Wimbledon 2026';
+
+assert.ok(firstAvailableName, 'Mock data has at least one available fixture');
+assert.ok(secondAvailableName, 'Mock data has at least two available fixtures for bulk import test');
+
 const calls = {
   refreshData: 0,
   confirmSingleImport: [],
@@ -73,8 +85,8 @@ const change = (el) => el.dispatchEvent(new window.Event('change', { bubbles: tr
 const input = (el) => el.dispatchEvent(new window.Event('input', { bubbles: true }));
 
 assert.equal(document.querySelectorAll('#dashboardStats .stat-card').length, 3, 'dashboard stats render');
-assert.equal(document.querySelectorAll('#recentlyImportedBody tr').length, 8, 'recently imported table renders');
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'fixture table renders first page of mock fixtures');
+assert.equal(document.querySelectorAll('#recentlyImportedBody tr').length, recentlyImportedCount, `recently imported table renders ${recentlyImportedCount} rows from mock data`);
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, pageSize, `fixture table renders first page of ${pageSize} mock fixtures`);
 
 click(document.querySelector('.nav-item[data-page-index="2"]'));
 assert.ok(document.querySelector('.page[data-page-index="2"]').classList.contains('active'), 'subscriptions page becomes active');
@@ -93,25 +105,30 @@ assert.equal(calls.refreshData, 1, 'refresh action is invoked');
 const searchInput = document.getElementById('fixtureSearchInput');
 searchInput.value = 'arsenal';
 input(searchInput);
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 1, 'search narrows fixture rows');
+const arsenalMatches = mockData.importableFixtures.filter((f) => f.name.toLowerCase().includes('arsenal'));
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, arsenalMatches.length, `search narrows fixture rows to ${arsenalMatches.length} match(es) for 'arsenal'`);
 searchInput.value = '';
 input(searchInput);
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'search clear restores paginated rows');
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, pageSize, `search clear restores ${pageSize} paginated rows`);
 
 const tennisCheckbox = document.querySelector('#sportOptions input[value="tennis"]');
 tennisCheckbox.checked = true;
 change(tennisCheckbox);
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'sport filter narrows to tennis fixtures with pagination');
+const tennisFixturesCount = mockData.importableFixtures.filter((f) => f.typeId === 'tennis').length;
+const expectedPages = Math.ceil(tennisFixturesCount / pageSize);
+const expectedRowsOnPage1 = Math.min(tennisFixturesCount, pageSize);
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, expectedRowsOnPage1, `sport filter narrows to tennis fixtures (${expectedRowsOnPage1} rows on first page)`);
 assert.equal(document.getElementById('sportFilterLabel').textContent, 'Tennis', 'sport filter label updates');
 click(document.getElementById('sportClearBtn'));
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'sport filter clears');
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, pageSize, `sport filter clears to ${pageSize} rows`);
 
-const groupCheckbox = document.querySelector('#groupOptions input[value="wimbledon-2026"]');
+const groupCheckbox = document.querySelector(`#groupOptions input[value="${sampleGroupId}"]`);
 groupCheckbox.checked = true;
 change(groupCheckbox);
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 3, 'group filter narrows fixtures');
+const wimbledonFixtures = mockData.importableFixtures.filter((f) => f.groupId === sampleGroupId);
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, wimbledonFixtures.length, `group filter narrows to ${wimbledonFixtures.length} ${sampleGroupName} fixtures`);
 click(document.getElementById('groupClearBtn'));
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'group filter clears');
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, pageSize, `group filter clears to ${pageSize} rows`);
 
 click(document.getElementById('dateTriggerBtn'));
 const monthLabel = document.getElementById('calMonth1');
@@ -131,21 +148,23 @@ click(document.getElementById('applyDatePickerBtn'));
 assert.ok(document.querySelectorAll('#fixturesTableBody tr').length >= 1, 'date range filter narrows fixtures to July range');
 assert.match(document.getElementById('dateRangeLabel').textContent, /Jul 2, 2026/, 'date filter label updates');
 click(document.getElementById('dateClearBtn'));
-assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, 12, 'date filter clears');
+assert.equal(document.querySelectorAll('#fixturesTableBody tr').length, pageSize, `date filter clears to ${pageSize} rows`);
 
 click(document.querySelector('[data-action="open-import"]'));
 assert.ok(document.getElementById('importModal').classList.contains('visible'), 'single import confirmation modal opens');
 assert.equal(document.getElementById('importConfirmMessage').textContent.trim(), 'Are you sure you want to import the selected fixture?', 'single import confirmation copy renders');
-assert.equal(document.getElementById('importFixtureSummary').textContent.trim(), 'Arsenal vs Chelsea', 'single import confirmation shows selected fixture');
+assert.equal(document.getElementById('importFixtureSummary').textContent.trim(), firstAvailableName, `single import confirmation shows first available fixture: ${firstAvailableName}`);
 click(document.getElementById('confirmImportBtn'));
 assert.equal(calls.confirmSingleImport.length, 1, 'single import action is invoked');
-assert.equal(calls.confirmSingleImport[0].title, 'Arsenal vs Chelsea', 'single import action uses fixture name as title');
+assert.equal(calls.confirmSingleImport[0].title, firstAvailableName, `single import action uses fixture name as title: ${firstAvailableName}`);
 
-const boxes = document.querySelectorAll('.fixture-checkbox');
-boxes[0].checked = true;
-change(boxes[0]);
-boxes[1].checked = true;
-change(boxes[1]);
+const selectAvailable = (n) => Array.from(document.querySelectorAll('.fixture-checkbox')).filter((cb) => !cb.disabled)[n];
+let box = selectAvailable(0);
+box.checked = true;
+change(box);
+box = selectAvailable(1); // re-query after re-render
+box.checked = true;
+change(box);
 click(document.getElementById('importSelectedBtn'));
 assert.ok(document.getElementById('bulkImportModal').classList.contains('visible'), 'bulk import confirmation modal opens');
 assert.equal(document.getElementById('bulkConfirmMessage').textContent.trim(), 'Are you sure you want to import the selected fixtures?', 'bulk import confirmation copy renders');
@@ -153,7 +172,7 @@ assert.equal(document.querySelectorAll('#bulkFixtureList .bulk-fixture-item').le
 click(document.getElementById('confirmBulkImportBtn'));
 assert.equal(calls.confirmBulkImport.length, 1, 'bulk import action is invoked');
 assert.equal(calls.confirmBulkImport[0].titles.length, 2, 'bulk import receives two titles');
-assert.deepEqual(calls.confirmBulkImport[0].titles, ['Arsenal vs Chelsea', 'Liverpool vs Man United'], 'bulk import uses fixture names as titles');
+assert.deepEqual(calls.confirmBulkImport[0].titles, [firstAvailableName, secondAvailableName], `bulk import uses fixture names as titles: [${firstAvailableName}, ${secondAvailableName}]`);
 
 click(document.querySelector('[data-action="open-group"]'));
 assert.ok(document.getElementById('groupModal').classList.contains('visible'), 'group modal opens');
@@ -170,14 +189,14 @@ click(document.getElementById('closeImportedFixtureFooterBtn'));
 assert.ok(!document.getElementById('importedFixtureModal').classList.contains('visible'), 'imported fixture modal closes');
 
 click(document.querySelector('.nav-item[data-page-index="2"]'));
-assert.equal(document.querySelectorAll('#subscriptionsTableBody tr.subscription-row').length, 12, 'subscription groups render first page');
+assert.equal(document.querySelectorAll('#subscriptionsTableBody tr.subscription-row').length, pageSize, `subscription groups render first page of ${pageSize} rows`);
 const subscriptionsSearchInput = document.getElementById('subscriptionsSearchInput');
 subscriptionsSearchInput.value = 'wimbledon';
 input(subscriptionsSearchInput);
 assert.equal(document.querySelectorAll('#subscriptionsTableBody tr.subscription-row').length, 1, 'subscription search matches by imported fixture name');
 subscriptionsSearchInput.value = '';
 input(subscriptionsSearchInput);
-assert.equal(document.querySelectorAll('#subscriptionsTableBody tr.subscription-row').length, 12, 'subscription search clear restores paginated rows');
+assert.equal(document.querySelectorAll('#subscriptionsTableBody tr.subscription-row').length, pageSize, `subscription search clear restores paginated ${pageSize} rows`);
 
 const expandToggle = Array.from(document.querySelectorAll('#subscriptionsTableBody [data-action="toggle-subscription-details"]')).at(0);
 click(expandToggle);

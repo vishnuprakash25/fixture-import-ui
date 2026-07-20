@@ -169,7 +169,7 @@
         </div>
         <div class="bulk-bar">
           <label><input type="checkbox" class="checkbox" id="selectAll"> Select all</label>
-          <button type="button" class="btn btn-primary btn-sm" id="importSelectedBtn">📥 Import Selected</button>
+          <button type="button" class="btn btn-primary btn-sm" id="importSelectedBtn" disabled>📥 Import Selected</button>
           <button type="button" class="btn btn-secondary btn-sm" id="clearSelectionBtn">Clear</button>
         </div>
         <div class="card-body">
@@ -194,6 +194,67 @@
       <div class="card">
         <div class="toolbar">
           <input type="text" id="subscriptionsSearchInput" class="search-input" placeholder="Search by fixture group, fixture name, type, or import date…">
+          <div class="multiselect-wrapper" id="pubSportTypeMultiselect">
+            <button type="button" class="multiselect-trigger" id="pubSportTriggerBtn">
+              <span id="pubSportFilterLabel">All Sports</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button type="button" class="multiselect-clear" id="pubSportClearBtn" style="display:none;" title="Clear selection">✕</button>
+            <div class="multiselect-dropdown" id="pubSportDropdown">
+              <input type="text" id="pubSportOptionsSearch" class="multiselect-search" placeholder="Search sport types…">
+              <div class="multiselect-options" id="pubSportOptions"></div>
+              <div class="multiselect-actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="pubClearSportOptionsBtn">Clear All</button>
+              </div>
+            </div>
+          </div>
+          <div class="multiselect-wrapper" id="pubFixtureGroupMultiselect">
+            <button type="button" class="multiselect-trigger" id="pubGroupTriggerBtn">
+              <span id="pubGroupFilterLabel">All Fixture Groups</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button type="button" class="multiselect-clear" id="pubGroupClearBtn" style="display:none;" title="Clear selection">✕</button>
+            <div class="multiselect-dropdown" id="pubGroupDropdown">
+              <input type="text" id="pubGroupOptionsSearch" class="multiselect-search" placeholder="Search fixture groups…">
+              <div class="multiselect-options" id="pubGroupOptions"></div>
+              <div class="multiselect-actions">
+                <button type="button" class="btn btn-ghost btn-sm" id="pubClearGroupOptionsBtn">Clear All</button>
+              </div>
+            </div>
+          </div>
+          <div class="daterange-wrapper" id="pubDateRangeWrapper">
+            <button type="button" class="multiselect-trigger" id="pubDateTriggerBtn">
+              <span id="pubDateRangeLabel">All Dates</span>
+              <span class="multiselect-arrow">▾</span>
+            </button>
+            <button type="button" class="multiselect-clear" id="pubDateClearBtn" style="display:none;" title="Clear dates">✕</button>
+            <div class="datepicker-popup" id="pubDatePickerPopup">
+              <div class="datepicker-presets">
+                <button type="button" class="preset-btn" data-pub-date-preset="today">Today</button>
+                <button type="button" class="preset-btn" data-pub-date-preset="week">This Week</button>
+                <button type="button" class="preset-btn" data-pub-date-preset="month">This Month</button>
+                <button type="button" class="preset-btn" data-pub-date-preset="quarter">This Quarter</button>
+              </div>
+              <div class="datepicker-divider"></div>
+              <div class="datepicker-calendars">
+                <div class="datepicker-cal">
+                  <div class="cal-nav">
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerPrevBtn">‹</button>
+                    <span class="cal-month" id="pubCalMonth1"></span>
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerNextBtn">›</button>
+                  </div>
+                  <div class="cal-grid" id="pubCalGrid1"></div>
+                </div>
+              </div>
+              <div class="datepicker-footer">
+                <span class="datepicker-range-text" id="pubDateRangeText">Select start date</span>
+                <div class="datepicker-actions">
+                  <button type="button" class="btn btn-ghost btn-sm" id="pubClearDatePickerBtn">Clear</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="pubApplyDatePickerBtn">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <button type="button" class="btn btn-ghost" id="clearSubscriptionsSearchBtn">Clear</button>
           <span class="subscriptions-result-count" id="subscriptionsResultCount"></span>
         </div>
@@ -406,6 +467,6 @@
   </div>
 </div>
 
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/app.js?v=6"></script>
 </body>
 </html>

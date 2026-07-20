@@ -474,6 +474,11 @@ const groupCatalog = [
   }
 ];
 
+// ─── Published Fixtures Seed ───
+// ⚠️ IMPORTANT: The ordering of fixtures in this array is used by test assertions:
+//   - scripts/smoke-test.mjs: References 'Arsenal vs Chelsea' as the first published fixture
+//   - scripts/dom-integration-test.mjs: Uses indices and specific fixture names for DOM assertions
+// If you reorder or modify this list, you MUST update corresponding assertions in the test files.
 const publishedFixturesSeed = [
   { groupId: 'premier-league-2025', name: 'Arsenal vs Chelsea', importedOn: 'Nov 10, 2025', titleId: '10001', importedBy: 'vishnu.prakash@sky.uk' },
   { groupId: 'premier-league-2025', name: 'Liverpool vs Man United', importedOn: 'Nov 12, 2025', titleId: '10002', importedBy: 'vishnu.prakash@sky.uk' },

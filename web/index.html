@@ -59,6 +59,32 @@
       </div>
     </div>
     <div class="sidebar-footer">
+      <div class="user-menu" id="userMenu">
+        <button type="button" class="user-menu-btn" id="userMenuBtn" title="User management" aria-haspopup="true" aria-expanded="false">
+          <span class="user-avatar" id="userAvatar">U</span>
+          <span class="user-meta">
+            <strong id="userDisplayName">Guest</strong>
+            <small id="userDisplayRole">Not signed in</small>
+          </span>
+          <span class="user-menu-chevron" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </span>
+        </button>
+        <div class="user-menu-dropdown" id="userMenuDropdown">
+          <div class="user-menu-profile" id="userMenuProfile">
+            <span class="user-avatar-lg" id="userAvatarLg">U</span>
+            <div class="user-menu-profile-info">
+              <strong id="userMenuName">Guest</strong>
+              <small id="userMenuEmail">Not signed in</small>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+          <button type="button" class="user-menu-item" id="signOutBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
       <p>v1.0.0 · © Sky 2026</p>
     </div>
     <button type="button" class="theme-toggle" id="themeToggleBtn" title="Toggle theme">
@@ -70,14 +96,31 @@
     <div class="page active" data-page-index="0">
       <div class="page-header">
         <div>
-          <h2>Dashboard</h2>
-          <p>Overview of your fixture management activity</p>
+          <h2 id="dashboardGreeting">Dashboard</h2>
+          <p id="dashboardSubtitle">Overview of your fixture management activity</p>
         </div>
-        <button type="button" class="btn-icon-refresh" id="refreshDataBtn" title="Refresh data">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        </button>
+        <div class="page-header-actions">
+          <span class="last-refreshed" id="lastRefreshedLabel">Updated just now</span>
+          <button type="button" class="btn-icon-refresh" id="refreshDataBtn" title="Refresh data">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
       </div>
       <div class="stats" id="dashboardStats"></div>
+      <div class="quick-actions" id="quickActions">
+        <button type="button" class="quick-action-btn" data-quick-action="import">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M12 8v7"></path><path d="m9 12 3 3 3-3"></path></svg>
+          Import Fixtures
+        </button>
+        <button type="button" class="quick-action-btn" data-quick-action="activity">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c1.7-3.2 3.6-4.8 5.8-4.8 2 0 3.5 1.4 5.1 1.4 1.2 0 2.3-.7 3.1-2"></path><path d="M4 20h16"></path><circle cx="9.8" cy="11.2" r="1"></circle><circle cx="14.9" cy="12.6" r="1"></circle></svg>
+          View Activity Log
+        </button>
+        <button type="button" class="quick-action-btn" data-quick-action="published">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="4" rx="1.5"></rect><rect x="5" y="10" width="14" height="4" rx="1.5"></rect><rect x="5" y="15" width="14" height="4" rx="1.5"></rect></svg>
+          Published Fixtures
+        </button>
+      </div>
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Recently Imported Fixtures</h3>
@@ -167,7 +210,7 @@
           </div>
           <button type="button" class="btn btn-primary" id="searchFixturesBtn">Search</button>
         </div>
-        <div class="bulk-bar">
+        <div class="bulk-bar" id="fixtureBulkBar" style="display:none;">
           <label><input type="checkbox" class="checkbox" id="selectAll"> Select all</label>
           <button type="button" class="btn btn-primary btn-sm" id="importSelectedBtn" disabled>📥 Import Selected</button>
           <button type="button" class="btn btn-secondary btn-sm" id="clearSelectionBtn">Clear</button>
@@ -175,7 +218,7 @@
         <div class="card-body">
           <table id="fixturesTable">
             <thead>
-              <tr><th style="width:44px"></th><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Date</th><th>Venue</th><th>Fixture ID</th><th>Status</th><th></th></tr>
+              <tr><th style="width:44px"></th><th>Fixture</th><th>Fixture Group</th><th>Type</th><th>Date</th><th>Venue</th><th>Fixture ID</th><th></th></tr>
             </thead>
             <tbody id="fixturesTableBody"></tbody>
           </table>
@@ -467,6 +510,43 @@
   </div>
 </div>
 
-<script type="module" src="js/app.js?v=6"></script>
+<div class="modal-overlay auth-modal" id="loginModal">
+  <div class="modal auth-dialog">
+    <div class="auth-hero">
+      <div class="auth-brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a8 8 0 1 1 16 0"></path><line x1="12" y1="14" x2="16" y2="10"></line><circle cx="12" cy="14" r="1.2"></circle></svg>
+      </div>
+      <h3 class="auth-title">Welcome back</h3>
+      <p class="auth-subtitle">Sign in to RightsLogic Fixtures</p>
+    </div>
+    <form class="auth-form" id="loginForm">
+      <div class="auth-field">
+        <label class="auth-label" for="loginEmailInput">Email address</label>
+        <div class="auth-input-wrapper">
+          <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"></rect><polyline points="22,7 12,13 2,7"></polyline></svg>
+          <input type="email" class="auth-input" id="loginEmailInput" placeholder="you@skysports.com" required autocomplete="email">
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="loginPasswordInput">Password</label>
+        <div class="auth-input-wrapper">
+          <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <input type="password" class="auth-input" id="loginPasswordInput" placeholder="Enter your password" required minlength="4" autocomplete="current-password">
+          <button type="button" class="auth-password-toggle" id="passwordToggleBtn" title="Show password" aria-label="Toggle password visibility">
+            <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="auth-submit-btn">
+        Sign in
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+      <p class="auth-demo-note">Demo: any valid email + password (4+ characters)</p>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>

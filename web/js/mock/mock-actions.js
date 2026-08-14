@@ -5,6 +5,14 @@ export const mockActions = {
   refreshData() {
     window.alert('Refreshing fixture data from Fixture Manager API…');
   },
+  login({ displayName }) {
+    // Login feedback is handled by an in-app toast to avoid blocking modals.
+    void displayName;
+  },
+  signOut({ displayName }) {
+    // Sign-out feedback is handled by in-app toast and login modal transition.
+    void displayName;
+  },
   confirmSingleImport({ title, fixture }) {
     window.alert(
       'Queued 1 fixture for import:\n\nTitle: "' + title + '"\nFixture ID: ' + fixture.id +

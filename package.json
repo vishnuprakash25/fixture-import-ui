@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "serve": "python3 -m http.server 4173 -d .",
-    "check:js": "node --check web/js/app.js && node --check web/js/core/helpers.js && node --check web/js/core/createFixtureImportApp.js && node --check web/js/mock/mock-data.js && node --check web/js/mock/mock-actions.js",
+    "serve:mock": "python3 -m http.server 4173 -d .",
+    "serve:real": "python3 -m http.server 4173 -d .",
+    "check:js": "node --check web/js/app.js && node --check web/js/core/helpers.js && node --check web/js/core/createFixtureImportApp.js && node --check web/js/mock/mock-data.js && node --check web/js/mock/mock-actions.js && node --check web/js/providers/index.js && node --check web/js/providers/mock-provider.js && node --check web/js/providers/real-provider.js",
     "test:smoke": "node scripts/smoke-test.mjs",
     "test:dom": "node scripts/dom-integration-test.mjs"
   },

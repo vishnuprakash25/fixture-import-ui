@@ -9,6 +9,7 @@ import {
 
 export function createFixtureImportApp({ data, actions = {} }) {
   const notify = actions.notify || ((message) => window.alert(message));
+  const AUTH_STORAGE_KEY = 'fixture-import-ui.auth-user';
   const fixtureGroups = data.fixtureGroups || {};
   const importableFixtures = data.importableFixtures || [];
   const recentlyImported = data.recentlyImported || [];
@@ -20,6 +21,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   const state = {
     activePage: 0,
+    hasSearched: false,
     filters: {
       search: '',
       sports: new Set(),
@@ -69,6 +71,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
       hover: null
     },
     currentActivityEntry: null,
+    auth: {
+      isAuthenticated: false,
+      email: '',
+      displayName: ''
+    },
     pagination: {
       pageSize: 12,
       fixturesPage: 1,
@@ -89,22 +96,46 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   let copyToastEl = null;
   let copyToastTimer = null;
+  let authToastTimer = null;
 
   function init() {
     cacheDom();
+    restoreAuthSession();
     bindEvents();
     switchPage(0);
     syncFilterLabels();
     renderAll();
     updateThemeToggle();
+    syncAuthUi();
+    updateDashboardGreeting();
+    markRefreshTime();
   }
 
   function cacheDom() {
     Object.assign(dom, {
       navItems: Array.from(document.querySelectorAll('.nav-item[data-page-index]')),
       pages: Array.from(document.querySelectorAll('.page[data-page-index]')),
+      userMenu: document.getElementById('userMenu'),
+      userMenuBtn: document.getElementById('userMenuBtn'),
+      userMenuDropdown: document.getElementById('userMenuDropdown'),
+      userAvatar: document.getElementById('userAvatar'),
+      userAvatarLg: document.getElementById('userAvatarLg'),
+      userDisplayName: document.getElementById('userDisplayName'),
+      userDisplayRole: document.getElementById('userDisplayRole'),
+      userMenuName: document.getElementById('userMenuName'),
+      userMenuEmail: document.getElementById('userMenuEmail'),
+      signOutBtn: document.getElementById('signOutBtn'),
+      loginModal: document.getElementById('loginModal'),
+      loginForm: document.getElementById('loginForm'),
+      loginEmailInput: document.getElementById('loginEmailInput'),
+      loginPasswordInput: document.getElementById('loginPasswordInput'),
+      passwordToggleBtn: document.getElementById('passwordToggleBtn'),
       themeToggleBtn: document.getElementById('themeToggleBtn'),
       refreshDataBtn: document.getElementById('refreshDataBtn'),
+      dashboardGreeting: document.getElementById('dashboardGreeting'),
+      dashboardSubtitle: document.getElementById('dashboardSubtitle'),
+      lastRefreshedLabel: document.getElementById('lastRefreshedLabel'),
+      quickActions: document.getElementById('quickActions'),
       viewAllBtn: document.getElementById('viewAllBtn'),
       dashboardStats: document.getElementById('dashboardStats'),
       recentlyImportedBody: document.getElementById('recentlyImportedBody'),
@@ -132,6 +163,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       calMonth1: document.getElementById('calMonth1'),
       calGrid1: document.getElementById('calGrid1'),
       fixturesBody: document.getElementById('fixturesTableBody'),
+      fixtureBulkBar: document.getElementById('fixtureBulkBar'),
       selectAll: document.getElementById('selectAll'),
       importSelectedBtn: document.getElementById('importSelectedBtn'),
       clearSelectionBtn: document.getElementById('clearSelectionBtn'),
@@ -226,9 +258,22 @@ export function createFixtureImportApp({ data, actions = {} }) {
       item.addEventListener('click', () => switchPage(Number(item.dataset.pageIndex)));
     });
 
+    dom.userMenuBtn.addEventListener('click', toggleUserMenu);
+    dom.signOutBtn.addEventListener('click', handleSignOut);
+    dom.loginForm.addEventListener('submit', handleLoginSubmit);
+    dom.passwordToggleBtn.addEventListener('click', togglePasswordVisibility);
+
     dom.themeToggleBtn.addEventListener('click', toggleTheme);
-    dom.refreshDataBtn.addEventListener('click', () => actions.refreshData?.({ data, state }));
+    dom.refreshDataBtn.addEventListener('click', () => { actions.refreshData?.({ data, state }); markRefreshTime(); });
     dom.viewAllBtn.addEventListener('click', () => switchPage(2));
+    dom.quickActions.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-quick-action]');
+      if (!btn) return;
+      const action = btn.dataset.quickAction;
+      if (action === 'import') switchPage(1);
+      else if (action === 'activity') switchPage(3);
+      else if (action === 'published') switchPage(2);
+    });
     dom.exportLogBtn.addEventListener('click', () => actions.exportLog?.({ data, state }));
     dom.subscriptionsSearchInput.addEventListener('input', (event) => {
       state.subscriptionsSearch = event.target.value;
@@ -347,9 +392,12 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.searchInput.addEventListener('input', (event) => {
       state.filters.search = event.target.value;
       state.pagination.fixturesPage = 1;
+      if (event.target.value.trim()) state.hasSearched = true;
+      else if (!hasActiveFilters()) state.hasSearched = false;
       renderFixturesTable();
     });
     dom.searchBtn.addEventListener('click', () => {
+      state.hasSearched = true;
       state.pagination.fixturesPage = 1;
       renderFixturesTable();
     });
@@ -364,6 +412,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       if (!event.target.matches('input[type="checkbox"]')) return;
       if (event.target.checked) state.filters.sports.add(event.target.value);
       else state.filters.sports.delete(event.target.value);
+      state.hasSearched = true;
       syncFilterLabels();
       renderSportOptions();
       state.pagination.fixturesPage = 1;
@@ -381,6 +430,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       if (!event.target.matches('input[type="checkbox"]')) return;
       if (event.target.checked) state.filters.groups.add(event.target.value);
       else state.filters.groups.delete(event.target.value);
+      state.hasSearched = true;
       syncFilterLabels();
       renderGroupOptions();
       state.pagination.fixturesPage = 1;
@@ -461,6 +511,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function handleDocumentClick(event) {
     const target = event.target;
 
+    if (!dom.userMenu.contains(target)) dom.userMenuDropdown.classList.remove('open');
     if (!dom.sportTypeMultiselect.contains(target)) dom.sportDropdown.classList.remove('open');
     if (!document.getElementById('fixtureGroupMultiselect').contains(target)) dom.groupDropdown.classList.remove('open');
     if (!dom.dateRangeWrapper.contains(target)) dom.datePickerPopup.classList.remove('open');
@@ -469,6 +520,175 @@ export function createFixtureImportApp({ data, actions = {} }) {
     if (!dom.pubSportTypeMultiselect.contains(target)) dom.pubSportDropdown.classList.remove('open');
     if (!dom.pubFixtureGroupMultiselect.contains(target)) dom.pubGroupDropdown.classList.remove('open');
     if (!dom.pubDateRangeWrapper.contains(target)) dom.pubDatePickerPopup.classList.remove('open');
+  }
+
+  function restoreAuthSession() {
+    try {
+      const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.email || !parsed.displayName) return;
+      state.auth.isAuthenticated = true;
+      state.auth.email = parsed.email;
+      state.auth.displayName = parsed.displayName;
+    } catch (_) {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  }
+
+  function persistAuthSession() {
+    if (!state.auth.isAuthenticated) {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+      email: state.auth.email,
+      displayName: state.auth.displayName
+    }));
+  }
+
+  function deriveDisplayName(email) {
+    const local = String(email || '').split('@')[0] || 'User';
+    return local
+      .split(/[._-]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  function syncAuthUi() {
+    const name = state.auth.displayName || 'Guest';
+    const role = state.auth.isAuthenticated ? state.auth.email : 'Not signed in';
+    const initial = name.charAt(0).toUpperCase() || 'U';
+
+    dom.userDisplayName.textContent = name;
+    dom.userDisplayRole.textContent = role;
+    dom.userAvatar.textContent = initial;
+    dom.userAvatarLg.textContent = initial;
+    dom.userMenuName.textContent = name;
+    dom.userMenuEmail.textContent = role;
+    dom.signOutBtn.disabled = !state.auth.isAuthenticated;
+    dom.userMenuBtn.setAttribute('aria-expanded', dom.userMenuDropdown.classList.contains('open') ? 'true' : 'false');
+    document.body.classList.toggle('auth-locked', !state.auth.isAuthenticated);
+
+    if (!state.auth.isAuthenticated) openLoginModal();
+    else closeLoginModal();
+
+    updateDashboardGreeting();
+  }
+
+  function openLoginModal() {
+    dom.loginModal.classList.add('visible');
+    dom.loginEmailInput.focus();
+  }
+
+  function closeLoginModal() {
+    dom.loginModal.classList.remove('visible');
+    dom.loginPasswordInput.value = '';
+    dom.loginPasswordInput.type = 'password';
+    dom.passwordToggleBtn.classList.remove('active');
+  }
+
+  function togglePasswordVisibility() {
+    const isPassword = dom.loginPasswordInput.type === 'password';
+    dom.loginPasswordInput.type = isPassword ? 'text' : 'password';
+    dom.passwordToggleBtn.classList.toggle('active', isPassword);
+    dom.passwordToggleBtn.title = isPassword ? 'Hide password' : 'Show password';
+  }
+
+  function toggleUserMenu() {
+    if (!state.auth.isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    dom.userMenuDropdown.classList.toggle('open');
+    dom.userMenuBtn.setAttribute('aria-expanded', dom.userMenuDropdown.classList.contains('open') ? 'true' : 'false');
+  }
+
+  function handleLoginSubmit(event) {
+    event.preventDefault();
+
+    const email = dom.loginEmailInput.value.trim().toLowerCase();
+    const password = dom.loginPasswordInput.value;
+    if (!email || !password) {
+      notify('Enter your email and password to continue.');
+      return;
+    }
+
+    state.auth.isAuthenticated = true;
+    state.auth.email = email;
+    state.auth.displayName = deriveDisplayName(email);
+    persistAuthSession();
+    syncAuthUi();
+    switchPage(0);
+    showAuthToast(`Welcome, ${state.auth.displayName}`);
+    actions.login?.({ email: state.auth.email, displayName: state.auth.displayName });
+  }
+
+  function handleSignOut() {
+    const displayName = state.auth.displayName;
+    state.auth.isAuthenticated = false;
+    state.auth.email = '';
+    state.auth.displayName = '';
+    dom.userMenuDropdown.classList.remove('open');
+    persistAuthSession();
+    syncAuthUi();
+    showAuthToast('Signed out');
+    actions.signOut?.({ displayName });
+  }
+
+  function showAuthToast(message) {
+    let toast = document.getElementById('authToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'authToast';
+      toast.className = 'auth-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.remove('visible');
+    void toast.offsetWidth;
+    toast.classList.add('visible');
+
+    if (authToastTimer) clearTimeout(authToastTimer);
+    authToastTimer = setTimeout(() => toast.classList.remove('visible'), 1600);
+  }
+
+  function updateDashboardGreeting() {
+    const hour = new Date().getHours();
+    let greeting = 'Good evening';
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 18) greeting = 'Good afternoon';
+
+    const name = state.auth.displayName || '';
+    dom.dashboardGreeting.textContent = name ? `${greeting}, ${name.split(' ')[0]}` : greeting;
+    dom.dashboardSubtitle.textContent = 'Here\u2019s your fixture management overview';
+  }
+
+  let lastRefreshDate = null;
+  function markRefreshTime() {
+    lastRefreshDate = new Date();
+    dom.lastRefreshedLabel.textContent = 'Updated just now';
+  }
+
+  function getRelativeTime(dateString) {
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return dateString;
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    return dateString;
   }
 
   function handlePaginationClick(event) {
@@ -594,29 +814,91 @@ export function createFixtureImportApp({ data, actions = {} }) {
           <div class="stat-icon ${escapeHtml(stat.iconClass)}">${escapeHtml(stat.icon)}</div>
           <span class="stat-trend ${escapeHtml(stat.trendDirection)}">${escapeHtml(stat.trend)}</span>
         </div>
-        <div class="stat-value">${escapeHtml(stat.value)}</div>
-        <div class="stat-label">${escapeHtml(stat.label)}</div>
+        <div class="stat-body">
+          <div class="stat-text">
+            <div class="stat-value">${escapeHtml(stat.value)}</div>
+            <div class="stat-label">${escapeHtml(stat.label)}</div>
+          </div>
+          ${renderStatChart(stat.chart)}
+        </div>
       </div>
     `).join('');
   }
 
+  function renderStatChart(chart) {
+    if (!chart) return '';
+
+    if (chart.type === 'donut') {
+      const pct = Math.round((chart.filled / chart.total) * 100);
+      const circumference = 2 * Math.PI * 28;
+      const dashOffset = circumference - (circumference * pct / 100);
+      return `
+        <div class="stat-chart stat-chart-donut" title="${chart.filled} of ${chart.total} fixtures imported (${pct}%)">
+          <svg width="56" height="56" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="var(--border)" stroke-width="5"/>
+            <circle cx="32" cy="32" r="28" fill="none" stroke="url(#donutGrad)" stroke-width="5"
+              stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
+              stroke-linecap="round" transform="rotate(-90 32 32)"/>
+            <defs><linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#ec4899"/></linearGradient></defs>
+          </svg>
+          <span class="stat-chart-pct">${pct}%</span>
+        </div>
+      `;
+    }
+
+    if (chart.type === 'bars') {
+      const maxBar = Math.max(...chart.bars);
+      const colorClass = chart.color ? ` stat-bar-${chart.color}` : '';
+      const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      const barHtml = chart.bars.map((value, i) => {
+        const height = Math.round((value / maxBar) * 100);
+        return `<div class="stat-bar-col"><div class="stat-bar${colorClass}" style="height:${height}%" title="${dayLabels[i]}: ${value}"></div><span class="stat-bar-label">${dayLabels[i]}</span></div>`;
+      }).join('');
+      return `<div class="stat-chart stat-chart-bars">${barHtml}</div>`;
+    }
+
+    if (chart.type === 'segmented') {
+      const total = chart.segments.reduce((sum, seg) => sum + seg.value, 0);
+      const segHtml = chart.segments.map((seg, i) => {
+        const pct = total > 0 ? Math.round((seg.value / total) * 100) : 0;
+        return `<div class="stat-segment stat-segment-${i}" style="width:${pct}%" title="${seg.label}: ${seg.value} (${pct}%)"></div>`;
+      }).join('');
+      return `
+        <div class="stat-chart stat-chart-segmented">
+          <div class="stat-segment-track">${segHtml}</div>
+          <div class="stat-segment-legend">
+            ${chart.segments.map((seg, i) => `<span class="stat-segment-key stat-segment-key-${i}">${seg.label}: ${seg.value}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
+  }
+
   function renderRecentlyImported() {
-    dom.recentlyImportedBody.innerHTML = recentlyImported.map((item, index) => {
+    const displayItems = recentlyImported.slice(0, 5);
+    dom.recentlyImportedBody.innerHTML = displayItems.length ? displayItems.map((item, index) => {
       const importStatus = item.importStatus || 'Processed';
-      const importStatusBadge = importStatus === 'Processed' ? 'badge-green' : 'badge-indigo';
-      const canShowTitleId = importStatus === 'Processed' && item.titleId;
+      const isInProgress = importStatus !== 'Processed';
+      const importStatusBadge = isInProgress ? 'badge-indigo' : 'badge-green';
+      const pulseDot = isInProgress ? '<span class="pulse-dot"></span>' : '';
+      const canShowTitleId = !isInProgress && item.titleId;
+      const relTime = getRelativeTime(item.importDate);
       return `
       <tr>
         <td><strong>${escapeHtml(item.name)}</strong></td>
         <td><span class="badge badge-gray">${escapeHtml(fixtureGroups[item.groupId]?.name || item.groupId)}</span></td>
         <td>${escapeHtml(item.sport)}</td>
-        <td>${escapeHtml(item.importDate)}</td>
+        <td><span title="${escapeHtml(item.importDate)}">${escapeHtml(item.importDate)} <small class="relative-time">(${escapeHtml(relTime)})</small></span></td>
         <td>${canShowTitleId ? `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId)}</span>` : '<span class="muted">Not available</span>'}</td>
-        <td><span class="badge ${importStatusBadge}">${escapeHtml(importStatus)}</span></td>
+        <td><span class="badge ${importStatusBadge}">${pulseDot}${escapeHtml(importStatus)}</span></td>
         <td><button type="button" class="btn btn-secondary btn-sm" data-action="view-imported" data-imported-index="${index}">Details</button></td>
       </tr>
     `;
-    }).join('');
+    }).join('') : `
+      <tr><td colspan="7"><div class="empty-state">No recent imports yet. Start by importing fixtures from the Import Fixtures tab.</div></td></tr>
+    `;
   }
 
   function renderSportOptions() {
@@ -643,8 +925,17 @@ export function createFixtureImportApp({ data, actions = {} }) {
     `).join('') || '<div class="multiselect-option">No fixture groups match.</div>';
   }
 
+  function hasActiveFilters() {
+    return state.filters.search.trim() !== '' ||
+      state.filters.sports.size > 0 ||
+      state.filters.groups.size > 0 ||
+      state.filters.dateFrom !== null ||
+      state.filters.dateTo !== null;
+  }
+
   function getFilteredFixtures() {
-    return filterFixtures(importableFixtures, state.filters, fixtureGroups);
+    const available = importableFixtures.filter((fixture) => fixture.status !== 'Imported');
+    return filterFixtures(available, state.filters, fixtureGroups);
   }
 
   function getPaginatedItems(items, page) {
@@ -676,6 +967,21 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderFixturesTable() {
+    if (!state.hasSearched) {
+      dom.fixturesBody.innerHTML = `
+        <tr>
+          <td colspan="8"><div class="empty-state">Use the search bar or filters above to find available fixtures to import.</div></td>
+        </tr>
+      `;
+      dom.fixturesPagination.innerHTML = '';
+      dom.fixtureBulkBar.style.display = 'none';
+      syncSelectAllState();
+      syncImportSelectedButton();
+      return;
+    }
+
+    dom.fixtureBulkBar.style.display = '';
+
     const fixtures = getFilteredFixtures();
     const paged = getPaginatedItems(fixtures, state.pagination.fixturesPage);
     state.pagination.fixturesPage = paged.page;
@@ -683,26 +989,22 @@ export function createFixtureImportApp({ data, actions = {} }) {
     const hasSelection = state.selectedFixtureIds.size > 0;
 
     dom.fixturesBody.innerHTML = paged.pageItems.length ? paged.pageItems.map((fixture) => {
-      const isImported = fixture.status === 'Imported';
-      const importCell = isImported
-        ? `<span class="muted" aria-label="Already imported">—</span>`
-        : `<button type="button" class="btn btn-primary btn-sm" data-action="open-import" data-fixture-id="${escapeHtml(fixture.id)}"${hasSelection ? ' disabled title="Use Import Selected to import multiple fixtures"' : ''}>Import</button>`;
+      const importCell = `<button type="button" class="btn btn-primary btn-sm" data-action="open-import" data-fixture-id="${escapeHtml(fixture.id)}"${hasSelection ? ' disabled title="Use Import Selected to import multiple fixtures"' : ''}>Import</button>`;
       return `
       <tr>
-        <td><input type="checkbox" class="checkbox fixture-checkbox" data-fixture-id="${escapeHtml(fixture.id)}" ${state.selectedFixtureIds.has(fixture.id) ? 'checked' : ''}${isImported ? ' disabled title="Already imported"' : ''}></td>
+        <td><input type="checkbox" class="checkbox fixture-checkbox" data-fixture-id="${escapeHtml(fixture.id)}" ${state.selectedFixtureIds.has(fixture.id) ? 'checked' : ''}></td>
         <td><strong>${escapeHtml(fixture.name)}</strong></td>
         <td><span class="badge badge-gray fixture-group-link" data-action="open-group" data-group-id="${escapeHtml(fixture.groupId)}">${escapeHtml(fixtureGroups[fixture.groupId]?.name || fixture.groupId)}</span></td>
         <td>${escapeHtml(fixture.sportType)}</td>
         <td>${escapeHtml(fixture.date)}</td>
         <td>${escapeHtml(fixture.venue)}</td>
         <td class="fixture-id" title="${escapeHtml(fixture.id)}" data-copy-value="${escapeHtml(fixture.id)}">${escapeHtml(fixture.shortId)}</td>
-        <td><span class="badge ${isImported ? 'badge-green' : 'badge-indigo'}">${escapeHtml(fixture.status)}</span></td>
         <td>${importCell}</td>
       </tr>
     `;
     }).join('') : `
       <tr>
-        <td colspan="9"><div class="empty-state">No fixtures match the current filters.</div></td>
+        <td colspan="8"><div class="empty-state">No fixtures match the current filters.</div></td>
       </tr>
     `;
 
@@ -1449,6 +1751,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.optionSearch.sport = '';
     state.pagination.fixturesPage = 1;
     dom.sportOptionsSearch.value = '';
+    if (!hasActiveFilters()) state.hasSearched = false;
     syncFilterLabels();
     renderSportOptions();
     renderFixturesTable();
@@ -1459,6 +1762,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.optionSearch.group = '';
     state.pagination.fixturesPage = 1;
     dom.groupOptionsSearch.value = '';
+    if (!hasActiveFilters()) state.hasSearched = false;
     syncFilterLabels();
     renderGroupOptions();
     renderFixturesTable();
@@ -1596,6 +1900,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.filters.dateFrom = cloneDate(state.datePicker.start);
     state.filters.dateTo = cloneDate(state.datePicker.end || state.datePicker.start);
     dom.datePickerPopup.classList.remove('open');
+    state.hasSearched = true;
     state.pagination.fixturesPage = 1;
     syncFilterLabels();
     renderFixturesTable();
@@ -1609,6 +1914,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.datePicker.hover = null;
     dom.datePickerPopup.classList.remove('open');
     state.pagination.fixturesPage = 1;
+    if (!hasActiveFilters()) state.hasSearched = false;
     syncFilterLabels();
     renderCalendar();
     renderFixturesTable();
@@ -1617,7 +1923,6 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function toggleSelectAll(checked) {
     const visibleFixtures = getPaginatedItems(getFilteredFixtures(), state.pagination.fixturesPage).pageItems;
     visibleFixtures.forEach((fixture) => {
-      if (fixture.status === 'Imported') return; // skip already-imported fixtures
       if (checked) state.selectedFixtureIds.add(fixture.id);
       else state.selectedFixtureIds.delete(fixture.id);
     });
@@ -1631,11 +1936,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   function syncSelectAllState() {
     const visibleFixtures = getPaginatedItems(getFilteredFixtures(), state.pagination.fixturesPage).pageItems;
-    const selectableFixtures = visibleFixtures.filter((fixture) => fixture.status !== 'Imported');
-    const selectedVisibleCount = selectableFixtures.filter((fixture) => state.selectedFixtureIds.has(fixture.id)).length;
-    dom.selectAll.checked = selectableFixtures.length > 0 && selectedVisibleCount === selectableFixtures.length;
-    dom.selectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < selectableFixtures.length;
-    dom.selectAll.disabled = selectableFixtures.length === 0;
+    const selectedVisibleCount = visibleFixtures.filter((fixture) => state.selectedFixtureIds.has(fixture.id)).length;
+    dom.selectAll.checked = visibleFixtures.length > 0 && selectedVisibleCount === visibleFixtures.length;
+    dom.selectAll.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleFixtures.length;
+    dom.selectAll.disabled = visibleFixtures.length === 0;
   }
 
   function requestSingleImportConfirmation(fixtureId) {

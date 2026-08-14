@@ -826,14 +826,21 @@ const importQueueCount = recentlyImported.filter((item) => item.importStatus ===
 const updateQueueCount = 6;
 const hasProcessingQueue = importQueueCount > 0 || updateQueueCount > 0;
 
+const totalFixtureCount = importableFixtures.length + publishedFixturesSeed.length;
+
 const dashboardStats = [
   {
     icon: 'RL',
     iconClass: 'rose',
-    trend: `${subscriptions.length} groups`,
+    trend: `${subscriptions.length} Fixture Groups`,
     trendDirection: 'up',
     value: String(publishedFixturesSeed.length),
-    label: 'Published Fixtures'
+    label: 'Imported Fixtures',
+    chart: {
+      type: 'bars',
+      bars: [2, 4, 3, 5, 2, 3, 2],
+      color: 'rose'
+    }
   },
   {
     icon: 'UP',
@@ -841,7 +848,12 @@ const dashboardStats = [
     trend: `Week: ${recentWeekUpdatesCount} | Month: ${recentMonthUpdatesCount}`,
     trendDirection: 'up',
     value: String(eventNotificationUpdates.length),
-    label: 'Published Updates'
+    label: 'Processed Updates',
+    chart: {
+      type: 'bars',
+      bars: [3, 5, 2, 4, 6, 3, 5],
+      color: 'sky'
+    }
   },
   {
     icon: 'PQ',
@@ -849,8 +861,15 @@ const dashboardStats = [
     trend: `Imports: ${importQueueCount} | Updates: ${updateQueueCount}`,
     trendDirection: 'up',
     value: String(importQueueCount + updateQueueCount),
-    label: 'Processing Queue',
-    hidden: !hasProcessingQueue
+    label: 'In Progress',
+    hidden: !hasProcessingQueue,
+    chart: {
+      type: 'segmented',
+      segments: [
+        { value: importQueueCount, label: 'Imports' },
+        { value: updateQueueCount, label: 'Updates' }
+      ]
+    }
   }
 ];
 

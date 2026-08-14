@@ -1,12 +1,9 @@
 import { createFixtureImportApp } from './core/createFixtureImportApp.js';
-import { mockActions } from './mock/mock-actions.js';
-import { mockData } from './mock/mock-data.js';
+import { loadAppProvider } from './providers/index.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const app = createFixtureImportApp({
-    data: mockData,
-    actions: mockActions
-  });
+document.addEventListener('DOMContentLoaded', async () => {
+  const provider = await loadAppProvider();
+  const app = createFixtureImportApp({ data: provider.data, actions: provider.actions });
 
   app.init();
 });

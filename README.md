@@ -1,6 +1,6 @@
 # Fixture Import UI
 
-A reusable front-end shell for the fixture import workflow, currently bootstrapped with mock data and mock actions.
+A reusable front-end shell for the fixture import workflow, now using provider-based runtime wiring so mock modules are isolated from the default app bootstrap.
 
 ## What changed
 
@@ -9,6 +9,7 @@ This repo has been restructured so the reusable UI framework is separated from t
 - **Reusable core** lives under `web/js/core/`
 - **Mock-only data and placeholder actions** live under `web/js/mock/`
 - **Bootstrap wiring** lives in `web/js/app.js`
+- **Provider selection** lives in `web/js/providers/`
 - `web/index.html` is now a reusable shell with data containers instead of hardcoded mock rows
 
 That means you can keep using the current mock-up now, and later replace or delete the mock layer without rewriting the UI shell.
@@ -21,10 +22,14 @@ web/
   css/
     styles.css
   js/
-    app.js                         # bootstraps the app with a data/actions implementation
+    app.js                         # bootstraps the app with the selected provider
     core/
       createFixtureImportApp.js    # reusable UI/controller layer
       helpers.js                   # reusable pure helpers
+    providers/
+      index.js                     # chooses app mode (mock/real)
+      mock-provider.js             # adapter for web/js/mock/*
+      real-provider.js             # placeholder for real API-backed implementation
     mock/
       mock-data.js                 # all mock fixture, dashboard, activity and subscription data
       mock-actions.js              # alert/confirm placeholders for mock-up mode
@@ -35,14 +40,14 @@ package.json
 
 ## How it works
 
-`web/js/app.js` currently does this:
+`web/js/app.js` now does this:
 
 1. imports the reusable app creator from `web/js/core/createFixtureImportApp.js`
-2. imports `mockData` from `web/js/mock/mock-data.js`
-3. imports `mockActions` from `web/js/mock/mock-actions.js`
-4. wires them together at runtime
+2. loads a provider via `web/js/providers/index.js`
+3. receives `{ data, actions }` from the chosen provider
+4. wires them into the reusable app factory
 
-So later, instead of editing the core UI, you can swap only the injected implementation.
+The entrypoint no longer imports mock modules directly.
 
 ## Running locally
 
@@ -57,6 +62,22 @@ Then open:
 ```text
 http://localhost:4173/web/
 ```
+
+### Choose runtime mode
+
+- Mock mode (default):
+
+```text
+http://localhost:4173/web/?mode=mock
+```
+
+- Real provider mode (placeholder adapter):
+
+```text
+http://localhost:4173/web/?mode=real
+```
+
+Mode is persisted in `localStorage` key `fixture-import-ui.app-mode`.
 
 ## Validation
 
@@ -80,17 +101,15 @@ npm run test:dom
 
 ## Replacing the mock layer later
 
-When you start the real app, keep `web/js/core/` and replace the mock modules.
+When you start the real app, keep `web/js/core/` and implement the real provider.
 
 ### Remove or replace
 
-- `web/js/mock/mock-data.js`
-- `web/js/mock/mock-actions.js`
-- the imports inside `web/js/app.js`
+- `web/js/providers/real-provider.js` (replace placeholder `createEmptyData` and actions)
 
 ### Add instead
 
-- a real API-backed data source
+- a real API-backed data source inside `web/js/providers/real-provider.js`
 - real action handlers for import, refresh, subscriptions, and activity
 - optional app state persistence / auth / routing if needed
 
@@ -98,10 +117,10 @@ Example future bootstrap shape:
 
 ```js
 import { createFixtureImportApp } from './core/createFixtureImportApp.js';
-import { realData } from './real/data-source.js';
-import { realActions } from './real/actions.js';
+import { loadRealProvider } from './providers/real-provider.js';
 
-createFixtureImportApp({ data: realData, actions: realActions }).init();
+const provider = await loadRealProvider();
+createFixtureImportApp({ data: provider.data, actions: provider.actions }).init();
 ```
 
 ## Recommended next phase

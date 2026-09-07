@@ -808,21 +808,50 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderStats() {
-    dom.dashboardStats.innerHTML = data.dashboardStats.filter((stat) => !stat.hidden).map((stat) => `
-      <div class="stat-card">
+    dom.dashboardStats.innerHTML = data.dashboardStats.filter((stat) => !stat.hidden).map((stat) => {
+      // Cards may expose a hover/focus tooltip that explains the metric.
+      const tooltipAttrs = stat.tooltip
+        ? ` data-tooltip="${escapeHtml(stat.tooltip)}" tabindex="0" role="note" aria-label="${escapeHtml(stat.label || '')}. ${escapeHtml(stat.tooltip)}"`
+        : '';
+      // Icons can be a short text badge or an inline SVG glyph.
+      const iconContent = stat.iconSvg ? stat.iconSvg : escapeHtml(stat.icon || '');
+      // The trend pill is optional — omit the markup entirely when unset.
+      const trendHtml = stat.trend
+        ? `<span class="stat-trend ${escapeHtml(stat.trendDirection)}">${escapeHtml(stat.trend)}</span>`
+        : '';
+      // Optional eyebrow title that qualifies multi-metric cards
+      // (e.g. "Imported" above Fixtures / Fixture Groups counts).
+      const titleHtml = stat.title
+        ? `<div class="stat-title">${escapeHtml(stat.title)}</div>`
+        : '';
+      return `
+      <div class="stat-card"${tooltipAttrs}>
         <div class="stat-top">
-          <div class="stat-icon ${escapeHtml(stat.iconClass)}">${escapeHtml(stat.icon)}</div>
-          <span class="stat-trend ${escapeHtml(stat.trendDirection)}">${escapeHtml(stat.trend)}</span>
+          <div class="stat-icon ${escapeHtml(stat.iconClass)}">${iconContent}</div>
+          ${trendHtml}
         </div>
         <div class="stat-body">
           <div class="stat-text">
-            <div class="stat-value">${escapeHtml(stat.value)}</div>
-            <div class="stat-label">${escapeHtml(stat.label)}</div>
+            ${titleHtml}
+            ${Array.isArray(stat.metrics) && stat.metrics.length
+              ? renderStatMetrics(stat.metrics)
+              : `<div class="stat-value">${escapeHtml(stat.value)}</div>
+            <div class="stat-label">${escapeHtml(stat.label)}</div>`}
           </div>
           ${renderStatChart(stat.chart)}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
+  }
+
+  function renderStatMetrics(metrics) {
+    return `<div class="stat-metrics">${metrics.map((metric) => `
+      <div class="stat-metric">
+        <div class="stat-value">${escapeHtml(metric.value)}</div>
+        <div class="stat-label">${escapeHtml(metric.label)}</div>
+      </div>
+    `).join('<span class="stat-metric-divider" aria-hidden="true"></span>')}</div>`;
   }
 
   function renderStatChart(chart) {
@@ -891,14 +920,23 @@ export function createFixtureImportApp({ data, actions = {} }) {
         <td><span class="badge badge-gray">${escapeHtml(fixtureGroups[item.groupId]?.name || item.groupId)}</span></td>
         <td>${escapeHtml(item.sport)}</td>
         <td><span title="${escapeHtml(item.importDate)}">${escapeHtml(item.importDate)} <small class="relative-time">(${escapeHtml(relTime)})</small></span></td>
+        <td>${renderUserCell(item.importedBy)}</td>
         <td>${canShowTitleId ? `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId)}</span>` : '<span class="muted">Not available</span>'}</td>
         <td><span class="badge ${importStatusBadge}">${pulseDot}${escapeHtml(importStatus)}</span></td>
         <td><button type="button" class="btn btn-secondary btn-sm" data-action="view-imported" data-imported-index="${index}">Details</button></td>
       </tr>
     `;
     }).join('') : `
-      <tr><td colspan="7"><div class="empty-state">No recent imports yet. Start by importing fixtures from the Import Fixtures tab.</div></td></tr>
+      <tr><td colspan="8"><div class="empty-state">No recent imports yet. Start by importing fixtures from the Import Fixtures tab.</div></td></tr>
     `;
+  }
+
+  // Renders a user/system attribution cell: full value on hover, short handle inline.
+  function renderUserCell(value) {
+    const user = String(value || '').trim();
+    if (!user) return '<span class="muted">Unknown</span>';
+    const display = user.includes('@') ? user.split('@')[0] : user;
+    return `<span class="user-cell" title="${escapeHtml(user)}">${escapeHtml(display)}</span>`;
   }
 
   function renderSportOptions() {
@@ -1046,6 +1084,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
         <td>${escapeHtml(subscription.type)}</td>
         <td><span class="badge badge-indigo">${escapeHtml(String(subscription.importedFixtures.length))}</span></td>
         <td>${escapeHtml(subscription.importedSince)}</td>
+        <td>${renderImporterCell(subscription)}</td>
         <td>${escapeHtml(subscription.lastSyncedAt)}</td>
         <td><a href="#" class="link" data-action="show-activity" data-subscription-index="${sourceIndex}">${escapeHtml(subscription.activityLabel)}</a></td>
       </tr>
@@ -1053,7 +1092,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     `;
     }).join('') : `
       <tr>
-        <td colspan="7"><div class="empty-state">No imported fixture groups match the current search.</div></td>
+        <td colspan="8"><div class="empty-state">No imported fixture groups match the current search.</div></td>
       </tr>
     `;
 
@@ -1073,14 +1112,32 @@ export function createFixtureImportApp({ data, actions = {} }) {
     renderSubscriptions();
   }
 
+  // A group can be imported by more than one user/system — show the primary
+  // importer and keep the rest available on hover.
+  function renderImporterCell(subscription) {
+    const importers = Array.isArray(subscription.importedByList) && subscription.importedByList.length
+      ? subscription.importedByList
+      : [subscription.importedBy].filter(Boolean);
+    if (!importers.length) return '<span class="muted">Unknown</span>';
+
+    const [primary, ...others] = importers;
+    const primaryHtml = renderUserCell(primary);
+    if (!others.length) return primaryHtml;
+    return `${primaryHtml} <span class="user-cell-more" title="${escapeHtml(importers.join(', '))}">+${others.length}</span>`;
+  }
+
   function buildSubscriptionDetailsRowHtml(subscription) {
+    const importers = Array.isArray(subscription.importedByList) && subscription.importedByList.length
+      ? subscription.importedByList.join(', ')
+      : subscription.importedBy || 'Unknown';
     return `
       <tr class="subscription-details-row">
-        <td colspan="7">
+        <td colspan="8">
           <div class="subscription-details-panel">
             <div class="subscription-details-header">
-              <span><strong>Type:</strong> ${escapeHtml(subscription.type)}</span>
+              <span><strong>Sport:</strong> ${escapeHtml(subscription.type)}</span>
               <span><strong>Imported Since:</strong> ${escapeHtml(subscription.importedSince)}</span>
+              <span><strong>Imported By:</strong> ${escapeHtml(importers)}</span>
             </div>
             <div class="group-fixtures-list">${buildSubscriptionFixturesHtml(subscription.importedFixtures || [])}</div>
           </div>
@@ -1120,7 +1177,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
         <span class="subscription-summary-value">${escapeHtml(String(filteredImportedCount))} <small>/ ${escapeHtml(String(allImportedCount))}</small></span>
       </div>
       <div class="subscription-summary-item">
-        <span class="subscription-summary-label">Latest Sync (Visible)</span>
+        <span class="subscription-summary-label">Latest Update (Visible)</span>
         <span class="subscription-summary-value">${escapeHtml(lastSyncedAt)}</span>
       </div>
     `;
@@ -1165,6 +1222,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
         subscription.fixtureManagerRecordId,
         subscription.type,
         subscription.importedSince,
+        (subscription.importedByList || []).join(' '),
         fixtureNames,
         fixtureTypes,
         fixtureDates
@@ -2161,7 +2219,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       <div class="group-fixture-row imported-subscription-fixture${isHighlighted ? ' highlighted-fixture' : ''}"${isHighlighted ? ' data-highlighted="true"' : ''}>
         <div class="group-fixture-name">
           <strong>${escapeHtml(fixture.name)}</strong>
-          <div class="group-fixture-meta">${escapeHtml(fixture.type)} · Imported ${escapeHtml(fixture.importedOn)}</div>
+          <div class="group-fixture-meta">${escapeHtml(fixture.type)} · Imported ${escapeHtml(fixture.importedOn)}${fixture.importedBy ? ` by ${escapeHtml(fixture.importedBy)}` : ''}</div>
         </div>
         <div class="group-fixture-meta">Title ID: <span class="fixture-id" title="${escapeHtml(fixture.titleId)}" data-copy-value="${escapeHtml(fixture.titleId)}">${escapeHtml(fixture.titleId)}</span></div>
         <div class="group-fixture-status"><span class="badge badge-green">${escapeHtml(fixture.status)}</span></div>

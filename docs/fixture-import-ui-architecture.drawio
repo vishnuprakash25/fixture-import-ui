@@ -1,0 +1,166 @@
+<mxfile host="app.diagrams.net" modified="2026-08-13T13:10:00.000Z" agent="GitHub Copilot" version="24.7.17" type="device">
+  <diagram id="fixture-import-ui-technical-workflow" name="Technical Workflow">
+    <mxGraphModel dx="1660" dy="940" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Fixture Import UI - Technical Workflow and Components" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="730" y="20" width="940" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Production-oriented architecture from discovery/import to queue-driven synchronization" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontColor=#4B5563;" vertex="1" parent="1">
+          <mxGeometry x="780" y="55" width="840" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="laneClient" value="Client Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontColor=#334155;fontSize=16;fontStyle=1;align=left;spacingLeft=14;verticalAlign=top;spacingTop=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="700" height="1300" as="geometry" />
+        </mxCell>
+        <mxCell id="laneService" value="Application / Integration Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFF;strokeColor=#C4B5FD;fontColor=#4C1D95;fontSize=16;fontStyle=1;align=left;spacingLeft=14;verticalAlign=top;spacingTop=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="100" width="800" height="1300" as="geometry" />
+        </mxCell>
+        <mxCell id="laneExternal" value="External Systems" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FDBA74;fontColor=#9A3412;fontSize=16;fontStyle=1;align=left;spacingLeft=14;verticalAlign=top;spacingTop=12;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="100" width="740" height="1300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="users" value="Operational Users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontColor=#1E3A8A;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="150" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="webui" value="Web App (Fixture Import UI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontColor=#4C1D95;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="250" width="440" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uiModules" value="UI Modules: Dashboard | Import Fixtures | Published Fixtures | Activity Log" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F3FF;strokeColor=#A78BFA;fontColor=#4C1D95;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="350" width="540" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uiState" value="Client State: filters, selected fixtures, date ranges, pagination" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#818CF8;fontColor=#3730A3;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="430" width="540" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bff" value="BFF / App API Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontColor=#92400E;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="250" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="queryService" value="Fixture Query Service&#xa;(fetch fixtures/groups from source)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontColor=#166534;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="380" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="importService" value="Import Orchestrator&#xa;(build title payloads, call RightsLogic create APIs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontColor=#9D174D;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="500" width="320" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="eventConsumer" value="Queue Event Consumer&#xa;(subscribes to Data Hub notifications)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;fontColor=#0C4A6E;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="760" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="syncService" value="Sync Update Service&#xa;(resolve mappings and send RightsLogic updates)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0F766E;fontColor=#134E4A;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="760" width="320" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="mappingStore" value="Fixture-Title Mapping Store&#xa;(fixtureId &lt;-&gt; rightsLogicTitleId)" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#F3F4F6;strokeColor=#6B7280;fontColor=#374151;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="840" y="980" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="activityStore" value="Activity/Audit Store" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#F3F4F6;strokeColor=#6B7280;fontColor=#374151;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="980" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="statusApi" value="Read Model API&#xa;(dashboard, published fixtures, activity data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E5E7EB;strokeColor=#6B7280;fontColor=#374151;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="960" y="1120" width="420" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fixtureManager" value="Fixture Manager APIs&#xa;GET /fixtures, /groups, /sports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontColor=#166534;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="380" width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rightsCreate" value="RightsLogic Create APIs&#xa;POST create title" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontColor=#9D174D;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="520" width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="rightsUpdate" value="RightsLogic Update APIs&#xa;POST/PATCH title updates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE7F3;strokeColor=#DB2777;fontColor=#9D174D;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="760" width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="dataHub" value="Data Hub / Fixture Hub Queue&#xa;fixture change notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;fontColor=#0C4A6E;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="920" width="360" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="Flow legend: 1-7 Import workflow | 8-11 Queue-driven update workflow | 12 UI read workflow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;fontColor=#92400E;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="1220" width="1480" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="1) User operates UI" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#2563EB;fontColor=#1E3A8A;endArrow=block;endFill=1;" edge="1" parent="1" source="users" target="webui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="2) UI request" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#7C3AED;fontColor=#4C1D95;endArrow=block;endFill=1;" edge="1" parent="1" source="webui" target="bff">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="3) Fetch source data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#16A34A;fontColor=#166534;endArrow=block;endFill=1;" edge="1" parent="1" source="bff" target="queryService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="4) GET fixtures/groups" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#16A34A;fontColor=#166534;endArrow=block;endFill=1;" edge="1" parent="1" source="queryService" target="fixtureManager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="5) Start import" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#D97706;fontColor=#92400E;endArrow=block;endFill=1;" edge="1" parent="1" source="bff" target="importService">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="285" />
+              <mxPoint x="760" y="545" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="6) POST create titles" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#DB2777;fontColor=#9D174D;endArrow=block;endFill=1;" edge="1" parent="1" source="importService" target="rightsCreate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="7) Store mapping + audit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;fontColor=#374151;endArrow=block;endFill=1;" edge="1" parent="1" source="importService" target="mappingStore">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1580" y="545" />
+              <mxPoint x="1580" y="1025" />
+              <mxPoint x="1120" y="1025" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;endArrow=block;endFill=1;" edge="1" parent="1" source="importService" target="activityStore">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1640" y="545" />
+              <mxPoint x="1640" y="1025" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e8" value="8) Consume notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#0284C7;fontColor=#0C4A6E;endArrow=block;endFill=1;" edge="1" parent="1" source="dataHub" target="eventConsumer">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="965" />
+              <mxPoint x="1700" y="730" />
+              <mxPoint x="1120" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="9) Resolve fixture-title mapping" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#0F766E;fontColor=#134E4A;endArrow=block;endFill=1;" edge="1" parent="1" source="eventConsumer" target="mappingStore">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="10) Apply RightsLogic updates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#0F766E;fontColor=#134E4A;endArrow=block;endFill=1;" edge="1" parent="1" source="syncService" target="rightsUpdate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="11) Record update activity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;fontColor=#374151;endArrow=block;endFill=1;" edge="1" parent="1" source="syncService" target="activityStore">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e12" value="12) UI read request/response (dashboard, published fixtures, activity)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;fontColor=#374151;dashed=1;endArrow=block;endFill=1;" edge="1" parent="1" source="webui" target="statusApi">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="285" />
+              <mxPoint x="700" y="1160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="aux1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#0F766E;endArrow=block;endFill=1;" edge="1" parent="1" source="eventConsumer" target="syncService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aux2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;endArrow=block;endFill=1;" edge="1" parent="1" source="mappingStore" target="statusApi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aux3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;strokeColor=#6B7280;endArrow=block;endFill=1;" edge="1" parent="1" source="activityStore" target="statusApi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note" value="Implementation note: UI shell exists now; service/integration components represent the target production architecture for real API and queue processing." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;fontColor=#9A3412;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1310" width="2260" height="70" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

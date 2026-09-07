@@ -480,27 +480,27 @@ const groupCatalog = [
 //   - scripts/dom-integration-test.mjs: Uses indices and specific fixture names for DOM assertions
 // If you reorder or modify this list, you MUST update corresponding assertions in the test files.
 const publishedFixturesSeed = [
-  { groupId: 'premier-league-2025', name: 'Arsenal vs Chelsea', importedOn: 'Nov 10, 2025', titleId: '10001', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'premier-league-2025', name: 'Liverpool vs Man United', importedOn: 'Nov 12, 2025', titleId: '10002', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'champions-league-2025', name: 'Real Madrid vs Bayern Munich', importedOn: 'Nov 7, 2025', titleId: '10011', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'champions-league-2025', name: 'Barcelona vs Man City', importedOn: 'Nov 9, 2025', titleId: '10012', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'la-liga-2025', name: 'Real Madrid vs Sevilla', importedOn: 'Nov 19, 2025', titleId: '10021', importedBy: 'ops@sky.uk' },
-  { groupId: 'bundesliga-2025', name: 'Bayern Munich vs Dortmund', importedOn: 'Nov 20, 2025', titleId: '10031', importedBy: 'ops@sky.uk' },
-  { groupId: 'ligue-1-2025', name: 'PSG vs Marseille', importedOn: 'Nov 22, 2025', titleId: '10041', importedBy: 'ops@sky.uk' },
-  { groupId: 'australian-open-2026', name: 'Australian Open Semi Final', importedOn: 'Nov 8, 2025', titleId: '20011', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'australian-open-2026', name: 'Australian Open Final', importedOn: 'Nov 9, 2025', titleId: '20012', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'wimbledon-2026', name: 'Wimbledon Final', importedOn: 'Nov 8, 2025', titleId: '20021', importedBy: 'vishnu.prakash@sky.uk' },
-  { groupId: 'us-open-2026', name: 'US Open Final', importedOn: 'Nov 14, 2025', titleId: '20031', importedBy: 'rightsbot@sky.uk' },
-  { groupId: 'atp-masters-rome-2026', name: 'Rome Masters Final', importedOn: 'Nov 15, 2025', titleId: '20041', importedBy: 'rightsbot@sky.uk' },
-  { groupId: 'f1-bahrain-gp-2026', name: 'Bahrain GP - Race', importedOn: 'Nov 5, 2025', titleId: '30011', importedBy: 'Event Hub' },
-  { groupId: 'f1-saudi-gp-2026', name: 'Saudi GP - Race', importedOn: 'Nov 6, 2025', titleId: '30012', importedBy: 'Event Hub' },
-  { groupId: 'f1-australian-gp-2026', name: 'Australian GP - Race', importedOn: 'Nov 7, 2025', titleId: '30013', importedBy: 'Event Hub' },
-  { groupId: 'f1-japanese-gp-2026', name: 'Japanese GP - Race', importedOn: 'Nov 8, 2025', titleId: '30014', importedBy: 'Event Hub' },
-  { groupId: 'f1-miami-gp-2026', name: 'Miami GP - Race', importedOn: 'Nov 9, 2025', titleId: '30015', importedBy: 'Event Hub' },
-  { groupId: 'f1-monaco-gp-2026', name: 'Monaco GP - Qualifying', importedOn: 'Nov 10, 2025', titleId: '30016', importedBy: 'Event Hub' },
-  { groupId: 'f1-british-gp-2026', name: 'British GP - Race', importedOn: 'Nov 11, 2025', titleId: '30017', importedBy: 'Event Hub' },
-  { groupId: 'f1-italian-gp-2026', name: 'Italian GP - Race', importedOn: 'Nov 12, 2025', titleId: '30018', importedBy: 'Event Hub' },
-  { groupId: 'f1-abu-dhabi-gp-2026', name: 'Abu Dhabi GP - Race', importedOn: 'Nov 13, 2025', titleId: '30019', importedBy: 'Event Hub' }
+  { groupId: 'premier-league-2025', name: 'Arsenal vs Chelsea', importedOn: 'Nov 10, 2025', titleId: '10001', importedBy: 'Ops User' },
+  { groupId: 'premier-league-2025', name: 'Liverpool vs Man United', importedOn: 'Nov 12, 2025', titleId: '10002', importedBy: 'Ops User' },
+  { groupId: 'champions-league-2025', name: 'Real Madrid vs Bayern Munich', importedOn: 'Nov 7, 2025', titleId: '10011', importedBy: 'Ops User' },
+  { groupId: 'champions-league-2025', name: 'Barcelona vs Man City', importedOn: 'Nov 9, 2025', titleId: '10012', importedBy: 'Ops User' },
+  { groupId: 'la-liga-2025', name: 'Real Madrid vs Sevilla', importedOn: 'Nov 19, 2025', titleId: '10021', importedBy: 'Ops User' },
+  { groupId: 'bundesliga-2025', name: 'Bayern Munich vs Dortmund', importedOn: 'Nov 20, 2025', titleId: '10031', importedBy: 'Ops User' },
+  { groupId: 'ligue-1-2025', name: 'PSG vs Marseille', importedOn: 'Nov 22, 2025', titleId: '10041', importedBy: 'Ops User' },
+  { groupId: 'australian-open-2026', name: 'Australian Open Semi Final', importedOn: 'Nov 8, 2025', titleId: '20011', importedBy: 'Ops User' },
+  { groupId: 'australian-open-2026', name: 'Australian Open Final', importedOn: 'Nov 9, 2025', titleId: '20012', importedBy: 'Ops User' },
+  { groupId: 'wimbledon-2026', name: 'Wimbledon Final', importedOn: 'Nov 8, 2025', titleId: '20021', importedBy: 'Ops User' },
+  { groupId: 'us-open-2026', name: 'US Open Final', importedOn: 'Nov 14, 2025', titleId: '20031', importedBy: 'Ops User' },
+  { groupId: 'atp-masters-rome-2026', name: 'Rome Masters Final', importedOn: 'Nov 15, 2025', titleId: '20041', importedBy: 'Ops User' },
+  { groupId: 'f1-bahrain-gp-2026', name: 'Bahrain GP - Race', importedOn: 'Nov 5, 2025', titleId: '30011', importedBy: 'Ops User' },
+  { groupId: 'f1-saudi-gp-2026', name: 'Saudi GP - Race', importedOn: 'Nov 6, 2025', titleId: '30012', importedBy: 'Ops User' },
+  { groupId: 'f1-australian-gp-2026', name: 'Australian GP - Race', importedOn: 'Nov 7, 2025', titleId: '30013', importedBy: 'Ops User' },
+  { groupId: 'f1-japanese-gp-2026', name: 'Japanese GP - Race', importedOn: 'Nov 8, 2025', titleId: '30014', importedBy: 'Ops User' },
+  { groupId: 'f1-miami-gp-2026', name: 'Miami GP - Race', importedOn: 'Nov 9, 2025', titleId: '30015', importedBy: 'Ops User' },
+  { groupId: 'f1-monaco-gp-2026', name: 'Monaco GP - Qualifying', importedOn: 'Nov 10, 2025', titleId: '30016', importedBy: 'Ops User' },
+  { groupId: 'f1-british-gp-2026', name: 'British GP - Race', importedOn: 'Nov 11, 2025', titleId: '30017', importedBy: 'Ops User' },
+  { groupId: 'f1-italian-gp-2026', name: 'Italian GP - Race', importedOn: 'Nov 12, 2025', titleId: '30018', importedBy: 'Ops User' },
+  { groupId: 'f1-abu-dhabi-gp-2026', name: 'Abu Dhabi GP - Race', importedOn: 'Nov 13, 2025', titleId: '30019', importedBy: 'Ops User' }
 ];
 
 const publishedKeySet = new Set(publishedFixturesSeed.map((item) => `${item.groupId}::${item.name}`));
@@ -560,6 +560,8 @@ const subscriptions = Object.entries(
   const group = fixtureGroups[groupId];
   const sortedByImportedDate = fixtures.slice().sort((a, b) => new Date(a.importedOn) - new Date(b.importedOn));
   const latestDate = fixtures.slice().sort((a, b) => new Date(b.importedOn) - new Date(a.importedOn))[0]?.importedOn || 'Nov 1, 2025';
+  // Distinct users/systems that imported fixtures into this group.
+  const importedByList = [...new Set(fixtures.map((fixture) => fixture.importedBy).filter(Boolean))];
 
   return {
     id: `sub-${groupId}`,
@@ -568,6 +570,8 @@ const subscriptions = Object.entries(
     fixtureManagerRecordId: `FM-${groupId}`,
     type: group.sport,
     importedSince: sortedByImportedDate[0]?.importedOn || 'Nov 1, 2025',
+    importedBy: importedByList[0] || 'Unknown',
+    importedByList,
     lastSyncedAt: `${latestDate} ${String(10 + (index % 10)).padStart(2, '0')}:2${index % 6}`,
     queueStatus: 'Fixture Hub event queue listener active',
     activityLabel: `${fixtures.length * 3 + 7} updates`,
@@ -576,6 +580,7 @@ const subscriptions = Object.entries(
       name: fixture.name,
       type: group.sport,
       importedOn: fixture.importedOn,
+      importedBy: fixture.importedBy,
       titleId: fixture.titleId,
       status: 'Imported'
     }))
@@ -629,7 +634,7 @@ const activityLog = [
     detailType: 'Fixture name update',
     oldValue: 'Bahrain GP - Race',
     newValue: 'Bahrain GP - Race (Night Race)',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -646,7 +651,7 @@ const activityLog = [
     detailType: 'Fixture group name update',
     oldValue: 'Champions League 2025/26',
     newValue: 'UEFA Champions League 2025/26',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -663,7 +668,7 @@ const activityLog = [
     detailType: 'Type update',
     oldValue: 'Motor Sport',
     newValue: 'Formula 1',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -697,7 +702,7 @@ const activityLog = [
     detailType: 'Fixture name update',
     oldValue: 'US Open Final',
     newValue: 'US Open Finals',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -714,7 +719,7 @@ const activityLog = [
     detailType: 'Fixture group name update',
     oldValue: 'F1 British Grand Prix 2026',
     newValue: 'Formula 1 British Grand Prix 2026',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -731,7 +736,7 @@ const activityLog = [
     detailType: 'Type update',
     oldValue: 'Formula 1',
     newValue: 'Formula 1',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync (no material change)'
   },
   {
@@ -765,7 +770,7 @@ const activityLog = [
     detailType: 'Fixture name update',
     oldValue: 'Roma v Sevilla',
     newValue: 'Roma vs Sevilla',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -782,7 +787,7 @@ const activityLog = [
     detailType: 'Fixture group name update',
     oldValue: 'Rome Masters 2026',
     newValue: 'ATP Masters Rome 2026',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync'
   },
   {
@@ -799,7 +804,7 @@ const activityLog = [
     detailType: 'Type update',
     oldValue: 'Football',
     newValue: 'Football',
-    updatedBy: 'Event Hub',
+    updatedBy: 'Sport Data Hub',
     source: 'Event notification sync (classification verified)'
   }
 ];
@@ -807,20 +812,6 @@ const activityLog = [
 const eventNotificationUpdates = activityLog.filter(
   (entry) => entry.action === 'Auto Update' && String(entry.source || '').toLowerCase().includes('event notification')
 );
-const latestUpdateTimestamp = eventNotificationUpdates.reduce((latest, entry) => {
-  const ts = new Date(entry.timestamp).getTime();
-  return Number.isNaN(ts) || ts < latest ? latest : ts;
-}, 0);
-const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
-const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
-const recentWeekUpdatesCount = eventNotificationUpdates.filter((entry) => {
-  const ts = new Date(entry.timestamp).getTime();
-  return !Number.isNaN(ts) && latestUpdateTimestamp - ts <= oneWeekMs;
-}).length;
-const recentMonthUpdatesCount = eventNotificationUpdates.filter((entry) => {
-  const ts = new Date(entry.timestamp).getTime();
-  return !Number.isNaN(ts) && latestUpdateTimestamp - ts <= oneMonthMs;
-}).length;
 
 const importQueueCount = recentlyImported.filter((item) => item.importStatus === 'In Progress').length;
 const updateQueueCount = 6;
@@ -830,10 +821,18 @@ const totalFixtureCount = importableFixtures.length + publishedFixturesSeed.leng
 
 const dashboardStats = [
   {
-    icon: 'RL',
+    // Downward arrow into a tray: content pulled in and stored (imported).
+    iconSvg: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10"/><polyline points="8 9 12 13 16 9"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>`,
     iconClass: 'rose',
-    trend: `${subscriptions.length} Fixture Groups`,
     trendDirection: 'up',
+    title: 'Imported',
+    tooltip: 'Total fixtures imported into the platform and the fixture groups they belong to',
+    // Dual-metric card: surface both imported Fixtures and Fixture Groups
+    // as equally-weighted primary values.
+    metrics: [
+      { value: String(publishedFixturesSeed.length), label: 'Fixtures' },
+      { value: String(subscriptions.length), label: 'Fixture Groups' }
+    ],
     value: String(publishedFixturesSeed.length),
     label: 'Imported Fixtures',
     chart: {
@@ -843,12 +842,14 @@ const dashboardStats = [
     }
   },
   {
-    icon: 'UP',
+    // Circular "sync" arrows communicate automatic, recurring updates better
+    // than the previous "UP" text badge.
+    iconSvg: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.1 6.6L3 16"/><path d="M3 12a9 9 0 0 1 15.1-6.6L21 8"/><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/></svg>`,
     iconClass: 'sky',
-    trend: `Week: ${recentWeekUpdatesCount} | Month: ${recentMonthUpdatesCount}`,
     trendDirection: 'up',
+    tooltip: 'Total automatic updates received from SDH for fixtures already imported',
     value: String(eventNotificationUpdates.length),
-    label: 'Processed Updates',
+    label: 'Auto Updates',
     chart: {
       type: 'bars',
       bars: [3, 5, 2, 4, 6, 3, 5],
@@ -856,10 +857,11 @@ const dashboardStats = [
     }
   },
   {
-    icon: 'PQ',
+    // Clock face with hands: work currently in progress / queued.
+    iconSvg: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>`,
     iconClass: 'purple',
-    trend: `Imports: ${importQueueCount} | Updates: ${updateQueueCount}`,
     trendDirection: 'up',
+    tooltip: 'Imports and automatic updates currently being processed',
     value: String(importQueueCount + updateQueueCount),
     label: 'In Progress',
     hidden: !hasProcessingQueue,

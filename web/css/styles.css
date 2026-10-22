@@ -1160,6 +1160,12 @@ button.cal-month[aria-expanded="true"]::after { color:var(--accent); }
 .cal-day-name { font-size:11px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; height:28px; }
 .cal-day { cursor:pointer; border-radius:8px; transition:background .1s, color .1s; }
 .cal-day:hover { background:var(--accent-bg); color:var(--accent); }
+/* Keyboard users navigate the grid with arrow keys, so the focused day must be
+   clearly visible. :focus-visible keeps the ring off mouse clicks. */
+.cal-day:focus { outline:none; }
+.cal-day:focus-visible {
+  outline:2px solid var(--accent); outline-offset:-2px; background:var(--accent-bg);
+}
 .cal-today { font-weight:700; color:var(--accent); }
 .cal-start, .cal-end {
   background:var(--accent) !important; color:#fff !important; border-radius:8px; font-weight:700;

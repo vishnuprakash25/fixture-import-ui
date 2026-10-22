@@ -38,6 +38,7 @@ Object.assign(globalThis, {
   HTMLElement: window.HTMLElement,
   Event: window.Event,
   MouseEvent: window.MouseEvent,
+  KeyboardEvent: window.KeyboardEvent,
   getComputedStyle: window.getComputedStyle,
   alert: window.alert,
   confirm: window.confirm
@@ -102,6 +103,7 @@ const click = (el) => {
 };
 const change = (el) => el.dispatchEvent(new window.Event('change', { bubbles: true }));
 const input = (el) => el.dispatchEvent(new window.Event('input', { bubbles: true }));
+const keydown = (el, key, init = {}) => el.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
 
 const fixtureRowCount = () => document.querySelectorAll('#fixturesTableBody tr').length;
 const assertFixturePrompt = (context) => {
@@ -376,6 +378,74 @@ await wait();
 assert.ok(window.navigator.clipboard.written.length >= 1, 'clipboard write is called');
 assert.equal(window.navigator.clipboard.written.at(-1), allSportFixtures[0].id, 'copied fixture id matches the clicked cell');
 assert.match(document.querySelector('.copy-toast').textContent, /Copied ID:/, 'copy toast appears');
+
+// ─── Accessibility: keyboard navigation and focus management ───
+
+// The app is gated behind a login modal, so sign in first. Escape must NOT
+// dismiss that gate, which is asserted before logging in.
+const loginModal = document.getElementById('loginModal');
+assert.ok(loginModal.classList.contains('visible'), 'login modal gates the app while signed out');
+keydown(document.body, 'Escape');
+assert.ok(loginModal.classList.contains('visible'), 'Escape does not dismiss the login gate');
+
+document.getElementById('loginEmailInput').value = 'tester@skysports.com';
+document.getElementById('loginPasswordInput').value = 'password';
+document.getElementById('loginForm').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+assert.ok(!loginModal.classList.contains('visible'), 'submitting the login form closes the gate');
+assert.match(document.getElementById('userDisplayName').textContent, /\w/, 'signed-in user name is shown');
+
+// Calendar grids are exposed as grids with a single roving tab stop.
+click(document.getElementById('dateTriggerBtn'));
+const calGrid = document.getElementById('calGrid1');
+assert.equal(calGrid.getAttribute('role'), 'grid', 'calendar grid exposes role=grid');
+assert.equal(calGrid.querySelectorAll('.cal-day[tabindex="0"]').length, 1, 'exactly one calendar day is tabbable');
+
+const startCell = calGrid.querySelector('.cal-day[tabindex="0"]');
+const startDate = new Date(startCell.dataset.date);
+keydown(startCell, 'ArrowRight');
+const afterRight = calGrid.querySelector('.cal-day[tabindex="0"]');
+assert.equal(new Date(afterRight.dataset.date).getDate(), new Date(startDate.getTime() + 86400000).getDate(), 'ArrowRight moves focus one day forward');
+keydown(afterRight, 'ArrowDown');
+const afterDown = calGrid.querySelector('.cal-day[tabindex="0"]');
+assert.equal(new Date(afterDown.dataset.date).getDate(), new Date(startDate.getTime() + 8 * 86400000).getDate(), 'ArrowDown moves focus one week forward');
+
+// Enter selects the focused day, same as clicking it.
+const monthBeforeEnter = document.getElementById('calMonth1').textContent;
+keydown(calGrid.querySelector('.cal-day[tabindex="0"]'), 'Enter');
+assert.equal(calGrid.querySelectorAll('.cal-start').length, 1, 'Enter selects the focused day as the range start');
+
+// PageDown steps a whole month without leaving the grid.
+keydown(calGrid.querySelector('.cal-day[tabindex="0"]'), 'PageDown');
+assert.notEqual(document.getElementById('calMonth1').textContent, monthBeforeEnter, 'PageDown advances the calendar a month');
+
+// Escape closes the open picker.
+assert.ok(document.getElementById('datePickerPopup').classList.contains('open'), 'date picker is open before Escape');
+keydown(document.body, 'Escape');
+assert.ok(!document.getElementById('datePickerPopup').classList.contains('open'), 'Escape closes the date picker');
+click(document.getElementById('dateClearBtn'));
+
+// Escape closes an open modal, and focus returns to whatever opened it.
+showAllFixtures();
+const importTrigger = document.querySelector('[data-action="open-import"]');
+importTrigger.focus();
+click(importTrigger);
+const importModal = document.getElementById('importModal');
+assert.ok(importModal.classList.contains('visible'), 'import modal opens');
+assert.ok(importModal.contains(document.activeElement), 'focus moves into the modal on open');
+keydown(document.body, 'Escape');
+assert.ok(!importModal.classList.contains('visible'), 'Escape closes the import modal');
+assert.equal(document.activeElement, importTrigger, 'focus returns to the element that opened the modal');
+
+// Tab is trapped inside an open modal.
+click(importTrigger);
+const focusable = [...importModal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+focusable.at(-1).focus();
+keydown(document.body, 'Tab');
+assert.equal(document.activeElement, focusable[0], 'Tab from the last control wraps to the first');
+focusable[0].focus();
+keydown(document.body, 'Tab', { shiftKey: true });
+assert.equal(document.activeElement, focusable.at(-1), 'Shift+Tab from the first control wraps to the last');
+keydown(document.body, 'Escape');
 
 console.log('DOM integration checks passed.');
 

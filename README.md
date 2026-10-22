@@ -167,15 +167,35 @@ Behaviour owned by the core layer:
 - copy-to-clipboard for fixture IDs with a transient confirmation toast
 - relative time formatting and a time-of-day dashboard greeting
 
+### Keyboard and accessibility
+
+- modals trap `Tab`, close on `Escape`, move focus inside on open and return focus to the trigger on close (the login gate is deliberately exempt from `Escape`)
+- calendar grids use `role="grid"` with a roving tab stop: `←/→` step a day, `↑/↓` a week, `PageUp`/`PageDown` a month, `Home`/`End` jump to the start/end of the month, and `Enter`/`Space` select
+- `Escape` also closes any open filter dropdown or date picker
+- typed date fields are tied to their inline error text via `aria-describedby`
+
+### Security note
+
+`escapeHtml()` is applied to every interpolated value. The one exception is
+`dashboardStats[].iconSvg`, which is intentionally raw markup — it is passed
+through `sanitizeInlineSvg()`, an allow-list filter that drops scripts, event
+handler attributes and `javascript:` URLs. Anything a future real provider
+returns is therefore safe to render.
+
 ### `helpers.js`
 
 | Function | Signature | Purpose |
 | --- | --- | --- |
 | `toYYYYMMDD` | `(value) => string` | compact `YYYYMMDD` key for date comparisons |
 | `formatDisplayDate` | `(value) => string` | `Mon D, YYYY` display formatting |
+| `formatInputDate` | `(value) => string` | `DD/MM/YYYY` for the typed range inputs |
+| `parseInputDate` | `(value) => Date \| null` | strict `DD/MM/YYYY` parse; rejects impossible dates |
+| `maskInputDate` | `(value) => string` | inserts the slashes while the user types |
+| `toLocalISODate` | `(value) => string` | local-time `YYYY-MM-DD` (avoids the `toISOString()` day shift) |
 | `parseFixtureDate` | `(value) => Date \| null` | parse and normalise to midnight |
 | `buildFixtureTitle` | `({ fixtureName, prefix, suffix }) => string` | compose the RightsLogic title candidate |
 | `escapeHtml` | `(value) => string` | escape interpolated values before injection |
+| `sanitizeInlineSvg` | `(markup) => string` | allow-list filter for provider-supplied stat icons |
 | `normalizeGroupKey` | `(name, fixtureGroups) => string` | resolve a group name to its ID |
 | `getGroupOptions` | `(fixtureGroups) => Array<{ id, label }>` | sorted option list for group filters |
 | `filterFixtures` | `(fixtures, filters, fixtureGroups) => Array` | apply search, sport, group and date filters |
@@ -195,6 +215,16 @@ npm run test:dom           # JSDOM regression pass over the main UI flows
 `scripts/dom-integration-test.mjs` loads `web/index.html` in JSDOM, stubs `alert`, `confirm` and the clipboard, then asserts navigation, theme toggling, filtering, pagination, import modals, subscription expansion, activity filtering and clipboard behaviour.
 
 ## Replacing the mock layer
+
+> **Current status:** `real-provider.js` is a stub. It returns empty collections
+> for every data key and implements only `notify()`. The app you see is the mock
+> dataset end to end, so this is the largest remaining piece of work.
+>
+> Note that the mock data encodes assumptions a real API will probably not share:
+> dates are display strings (`'Dec 22, 2025'`) rather than ISO, `shortId` is
+> derived by splitting the `NNNN-fx-{groupId}` pattern, and
+> `fixtureManagerRecordId` is synthesised as `FM-{groupId}`. Pin down the real
+> payload shape before building against it.
 
 Keep `web/js/core/` and `web/index.html`; implement `web/js/providers/real-provider.js`:
 

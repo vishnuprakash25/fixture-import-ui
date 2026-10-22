@@ -3,8 +3,12 @@ import {
   escapeHtml,
   filterFixtures,
   formatDisplayDate,
+  formatInputDate,
   getGroupOptions,
-  normalizeGroupKey
+  maskInputDate,
+  normalizeGroupKey,
+  parseInputDate,
+  toLocalISODate
 } from './helpers.js';
 
 export function createFixtureImportApp({ data, actions = {} }) {
@@ -54,7 +58,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
       viewDate: new Date(),
       start: null,
       end: null,
-      hover: null
+      hover: null,
+      // Which end of the range the next calendar click fills in ('start' | 'end').
+      activeField: 'start',
+      // Month/year quick-jump panel state.
+      jump: { open: false, mode: 'month', year: new Date().getFullYear(), yearStart: 0 }
     },
     highlightedFixtureName: '',
     activityFilters: {
@@ -68,7 +76,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
       viewDate: new Date(),
       start: null,
       end: null,
-      hover: null
+      hover: null,
+      // Which end of the range the next calendar click fills in ('start' | 'end').
+      activeField: 'start',
+      // Month/year quick-jump panel state.
+      jump: { open: false, mode: 'month', year: new Date().getFullYear(), yearStart: 0 }
     },
     currentActivityEntry: null,
     auth: {
@@ -86,7 +98,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
       viewDate: new Date(),
       start: null,
       end: null,
-      hover: null
+      hover: null,
+      // Which end of the range the next calendar click fills in ('start' | 'end').
+      activeField: 'start',
+      // Month/year quick-jump panel state.
+      jump: { open: false, mode: 'month', year: new Date().getFullYear(), yearStart: 0 }
     }
   };
 
@@ -160,8 +176,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
       dateRangeLabel: document.getElementById('dateRangeLabel'),
       datePickerPopup: document.getElementById('datePickerPopup'),
       dateRangeText: document.getElementById('dateRangeText'),
+      dateFromField: document.getElementById('dateFromField'),
+      dateToField: document.getElementById('dateToField'),
+      dateFromInput: document.getElementById('dateFromInput'),
+      dateToInput: document.getElementById('dateToInput'),
+      dateInputError: document.getElementById('dateInputError'),
       calMonth1: document.getElementById('calMonth1'),
       calGrid1: document.getElementById('calGrid1'),
+      calJump1: document.getElementById('calJump1'),
       fixturesBody: document.getElementById('fixturesTableBody'),
       fixtureBulkBar: document.getElementById('fixtureBulkBar'),
       selectAll: document.getElementById('selectAll'),
@@ -194,8 +216,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
       pubDateRangeLabel: document.getElementById('pubDateRangeLabel'),
       pubDatePickerPopup: document.getElementById('pubDatePickerPopup'),
       pubDateRangeText: document.getElementById('pubDateRangeText'),
+      pubDateFromField: document.getElementById('pubDateFromField'),
+      pubDateToField: document.getElementById('pubDateToField'),
+      pubDateFromInput: document.getElementById('pubDateFromInput'),
+      pubDateToInput: document.getElementById('pubDateToInput'),
+      pubDateInputError: document.getElementById('pubDateInputError'),
       pubCalMonth1: document.getElementById('pubCalMonth1'),
       pubCalGrid1: document.getElementById('pubCalGrid1'),
+      pubCalJump1: document.getElementById('pubCalJump1'),
       activityGroupMultiselect: document.getElementById('activityGroupMultiselect'),
       activityGroupTriggerBtn: document.getElementById('activityGroupTriggerBtn'),
       activityGroupClearBtn: document.getElementById('activityGroupClearBtn'),
@@ -210,8 +238,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
       activityDateRangeLabel: document.getElementById('activityDateRangeLabel'),
       activityDatePickerPopup: document.getElementById('activityDatePickerPopup'),
       activityDateRangeText: document.getElementById('activityDateRangeText'),
+      activityDateFromField: document.getElementById('activityDateFromField'),
+      activityDateToField: document.getElementById('activityDateToField'),
+      activityDateFromInput: document.getElementById('activityDateFromInput'),
+      activityDateToInput: document.getElementById('activityDateToInput'),
+      activityDateInputError: document.getElementById('activityDateInputError'),
       activityCalMonth1: document.getElementById('activityCalMonth1'),
       activityCalGrid1: document.getElementById('activityCalGrid1'),
+      activityCalJump1: document.getElementById('activityCalJump1'),
       clearActivityFiltersBtn: document.getElementById('clearActivityFiltersBtn'),
       activityLogBody: document.getElementById('activityLogTableBody'),
       activityPagination: document.getElementById('activityPagination'),
@@ -327,6 +361,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     });
     document.getElementById('pubDatePickerPrevBtn').addEventListener('click', () => changePubMonth(-1));
     document.getElementById('pubDatePickerNextBtn').addEventListener('click', () => changePubMonth(1));
+    document.getElementById('pubDatePickerPrevYearBtn').addEventListener('click', () => changeCalYear('pub', -1));
+    document.getElementById('pubDatePickerNextYearBtn').addEventListener('click', () => changeCalYear('pub', 1));
+    bindDateRangeInputs('pub');
+    dom.pubCalMonth1.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleCalJump('pub');
+    });
+    dom.pubCalJump1.addEventListener('click', (event) => handleCalJumpClick('pub', event));
     document.getElementById('pubClearDatePickerBtn').addEventListener('click', clearPubDateRange);
     document.getElementById('pubApplyDatePickerBtn').addEventListener('click', applyPubDatePicker);
     dom.pubCalGrid1.addEventListener('click', (event) => {
@@ -372,6 +414,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     });
     document.getElementById('activityDatePickerPrevBtn').addEventListener('click', () => changeActivityMonth(-1));
     document.getElementById('activityDatePickerNextBtn').addEventListener('click', () => changeActivityMonth(1));
+    document.getElementById('activityDatePickerPrevYearBtn').addEventListener('click', () => changeCalYear('activity', -1));
+    document.getElementById('activityDatePickerNextYearBtn').addEventListener('click', () => changeCalYear('activity', 1));
+    bindDateRangeInputs('activity');
+    dom.activityCalMonth1.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleCalJump('activity');
+    });
+    dom.activityCalJump1.addEventListener('click', (event) => handleCalJumpClick('activity', event));
     document.getElementById('clearActivityDatePickerBtn').addEventListener('click', clearActivityDateRange);
     document.getElementById('applyActivityDatePickerBtn').addEventListener('click', applyActivityDatePicker);
     dom.activityCalGrid1.addEventListener('click', (event) => {
@@ -445,6 +495,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     });
     document.getElementById('datePickerPrevBtn').addEventListener('click', () => changeMonth(-1));
     document.getElementById('datePickerNextBtn').addEventListener('click', () => changeMonth(1));
+    document.getElementById('datePickerPrevYearBtn').addEventListener('click', () => changeYear(-1));
+    document.getElementById('datePickerNextYearBtn').addEventListener('click', () => changeYear(1));
+    bindDateRangeInputs('fixtures');
+    dom.calMonth1.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleCalJump('fixtures');
+    });
+    dom.calJump1.addEventListener('click', (event) => handleCalJumpClick('fixtures', event));
     document.getElementById('clearDatePickerBtn').addEventListener('click', clearDateRange);
     document.getElementById('applyDatePickerBtn').addEventListener('click', applyDatePicker);
     dom.calGrid1.addEventListener('click', (event) => {
@@ -1313,29 +1371,36 @@ export function createFixtureImportApp({ data, actions = {} }) {
     if (!state.pubFilters.dateFrom) {
       dom.pubDateRangeLabel.textContent = 'All Dates';
       dom.pubDateClearBtn.style.display = 'none';
-      dom.pubDateRangeText.textContent = 'Select start date';
     } else if (!state.pubFilters.dateTo) {
       dom.pubDateRangeLabel.textContent = formatDisplayDate(state.pubFilters.dateFrom);
       dom.pubDateClearBtn.style.display = '';
-      dom.pubDateRangeText.textContent = `${formatDisplayDate(state.pubDatePicker.start)} → select end date`;
     } else {
       dom.pubDateRangeLabel.textContent = `${formatDisplayDate(state.pubFilters.dateFrom)} – ${formatDisplayDate(state.pubFilters.dateTo)}`;
       dom.pubDateClearBtn.style.display = '';
-      dom.pubDateRangeText.textContent = `${formatDisplayDate(state.pubDatePicker.start)} → ${formatDisplayDate(state.pubDatePicker.end)}`;
     }
+    updateRangeFooterText('pub');
   }
 
   function togglePubDatePicker() {
+    closeCalJump('pub');
     togglePubDropdown(dom.pubDatePickerPopup);
-    if (dom.pubDatePickerPopup.classList.contains('open')) renderPubCalendar();
+    if (dom.pubDatePickerPopup.classList.contains('open')) {
+      setActiveDateField('pub', state.pubDatePicker.start && !state.pubDatePicker.end ? 'end' : 'start', { silent: true });
+      setDateInputError('pub', '');
+      renderPubCalendar();
+    }
   }
 
   function changePubMonth(direction) {
+    closeCalJump('pub');
+    // Normalise to the 1st so month stepping never skips a short month.
+    state.pubDatePicker.viewDate.setDate(1);
     state.pubDatePicker.viewDate.setMonth(state.pubDatePicker.viewDate.getMonth() + direction);
     renderPubCalendar();
   }
 
   function selectPubDatePreset(preset) {
+    closeCalJump('pub');
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
@@ -1358,29 +1423,19 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     state.pubDatePicker.viewDate = new Date(state.pubDatePicker.start);
+    resetRangeEntryState('pub');
     renderPubCalendar();
   }
 
   function selectPubCalendarDate(date) {
-    if (!state.pubDatePicker.start || state.pubDatePicker.end) {
-      state.pubDatePicker.start = date;
-      state.pubDatePicker.end = null;
-    } else if (date.toDateString() === state.pubDatePicker.start.toDateString()) {
-      state.pubDatePicker.end = date;
-    } else if (date < state.pubDatePicker.start) {
-      state.pubDatePicker.end = state.pubDatePicker.start;
-      state.pubDatePicker.start = date;
-    } else {
-      state.pubDatePicker.end = date;
-    }
-    renderPubCalendar();
+    selectRangeDate('pub', date);
   }
 
   function renderPubCalendar() {
     const viewDate = state.pubDatePicker.viewDate;
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    dom.pubCalMonth1.textContent = `${MONTHS[month]} ${year}`;
+    renderCalMonthLabel(dom.pubCalMonth1, viewDate);
 
     let html = '<div class="cal-row cal-header">';
     DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
@@ -1417,20 +1472,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     dom.pubCalGrid1.innerHTML = html;
+    renderCalJump('pub');
+    syncDateInputs('pub');
     updatePubDatePickerText();
     updatePubHoverStyles();
   }
 
   function updatePubDatePickerText() {
-    if (!state.pubDatePicker.start) {
-      dom.pubDateRangeText.textContent = 'Select start date';
-      return;
-    }
-    if (!state.pubDatePicker.end) {
-      dom.pubDateRangeText.textContent = `${formatDisplayDate(state.pubDatePicker.start)} → select end date`;
-      return;
-    }
-    dom.pubDateRangeText.textContent = `${formatDisplayDate(state.pubDatePicker.start)} → ${formatDisplayDate(state.pubDatePicker.end)}`;
+    updateRangeFooterText('pub');
   }
 
   function updatePubHoverStyles() {
@@ -1445,6 +1494,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function applyPubDatePicker() {
+    closeCalJump('pub');
+    // Flush anything still sitting in the typed inputs before applying.
+    if (!commitPendingRangeInputs('pub')) return;
+
     state.pubFilters.dateFrom = cloneDate(state.pubDatePicker.start);
     state.pubFilters.dateTo = cloneDate(state.pubDatePicker.end || state.pubDatePicker.start);
     dom.pubDatePickerPopup.classList.remove('open');
@@ -1454,11 +1507,13 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function clearPubDateRange() {
+    closeCalJump('pub');
     state.pubFilters.dateFrom = null;
     state.pubFilters.dateTo = null;
     state.pubDatePicker.start = null;
     state.pubDatePicker.end = null;
     state.pubDatePicker.hover = null;
+    clearRangeInputs('pub');
     dom.pubDatePickerPopup.classList.remove('open');
     state.pagination.subscriptionsPage = 1;
     syncPubFilterLabels();
@@ -1489,17 +1544,26 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function toggleActivityDatePicker() {
+    closeCalJump('activity');
     [dom.sportDropdown, dom.groupDropdown, dom.datePickerPopup, dom.activityGroupDropdown].forEach((element) => element.classList.remove('open'));
     dom.activityDatePickerPopup.classList.toggle('open');
-    if (dom.activityDatePickerPopup.classList.contains('open')) renderActivityCalendar();
+    if (dom.activityDatePickerPopup.classList.contains('open')) {
+      setActiveDateField('activity', state.activityDatePicker.start && !state.activityDatePicker.end ? 'end' : 'start', { silent: true });
+      setDateInputError('activity', '');
+      renderActivityCalendar();
+    }
   }
 
   function changeActivityMonth(direction) {
+    closeCalJump('activity');
+    // Normalise to the 1st so month stepping never skips a short month.
+    state.activityDatePicker.viewDate.setDate(1);
     state.activityDatePicker.viewDate.setMonth(state.activityDatePicker.viewDate.getMonth() + direction);
     renderActivityCalendar();
   }
 
   function selectActivityDatePreset(preset) {
+    closeCalJump('activity');
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
@@ -1522,30 +1586,19 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     state.activityDatePicker.viewDate = new Date(state.activityDatePicker.start);
+    resetRangeEntryState('activity');
     renderActivityCalendar();
   }
 
   function selectActivityCalendarDate(date) {
-    if (!state.activityDatePicker.start || state.activityDatePicker.end) {
-      state.activityDatePicker.start = date;
-      state.activityDatePicker.end = null;
-    } else if (date.toDateString() === state.activityDatePicker.start.toDateString()) {
-      state.activityDatePicker.end = date;
-    } else if (date < state.activityDatePicker.start) {
-      state.activityDatePicker.end = state.activityDatePicker.start;
-      state.activityDatePicker.start = date;
-    } else {
-      state.activityDatePicker.end = date;
-    }
-
-    renderActivityCalendar();
+    selectRangeDate('activity', date);
   }
 
   function renderActivityCalendar() {
     const viewDate = state.activityDatePicker.viewDate;
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    dom.activityCalMonth1.textContent = `${MONTHS[month]} ${year}`;
+    renderCalMonthLabel(dom.activityCalMonth1, viewDate);
 
     let html = '<div class="cal-row cal-header">';
     DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
@@ -1582,20 +1635,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     dom.activityCalGrid1.innerHTML = html;
+    renderCalJump('activity');
+    syncDateInputs('activity');
     updateActivityDatePickerText();
     updateActivityHoverStyles();
   }
 
   function updateActivityDatePickerText() {
-    if (!state.activityDatePicker.start) {
-      dom.activityDateRangeText.textContent = 'Select start date';
-      return;
-    }
-    if (!state.activityDatePicker.end) {
-      dom.activityDateRangeText.textContent = `${formatDisplayDate(state.activityDatePicker.start)} → select end date`;
-      return;
-    }
-    dom.activityDateRangeText.textContent = `${formatDisplayDate(state.activityDatePicker.start)} → ${formatDisplayDate(state.activityDatePicker.end)}`;
+    updateRangeFooterText('activity');
   }
 
   function updateActivityHoverStyles() {
@@ -1611,9 +1658,13 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function applyActivityDatePicker() {
-    state.activityFilters.dateFrom = state.activityDatePicker.start ? state.activityDatePicker.start.toISOString().slice(0, 10) : '';
+    closeCalJump('activity');
+    // Flush anything still sitting in the typed inputs before applying.
+    if (!commitPendingRangeInputs('activity')) return;
+
+    state.activityFilters.dateFrom = toLocalISODate(state.activityDatePicker.start);
     const endDate = state.activityDatePicker.end || state.activityDatePicker.start;
-    state.activityFilters.dateTo = endDate ? endDate.toISOString().slice(0, 10) : '';
+    state.activityFilters.dateTo = toLocalISODate(endDate);
     dom.activityDatePickerPopup.classList.remove('open');
     state.pagination.activityPage = 1;
     syncActivityFilterInputs();
@@ -1621,11 +1672,13 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function clearActivityDateRange() {
+    closeCalJump('activity');
     state.activityFilters.dateFrom = '';
     state.activityFilters.dateTo = '';
     state.activityDatePicker.start = null;
     state.activityDatePicker.end = null;
     state.activityDatePicker.hover = null;
+    clearRangeInputs('activity');
     dom.activityDatePickerPopup.classList.remove('open');
     state.pagination.activityPage = 1;
     syncActivityFilterInputs();
@@ -1701,24 +1754,20 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function syncActivityFilterInputs() {
     syncActivityGroupLabel();
     dom.activityActionFilter.value = state.activityFilters.action;
-    state.activityDatePicker.start = state.activityFilters.dateFrom ? new Date(state.activityFilters.dateFrom) : null;
-    state.activityDatePicker.end = state.activityFilters.dateTo ? new Date(state.activityFilters.dateTo) : null;
+    state.activityDatePicker.start = state.activityFilters.dateFrom ? new Date(`${state.activityFilters.dateFrom}T00:00:00`) : null;
+    state.activityDatePicker.end = state.activityFilters.dateTo ? new Date(`${state.activityFilters.dateTo}T00:00:00`) : null;
     if (!state.activityFilters.dateFrom) {
       dom.activityDateRangeLabel.textContent = 'All Dates';
       dom.activityDateClearBtn.style.display = 'none';
-      dom.activityDateRangeText.textContent = 'Select start date';
     } else if (!state.activityFilters.dateTo || state.activityFilters.dateFrom === state.activityFilters.dateTo) {
-      const date = new Date(state.activityFilters.dateFrom);
-      dom.activityDateRangeLabel.textContent = formatDisplayDate(date);
+      dom.activityDateRangeLabel.textContent = formatDisplayDate(state.activityDatePicker.start);
       dom.activityDateClearBtn.style.display = '';
-      dom.activityDateRangeText.textContent = `${formatDisplayDate(date)} → select end date`;
     } else {
-      const from = new Date(state.activityFilters.dateFrom);
-      const to = new Date(state.activityFilters.dateTo);
-      dom.activityDateRangeLabel.textContent = `${formatDisplayDate(from)} – ${formatDisplayDate(to)}`;
+      dom.activityDateRangeLabel.textContent = `${formatDisplayDate(state.activityDatePicker.start)} – ${formatDisplayDate(state.activityDatePicker.end)}`;
       dom.activityDateClearBtn.style.display = '';
-      dom.activityDateRangeText.textContent = `${formatDisplayDate(from)} → ${formatDisplayDate(to)}`;
     }
+    syncDateInputs('activity');
+    updateRangeFooterText('activity');
   }
 
   function renderActivityLog() {
@@ -1755,6 +1804,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.activityDatePicker.start = null;
     state.activityDatePicker.end = null;
     state.activityDatePicker.hover = null;
+    clearRangeInputs('activity');
     state.pagination.activityPage = 1;
     dom.activityGroupOptionsSearch.value = '';
     renderActivityGroupOptions();
@@ -1792,16 +1842,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     if (!state.filters.dateFrom) {
       dom.dateRangeLabel.textContent = 'All Dates';
       dom.dateClearBtn.style.display = 'none';
-      dom.dateRangeText.textContent = 'Select start date';
     } else if (!state.filters.dateTo) {
       dom.dateRangeLabel.textContent = formatDisplayDate(state.filters.dateFrom);
       dom.dateClearBtn.style.display = '';
-      dom.dateRangeText.textContent = `${formatDisplayDate(state.datePicker.start)} → select end date`;
     } else {
       dom.dateRangeLabel.textContent = `${formatDisplayDate(state.filters.dateFrom)} – ${formatDisplayDate(state.filters.dateTo)}`;
       dom.dateClearBtn.style.display = '';
-      dom.dateRangeText.textContent = `${formatDisplayDate(state.datePicker.start)} → ${formatDisplayDate(state.datePicker.end)}`;
     }
+    updateRangeFooterText('fixtures');
   }
 
   function clearSportFilter() {
@@ -1833,17 +1881,398 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dropdown.classList.toggle('open');
   }
 
+  // ─── Shared calendar month/year quick navigation ───
+  // Powers the clickable month label in every date picker (Import Fixtures,
+  // Imported Fixtures and Activity Log) so users can jump months/years fast.
+  const CAL_JUMP_YEARS_PER_PAGE = 12;
+
+  function getCalPicker(key) {
+    if (key === 'pub') {
+      return { picker: state.pubDatePicker, monthEl: dom.pubCalMonth1, jumpEl: dom.pubCalJump1, render: renderPubCalendar };
+    }
+    if (key === 'activity') {
+      return { picker: state.activityDatePicker, monthEl: dom.activityCalMonth1, jumpEl: dom.activityCalJump1, render: renderActivityCalendar };
+    }
+    return { picker: state.datePicker, monthEl: dom.calMonth1, jumpEl: dom.calJump1, render: renderCalendar };
+  }
+
+  function ensureCalJumpState(picker) {
+    if (!picker.jump) {
+      picker.jump = { open: false, mode: 'month', year: picker.viewDate.getFullYear(), yearStart: 0 };
+    }
+    return picker.jump;
+  }
+
+  function getCalJumpYearStart(year) {
+    return Math.floor(year / CAL_JUMP_YEARS_PER_PAGE) * CAL_JUMP_YEARS_PER_PAGE;
+  }
+
+  function toggleCalJump(key) {
+    const { picker, render } = getCalPicker(key);
+    const jump = ensureCalJumpState(picker);
+    jump.open = !jump.open;
+    if (jump.open) {
+      jump.mode = 'month';
+      jump.year = picker.viewDate.getFullYear();
+      jump.yearStart = getCalJumpYearStart(jump.year);
+    }
+    renderCalJump(key);
+    if (!jump.open) render();
+  }
+
+  function closeCalJump(key) {
+    const { picker } = getCalPicker(key);
+    const jump = ensureCalJumpState(picker);
+    if (!jump.open) return;
+    jump.open = false;
+    renderCalJump(key);
+  }
+
+  function renderCalMonthLabel(element, viewDate) {
+    if (!element) return;
+    // Caret is rendered via CSS so the label keeps a clean text value.
+    element.textContent = `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+  }
+
+  function renderCalJump(key) {
+    const { picker, monthEl, jumpEl } = getCalPicker(key);
+    if (!jumpEl) return;
+    const jump = ensureCalJumpState(picker);
+
+    if (monthEl) monthEl.setAttribute('aria-expanded', jump.open ? 'true' : 'false');
+    if (!jump.open) {
+      jumpEl.classList.remove('open');
+      jumpEl.innerHTML = '';
+      return;
+    }
+
+    const viewYear = picker.viewDate.getFullYear();
+    const viewMonth = picker.viewDate.getMonth();
+    const today = new Date();
+    let html = '';
+
+    if (jump.mode === 'month') {
+      html += '<div class="cal-jump-nav">'
+        + '<button type="button" class="cal-nav-btn" data-cal-jump-step="-1" aria-label="Previous year">‹</button>'
+        + `<button type="button" class="cal-jump-title" data-cal-jump-mode="year" title="Pick a year">${jump.year}</button>`
+        + '<button type="button" class="cal-nav-btn" data-cal-jump-step="1" aria-label="Next year">›</button>'
+        + '</div><div class="cal-jump-grid">';
+      MONTHS.forEach((name, index) => {
+        let classes = 'cal-jump-item';
+        if (index === viewMonth && jump.year === viewYear) classes += ' cal-jump-active';
+        else if (index === today.getMonth() && jump.year === today.getFullYear()) classes += ' cal-jump-today';
+        html += `<button type="button" class="${classes}" data-cal-jump-month="${index}">${name.slice(0, 3)}</button>`;
+      });
+      html += '</div>';
+    } else {
+      const start = jump.yearStart;
+      const end = start + CAL_JUMP_YEARS_PER_PAGE - 1;
+      html += '<div class="cal-jump-nav">'
+        + '<button type="button" class="cal-nav-btn" data-cal-jump-step="-1" aria-label="Previous years">‹</button>'
+        + `<span class="cal-jump-title cal-jump-title-static">${start} – ${end}</span>`
+        + '<button type="button" class="cal-nav-btn" data-cal-jump-step="1" aria-label="Next years">›</button>'
+        + '</div><div class="cal-jump-grid">';
+      for (let offset = 0; offset < CAL_JUMP_YEARS_PER_PAGE; offset++) {
+        const year = start + offset;
+        let classes = 'cal-jump-item';
+        if (year === viewYear) classes += ' cal-jump-active';
+        else if (year === today.getFullYear()) classes += ' cal-jump-today';
+        html += `<button type="button" class="${classes}" data-cal-jump-year="${year}">${year}</button>`;
+      }
+      html += '</div>';
+    }
+
+    jumpEl.innerHTML = html;
+    jumpEl.classList.add('open');
+  }
+
+  function handleCalJumpClick(key, event) {
+    const button = event.target.closest('button');
+    if (!button) return;
+    // Keep the date picker popup open while navigating months/years.
+    event.stopPropagation();
+
+    const { picker, render } = getCalPicker(key);
+    const jump = ensureCalJumpState(picker);
+
+    if (button.dataset.calJumpStep) {
+      const step = Number(button.dataset.calJumpStep);
+      if (jump.mode === 'month') jump.year += step;
+      else jump.yearStart += step * CAL_JUMP_YEARS_PER_PAGE;
+      renderCalJump(key);
+      return;
+    }
+
+    if (button.dataset.calJumpMode === 'year') {
+      jump.mode = 'year';
+      jump.yearStart = getCalJumpYearStart(jump.year);
+      renderCalJump(key);
+      return;
+    }
+
+    if (button.dataset.calJumpYear) {
+      jump.year = Number(button.dataset.calJumpYear);
+      jump.mode = 'month';
+      renderCalJump(key);
+      return;
+    }
+
+    if (button.dataset.calJumpMonth !== undefined) {
+      const month = Number(button.dataset.calJumpMonth);
+      picker.viewDate = new Date(jump.year, month, 1);
+      jump.open = false;
+      render();
+    }
+  }
+
   function toggleDatePicker() {
+    closeCalJump('fixtures');
     toggleDropdown(dom.datePickerPopup);
-    if (dom.datePickerPopup.classList.contains('open')) renderCalendar();
+    if (dom.datePickerPopup.classList.contains('open')) {
+      setActiveDateField('fixtures', state.datePicker.start && !state.datePicker.end ? 'end' : 'start', { silent: true });
+      setDateInputError('fixtures', '');
+      renderCalendar();
+    }
   }
 
   function changeMonth(direction) {
+    closeCalJump('fixtures');
+    // Normalise to the 1st so month stepping never skips a short month.
+    state.datePicker.viewDate.setDate(1);
     state.datePicker.viewDate.setMonth(state.datePicker.viewDate.getMonth() + direction);
     renderCalendar();
   }
 
+  function changeYear(direction) {
+    changeCalYear('fixtures', direction);
+  }
+
+  // ─── Shared typed From/To range inputs ───
+  // Clicking through the grid is painful for ranges that span years, so every
+  // picker also accepts DD/MM/YYYY typed straight into its From and To fields.
+  function getDateRangeCtx(key) {
+    if (key === 'pub') {
+      return {
+        picker: state.pubDatePicker,
+        fromInput: dom.pubDateFromInput,
+        toInput: dom.pubDateToInput,
+        fromField: dom.pubDateFromField,
+        toField: dom.pubDateToField,
+        errorEl: dom.pubDateInputError,
+        rangeTextEl: dom.pubDateRangeText,
+        render: renderPubCalendar,
+        apply: applyPubDatePicker
+      };
+    }
+    if (key === 'activity') {
+      return {
+        picker: state.activityDatePicker,
+        fromInput: dom.activityDateFromInput,
+        toInput: dom.activityDateToInput,
+        fromField: dom.activityDateFromField,
+        toField: dom.activityDateToField,
+        errorEl: dom.activityDateInputError,
+        rangeTextEl: dom.activityDateRangeText,
+        render: renderActivityCalendar,
+        apply: applyActivityDatePicker
+      };
+    }
+    return {
+      picker: state.datePicker,
+      fromInput: dom.dateFromInput,
+      toInput: dom.dateToInput,
+      fromField: dom.dateFromField,
+      toField: dom.dateToField,
+      errorEl: dom.dateInputError,
+      rangeTextEl: dom.dateRangeText,
+      render: renderCalendar,
+      apply: applyDatePicker
+    };
+  }
+
+  function changeCalYear(key, direction) {
+    const { picker, render } = getDateRangeCtx(key);
+    closeCalJump(key);
+    picker.viewDate.setDate(1);
+    picker.viewDate.setFullYear(picker.viewDate.getFullYear() + direction);
+    render();
+  }
+
+  function bindDateRangeInputs(key) {
+    const ctx = getDateRangeCtx(key);
+    bindDateRangeInput(key, ctx.fromInput, 'start');
+    bindDateRangeInput(key, ctx.toInput, 'end');
+  }
+
+  function bindDateRangeInput(key, input, field) {
+    if (!input) return;
+
+    input.addEventListener('focus', () => setActiveDateField(key, field));
+    input.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setActiveDateField(key, field);
+    });
+    input.addEventListener('input', () => {
+      const masked = maskInputDate(input.value);
+      if (masked !== input.value) input.value = masked;
+      // Only commit once a full date has been typed; keeps errors from flashing.
+      commitDateInput(key, field, true);
+    });
+    input.addEventListener('blur', () => commitDateInput(key, field, false));
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const ctx = getDateRangeCtx(key);
+      if (!commitDateInput(key, field, false)) return;
+      if (field === 'start') ctx.toInput.focus();
+      else if (ctx.picker.start && ctx.picker.end) ctx.apply();
+    });
+  }
+
+  function commitDateInput(key, field, isLiveTyping) {
+    const ctx = getDateRangeCtx(key);
+    const { picker } = ctx;
+    const input = field === 'start' ? ctx.fromInput : ctx.toInput;
+    const raw = input.value.trim();
+
+    if (!raw) {
+      picker[field] = null;
+      picker.hover = null;
+      setDateInputError(key, '');
+      ctx.render();
+      return false;
+    }
+
+    if (raw.length < 10) {
+      if (isLiveTyping) return false;
+      setDateInputError(key, 'Enter the full date as DD/MM/YYYY (e.g. 12/04/2017).');
+      return false;
+    }
+
+    const date = parseInputDate(raw);
+    if (!date) {
+      setDateInputError(key, `That ${field === 'start' ? 'From' : 'To'} date doesn't exist. Use DD/MM/YYYY.`);
+      return false;
+    }
+
+    picker[field] = date;
+    // Keep the range reading low → high even if the dates are typed out of order.
+    if (picker.start && picker.end && picker.end < picker.start) {
+      const earlier = picker.end;
+      picker.end = picker.start;
+      picker.start = earlier;
+    }
+    picker.hover = null;
+    picker.viewDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    setDateInputError(key, '');
+    closeCalJump(key);
+    ctx.render();
+    return true;
+  }
+
+  function setActiveDateField(key, field, { silent = false } = {}) {
+    const ctx = getDateRangeCtx(key);
+    ctx.picker.activeField = field;
+    ctx.fromField?.classList.toggle('is-active', field === 'start');
+    ctx.toField?.classList.toggle('is-active', field === 'end');
+    if (!silent) updateRangeFooterText(key);
+  }
+
+  function setDateInputError(key, message) {
+    const ctx = getDateRangeCtx(key);
+    if (!ctx.errorEl) return;
+    ctx.errorEl.textContent = message || '';
+    ctx.errorEl.hidden = !message;
+    ctx.fromField?.classList.toggle('has-error', Boolean(message) && ctx.picker.activeField === 'start');
+    ctx.toField?.classList.toggle('has-error', Boolean(message) && ctx.picker.activeField === 'end');
+  }
+
+  function syncDateInputs(key) {
+    const ctx = getDateRangeCtx(key);
+    // Never clobber what the user is mid-way through typing.
+    if (ctx.fromInput && document.activeElement !== ctx.fromInput) {
+      ctx.fromInput.value = formatInputDate(ctx.picker.start);
+    }
+    if (ctx.toInput && document.activeElement !== ctx.toInput) {
+      ctx.toInput.value = formatInputDate(ctx.picker.end);
+    }
+  }
+
+  function updateRangeFooterText(key) {
+    const { picker, rangeTextEl } = getDateRangeCtx(key);
+    if (!rangeTextEl) return;
+
+    if (picker.start && picker.end) {
+      const days = Math.round((picker.end - picker.start) / 86400000) + 1;
+      rangeTextEl.textContent = `${formatDisplayDate(picker.start)} → ${formatDisplayDate(picker.end)} (${days} day${days === 1 ? '' : 's'})`;
+      return;
+    }
+    if (picker.start) {
+      rangeTextEl.textContent = `${formatDisplayDate(picker.start)} → select or type end date`;
+      return;
+    }
+    if (picker.end) {
+      rangeTextEl.textContent = `Select or type start date → ${formatDisplayDate(picker.end)}`;
+      return;
+    }
+    rangeTextEl.textContent = picker.activeField === 'end' ? 'Select end date' : 'Select start date';
+  }
+
+  function selectRangeDate(key, date) {
+    const ctx = getDateRangeCtx(key);
+    const { picker } = ctx;
+    setDateInputError(key, '');
+
+    if (picker.activeField === 'end' && picker.start) {
+      if (date < picker.start) {
+        picker.end = picker.start;
+        picker.start = date;
+      } else {
+        picker.end = date;
+      }
+      picker.hover = null;
+      // Range complete, so the next grid click starts a fresh selection.
+      setActiveDateField(key, 'start', { silent: true });
+    } else {
+      picker.start = date;
+      if (picker.end && picker.end < date) picker.end = null;
+      setActiveDateField(key, 'end', { silent: true });
+    }
+
+    ctx.render();
+  }
+
+  // Presets fill both ends at once, so the next grid click starts a new range.
+  function resetRangeEntryState(key) {
+    const { picker } = getDateRangeCtx(key);
+    picker.hover = null;
+    setDateInputError(key, '');
+    setActiveDateField(key, 'start', { silent: true });
+  }
+
+  function clearRangeInputs(key) {
+    const ctx = getDateRangeCtx(key);
+    if (ctx.fromInput) ctx.fromInput.value = '';
+    if (ctx.toInput) ctx.toInput.value = '';
+    setDateInputError(key, '');
+    setActiveDateField(key, 'start', { silent: true });
+  }
+
+  // Flushes pending typed text before a filter is applied. Returns false when
+  // the typed value is invalid so the caller can abort and keep the picker open.
+  function commitPendingRangeInputs(key) {
+    const ctx = getDateRangeCtx(key);
+    if (ctx.fromInput?.value.trim() && !commitDateInput(key, 'start', false)) return false;
+    if (ctx.toInput?.value.trim() && !commitDateInput(key, 'end', false)) return false;
+    if (!ctx.picker.start && ctx.picker.end) {
+      setDateInputError(key, 'Add a From date, or clear the To date.');
+      return false;
+    }
+    return true;
+  }
+
   function selectDatePreset(preset) {
+    closeCalJump('fixtures');
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
@@ -1866,30 +2295,19 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     state.datePicker.viewDate = new Date(state.datePicker.start);
+    resetRangeEntryState('fixtures');
     renderCalendar();
   }
 
   function selectCalendarDate(date) {
-    if (!state.datePicker.start || state.datePicker.end) {
-      state.datePicker.start = date;
-      state.datePicker.end = null;
-    } else if (date.toDateString() === state.datePicker.start.toDateString()) {
-      state.datePicker.end = date;
-    } else if (date < state.datePicker.start) {
-      state.datePicker.end = state.datePicker.start;
-      state.datePicker.start = date;
-    } else {
-      state.datePicker.end = date;
-    }
-
-    renderCalendar();
+    selectRangeDate('fixtures', date);
   }
 
   function renderCalendar() {
     const viewDate = state.datePicker.viewDate;
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    dom.calMonth1.textContent = `${MONTHS[month]} ${year}`;
+    renderCalMonthLabel(dom.calMonth1, viewDate);
 
     let html = '<div class="cal-row cal-header">';
     DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
@@ -1926,20 +2344,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     }
 
     dom.calGrid1.innerHTML = html;
+    renderCalJump('fixtures');
+    syncDateInputs('fixtures');
     updateDatePickerText();
     updateHoverStyles();
   }
 
   function updateDatePickerText() {
-    if (!state.datePicker.start) {
-      dom.dateRangeText.textContent = 'Select start date';
-      return;
-    }
-    if (!state.datePicker.end) {
-      dom.dateRangeText.textContent = `${formatDisplayDate(state.datePicker.start)} → select end date`;
-      return;
-    }
-    dom.dateRangeText.textContent = `${formatDisplayDate(state.datePicker.start)} → ${formatDisplayDate(state.datePicker.end)}`;
+    updateRangeFooterText('fixtures');
   }
 
   function updateHoverStyles() {
@@ -1955,6 +2367,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function applyDatePicker() {
+    closeCalJump('fixtures');
+    // Flush anything still sitting in the typed inputs before applying.
+    if (!commitPendingRangeInputs('fixtures')) return;
+
     state.filters.dateFrom = cloneDate(state.datePicker.start);
     state.filters.dateTo = cloneDate(state.datePicker.end || state.datePicker.start);
     dom.datePickerPopup.classList.remove('open');
@@ -1965,11 +2381,13 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function clearDateRange() {
+    closeCalJump('fixtures');
     state.filters.dateFrom = null;
     state.filters.dateTo = null;
     state.datePicker.start = null;
     state.datePicker.end = null;
     state.datePicker.hover = null;
+    clearRangeInputs('fixtures');
     dom.datePickerPopup.classList.remove('open');
     state.pagination.fixturesPage = 1;
     if (!hasActiveFilters()) state.hasSearched = false;

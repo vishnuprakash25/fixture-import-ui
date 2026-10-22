@@ -146,7 +146,7 @@
       </div>
       <div class="card">
         <div class="toolbar">
-          <input type="text" id="fixtureSearchInput" class="search-input" placeholder="Search by fixture name, ID, team, or Fixture Group…">
+          <input type="text" id="fixtureSearchInput" class="search-input" placeholder="Search by fixture name, fixtureID, or Fixture Group">
           <div class="multiselect-wrapper" id="sportTypeMultiselect">
             <button type="button" class="multiselect-trigger" id="sportTriggerBtn">
               <span id="sportFilterLabel">All Sports</span>
@@ -189,14 +189,30 @@
                 <button type="button" class="preset-btn" data-date-preset="quarter">This Quarter</button>
               </div>
               <div class="datepicker-divider"></div>
+              <div class="datepicker-inputs">
+                <label class="datepicker-field is-active" id="dateFromField">
+                  <span class="datepicker-field-label">From</span>
+                  <input type="text" class="datepicker-input" id="dateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                </label>
+                <span class="datepicker-field-arrow" aria-hidden="true">→</span>
+                <label class="datepicker-field" id="dateToField">
+                  <span class="datepicker-field-label">To</span>
+                  <input type="text" class="datepicker-input" id="dateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                </label>
+              </div>
+              <div class="datepicker-input-error" id="dateInputError" role="alert" hidden></div>
+              <div class="datepicker-divider"></div>
               <div class="datepicker-calendars">
                 <div class="datepicker-cal">
                   <div class="cal-nav">
-                    <button type="button" class="cal-nav-btn" id="datePickerPrevBtn">‹</button>
-                    <span class="cal-month" id="calMonth1"></span>
-                    <button type="button" class="cal-nav-btn" id="datePickerNextBtn">›</button>
+                    <button type="button" class="cal-nav-btn" id="datePickerPrevYearBtn" aria-label="Previous year" title="Previous year">«</button>
+                    <button type="button" class="cal-nav-btn" id="datePickerPrevBtn" aria-label="Previous month">‹</button>
+                    <button type="button" class="cal-month" id="calMonth1" aria-haspopup="true" aria-expanded="false" title="Jump to month or year"></button>
+                    <button type="button" class="cal-nav-btn" id="datePickerNextBtn" aria-label="Next month">›</button>
+                    <button type="button" class="cal-nav-btn" id="datePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
                   <div class="cal-grid" id="calGrid1"></div>
+                  <div class="cal-jump" id="calJump1"></div>
                 </div>
               </div>
               <div class="datepicker-footer">
@@ -236,7 +252,7 @@
       </div>
       <div class="card">
         <div class="toolbar">
-          <input type="text" id="subscriptionsSearchInput" class="search-input" placeholder="Search by fixture group, fixture name, type, or import date…">
+          <input type="text" id="subscriptionsSearchInput" class="search-input" placeholder="Search by fixture name, fixtureID, or Fixture Group">
           <div class="multiselect-wrapper" id="pubSportTypeMultiselect">
             <button type="button" class="multiselect-trigger" id="pubSportTriggerBtn">
               <span id="pubSportFilterLabel">All Sports</span>
@@ -279,14 +295,30 @@
                 <button type="button" class="preset-btn" data-pub-date-preset="quarter">This Quarter</button>
               </div>
               <div class="datepicker-divider"></div>
+              <div class="datepicker-inputs">
+                <label class="datepicker-field is-active" id="pubDateFromField">
+                  <span class="datepicker-field-label">From</span>
+                  <input type="text" class="datepicker-input" id="pubDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                </label>
+                <span class="datepicker-field-arrow" aria-hidden="true">→</span>
+                <label class="datepicker-field" id="pubDateToField">
+                  <span class="datepicker-field-label">To</span>
+                  <input type="text" class="datepicker-input" id="pubDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                </label>
+              </div>
+              <div class="datepicker-input-error" id="pubDateInputError" role="alert" hidden></div>
+              <div class="datepicker-divider"></div>
               <div class="datepicker-calendars">
                 <div class="datepicker-cal">
                   <div class="cal-nav">
-                    <button type="button" class="cal-nav-btn" id="pubDatePickerPrevBtn">‹</button>
-                    <span class="cal-month" id="pubCalMonth1"></span>
-                    <button type="button" class="cal-nav-btn" id="pubDatePickerNextBtn">›</button>
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerPrevYearBtn" aria-label="Previous year" title="Previous year">«</button>
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerPrevBtn" aria-label="Previous month">‹</button>
+                    <button type="button" class="cal-month" id="pubCalMonth1" aria-haspopup="true" aria-expanded="false" title="Jump to month or year"></button>
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerNextBtn" aria-label="Next month">›</button>
+                    <button type="button" class="cal-nav-btn" id="pubDatePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
                   <div class="cal-grid" id="pubCalGrid1"></div>
+                  <div class="cal-jump" id="pubCalJump1"></div>
                 </div>
               </div>
               <div class="datepicker-footer">
@@ -361,14 +393,30 @@
                 <button type="button" class="preset-btn" data-activity-date-preset="quarter">This Quarter</button>
               </div>
               <div class="datepicker-divider"></div>
+              <div class="datepicker-inputs">
+                <label class="datepicker-field is-active" id="activityDateFromField">
+                  <span class="datepicker-field-label">From</span>
+                  <input type="text" class="datepicker-input" id="activityDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                </label>
+                <span class="datepicker-field-arrow" aria-hidden="true">→</span>
+                <label class="datepicker-field" id="activityDateToField">
+                  <span class="datepicker-field-label">To</span>
+                  <input type="text" class="datepicker-input" id="activityDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                </label>
+              </div>
+              <div class="datepicker-input-error" id="activityDateInputError" role="alert" hidden></div>
+              <div class="datepicker-divider"></div>
               <div class="datepicker-calendars">
                 <div class="datepicker-cal">
                   <div class="cal-nav">
-                    <button type="button" class="cal-nav-btn" id="activityDatePickerPrevBtn">‹</button>
-                    <span class="cal-month" id="activityCalMonth1"></span>
-                    <button type="button" class="cal-nav-btn" id="activityDatePickerNextBtn">›</button>
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerPrevYearBtn" aria-label="Previous year" title="Previous year">«</button>
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerPrevBtn" aria-label="Previous month">‹</button>
+                    <button type="button" class="cal-month" id="activityCalMonth1" aria-haspopup="true" aria-expanded="false" title="Jump to month or year"></button>
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerNextBtn" aria-label="Next month">›</button>
+                    <button type="button" class="cal-nav-btn" id="activityDatePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
                   <div class="cal-grid" id="activityCalGrid1"></div>
+                  <div class="cal-jump" id="activityCalJump1"></div>
                 </div>
               </div>
               <div class="datepicker-footer">

@@ -9,7 +9,7 @@ import {
   normalizeGroupKey,
   parseInputDate,
   toLocalISODate
-} from './helpers.js';
+} from './helpers.js?v=c3c9a04b7a';
 
 export function createFixtureImportApp({ data, actions = {} }) {
   const notify = actions.notify || ((message) => window.alert(message));

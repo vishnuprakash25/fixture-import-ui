@@ -29,6 +29,8 @@ web/
 scripts/
   smoke-test.mjs                   # helper + mock-data validation
   dom-integration-test.mjs         # JSDOM regression coverage for the main UI flows
+  dev-server.mjs                   # no-cache static server for local development
+  cache-bust.mjs                   # stamps ?v=<hash> onto local asset references
 docs/
   fixture-import-ui-confluence.md            # product/technical reference
   fixture-import-ui-architecture-overview.md # system context and integration model
@@ -66,6 +68,29 @@ npm run serve
 ```
 
 Then open <http://localhost:4173/web/> (the root `index.html` also redirects there).
+
+`npm run serve` runs `scripts/dev-server.mjs`, a zero-dependency static server that sends `Cache-Control: no-store`. A normal refresh always shows your latest edits — no "clear cache and hard reload" needed, including for anyone hitting your machine over the LAN. Pass a port to override the default: `npm run serve -- 5000`.
+
+## Cache busting
+
+The app ships as plain files with no bundler, so browsers will happily hold on to an old `styles.css` or module forever. `scripts/cache-bust.mjs` prevents that by stamping a content hash onto every local asset reference:
+
+```bash
+npm run cache-bust         # stamp web/ in place
+npm run check:cache-bust   # exit 1 if the stamps are stale (used by npm test)
+```
+
+It stamps all three places a stale file can hide:
+
+1. `<link href="css/styles.css?v=…">` in `web/index.html`
+2. `<script src="js/app.js?v=…">` in `web/index.html`
+3. relative ES module specifiers in `web/js/**/*.js` — e.g. `from './helpers.js?v=…'`
+
+(3) matters because the browser resolves `import './helpers.js'` itself, so versioning only the entry script would still leave the rest of the module graph cached.
+
+The hash is derived from the content of every CSS/JS file with existing stamps stripped first, so the script is idempotent: it only changes the stamp when the code actually changes, and identical content always produces the same hash.
+
+**Run `npm run cache-bust` before committing any CSS or JS change** that will be published to a static host such as GitHub Pages. `npm test` fails if you forget.
 
 ### Runtime modes
 
@@ -160,9 +185,11 @@ Behaviour owned by the core layer:
 ## Validation
 
 ```bash
-npm run check:js     # node --check on every browser module
-npm run test:smoke   # helper + mock data assertions
-npm run test:dom     # JSDOM regression pass over the main UI flows
+npm test                   # everything below, in order
+npm run check:js           # node --check on every browser module
+npm run check:cache-bust   # fail if ?v= stamps are stale
+npm run test:smoke         # helper + mock data assertions
+npm run test:dom           # JSDOM regression pass over the main UI flows
 ```
 
 `scripts/dom-integration-test.mjs` loads `web/index.html` in JSDOM, stubs `alert`, `confirm` and the clipboard, then asserts navigation, theme toggling, filtering, pagination, import modals, subscription expansion, activity filtering and clipboard behaviour.

@@ -8,7 +8,8 @@ import { mockData } from '../web/js/mock/mock-data.js';
 
 const htmlPath = new URL('../web/index.html', import.meta.url);
 let html = await fs.readFile(htmlPath, 'utf8');
-html = html.replace(/<script type="module" src="js\/app\.js"><\/script>/, '');
+// Tolerates the ?v=<hash> cache-bust stamp added by scripts/cache-bust.mjs.
+html = html.replace(/<script type="module" src="js\/app\.js(?:\?v=[^"]*)?"><\/script>/, '');
 
 const dom = new JSDOM(html, {
   url: 'http://localhost/web/',

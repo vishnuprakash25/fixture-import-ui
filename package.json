@@ -3,12 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "serve": "python3 -m http.server 4173 -d .",
-    "serve:mock": "python3 -m http.server 4173 -d .",
-    "serve:real": "python3 -m http.server 4173 -d .",
+    "serve": "node scripts/dev-server.mjs",
+    "serve:mock": "node scripts/dev-server.mjs",
+    "serve:real": "node scripts/dev-server.mjs",
+    "cache-bust": "node scripts/cache-bust.mjs",
+    "check:cache-bust": "node scripts/cache-bust.mjs --check",
     "check:js": "node --check web/js/app.js && node --check web/js/core/helpers.js && node --check web/js/core/createFixtureImportApp.js && node --check web/js/mock/mock-data.js && node --check web/js/mock/mock-actions.js && node --check web/js/providers/index.js && node --check web/js/providers/mock-provider.js && node --check web/js/providers/real-provider.js",
     "test:smoke": "node scripts/smoke-test.mjs",
-    "test:dom": "node scripts/dom-integration-test.mjs"
+    "test:dom": "node scripts/dom-integration-test.mjs",
+    "test": "npm run check:js && npm run check:cache-bust && npm run test:smoke && npm run test:dom"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"

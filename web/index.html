@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- This page carries the  cache-bust stamps, so it must not be
+     served from a stale cache itself. -->
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>RightsLogic - Fixtures</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=c3c9a04b7a">
 </head>
 <body>
 <div class="app">
@@ -595,6 +598,6 @@
   </div>
 </div>
 
-<script type="module" src="js/app.js?v=11"></script>
+<script type="module" src="js/app.js?v=c3c9a04b7a"></script>
 </body>
 </html>

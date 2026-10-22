@@ -8,8 +8,9 @@ import {
   maskInputDate,
   normalizeGroupKey,
   parseInputDate,
+  sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=c3c9a04b7a';
+} from './helpers.js?v=54419a171f';
 
 export function createFixtureImportApp({ data, actions = {} }) {
   const notify = actions.notify || ((message) => window.alert(message));
@@ -116,6 +117,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   function init() {
     cacheDom();
+    registerModalClosers();
     restoreAuthSession();
     bindEvents();
     switchPage(0);
@@ -554,16 +556,119 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('click', handleFixtureIdCopyClick);
+    document.addEventListener('keydown', handleDocumentKeydown);
     document.querySelectorAll('.modal-overlay').forEach((overlay) => {
       overlay.addEventListener('click', (event) => {
         if (event.target !== overlay) return;
-        if (overlay === dom.importModal) closeImportModal();
-        if (overlay === dom.bulkImportModal) closeBulkImportModal();
-        if (overlay === dom.groupModal) closeGroupModal();
-        if (overlay === dom.importedFixtureModal) closeImportedFixtureModal();
-        if (overlay === dom.activityDetailsModal) closeActivityDetailsModal();
+        closeModalOverlay(overlay);
       });
     });
+    // Arrow-key navigation inside each calendar grid.
+    dom.calGrid1.addEventListener('keydown', (event) => handleCalGridKeydown('fixtures', event));
+    dom.pubCalGrid1.addEventListener('keydown', (event) => handleCalGridKeydown('pub', event));
+    dom.activityCalGrid1.addEventListener('keydown', (event) => handleCalGridKeydown('activity', event));
+  }
+
+  // ─── Overlay / modal keyboard handling ───
+  const MODAL_CLOSERS = new Map();
+
+  function closeModalOverlay(overlay) {
+    const close = MODAL_CLOSERS.get(overlay);
+    if (close) close();
+  }
+
+  function registerModalClosers() {
+    MODAL_CLOSERS.set(dom.importModal, closeImportModal);
+    MODAL_CLOSERS.set(dom.bulkImportModal, closeBulkImportModal);
+    MODAL_CLOSERS.set(dom.groupModal, closeGroupModal);
+    MODAL_CLOSERS.set(dom.importedFixtureModal, closeImportedFixtureModal);
+    MODAL_CLOSERS.set(dom.activityDetailsModal, closeActivityDetailsModal);
+    MODAL_CLOSERS.set(dom.loginModal, closeLoginModal);
+  }
+
+  function getOpenModal() {
+    return [...MODAL_CLOSERS.keys()].find((overlay) => overlay?.classList.contains('visible')) || null;
+  }
+
+  function handleDocumentKeydown(event) {
+    if (event.key === 'Escape') {
+      const openModal = getOpenModal();
+      if (openModal) {
+        // The login modal is the only one that must stay put while signed out.
+        if (openModal === dom.loginModal && !state.auth.isAuthenticated) return;
+        event.preventDefault();
+        closeModalOverlay(openModal);
+        return;
+      }
+      if (closeAllOverlays()) event.preventDefault();
+      return;
+    }
+
+    if (event.key === 'Tab') trapFocusInModal(event);
+  }
+
+  const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  // Keeps Tab inside the open dialog, as expected of a modal.
+  function trapFocusInModal(event) {
+    const openDialog = getOpenModal();
+    if (!openDialog) return;
+
+    // Note: deliberately not filtering on offsetParent — it is null for
+    // position:fixed overlays, which would discard every candidate.
+    const focusable = [...openDialog.querySelectorAll(FOCUSABLE)]
+      .filter((el) => !el.hasAttribute('hidden') && !el.closest('[hidden]'));
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (!openDialog.contains(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+      return;
+    }
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  // Closes any open dropdown/date picker. Returns true if something was closed.
+  function closeAllOverlays() {
+    const overlays = [
+      dom.userMenuDropdown, dom.sportDropdown, dom.groupDropdown, dom.datePickerPopup,
+      dom.activityGroupDropdown, dom.activityDatePickerPopup, dom.pubSportDropdown,
+      dom.pubGroupDropdown, dom.pubDatePickerPopup
+    ];
+    let closed = false;
+    overlays.forEach((element) => {
+      if (element?.classList.contains('open')) {
+        element.classList.remove('open');
+        closed = true;
+      }
+    });
+    return closed;
+  }
+
+  // Modal focus management: remember what opened the dialog, move focus into it,
+  // and hand focus back on close so keyboard users don't lose their place.
+  let modalReturnFocusEl = null;
+
+  function openModal(overlay, { focusEl = null } = {}) {
+    modalReturnFocusEl = document.activeElement;
+    overlay.classList.add('visible');
+    const target = focusEl || overlay.querySelector(FOCUSABLE);
+    target?.focus();
+  }
+
+  function closeModal(overlay) {
+    overlay.classList.remove('visible');
+    modalReturnFocusEl?.focus?.();
+    modalReturnFocusEl = null;
   }
 
   function handleDocumentClick(event) {
@@ -636,12 +741,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function openLoginModal() {
-    dom.loginModal.classList.add('visible');
-    dom.loginEmailInput.focus();
+    openModal(dom.loginModal, { focusEl: dom.loginEmailInput });
   }
 
   function closeLoginModal() {
-    dom.loginModal.classList.remove('visible');
+    closeModal(dom.loginModal);
     dom.loginPasswordInput.value = '';
     dom.loginPasswordInput.type = 'password';
     dom.passwordToggleBtn.classList.remove('active');
@@ -871,8 +975,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
       const tooltipAttrs = stat.tooltip
         ? ` data-tooltip="${escapeHtml(stat.tooltip)}" tabindex="0" role="note" aria-label="${escapeHtml(stat.label || '')}. ${escapeHtml(stat.tooltip)}"`
         : '';
-      // Icons can be a short text badge or an inline SVG glyph.
-      const iconContent = stat.iconSvg ? stat.iconSvg : escapeHtml(stat.icon || '');
+      // Icons can be a short text badge or an inline SVG glyph. The SVG is the
+      // only provider-supplied value injected as raw markup, so it is sanitised
+      // rather than trusted — a real provider may relay server-controlled data.
+      const iconContent = stat.iconSvg ? sanitizeInlineSvg(stat.iconSvg) : escapeHtml(stat.icon || '');
       // The trend pill is optional — omit the markup entirely when unset.
       const trendHtml = stat.trend
         ? `<span class="stat-trend ${escapeHtml(stat.trendDirection)}">${escapeHtml(stat.trend)}</span>`
@@ -1392,39 +1498,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function changePubMonth(direction) {
-    closeCalJump('pub');
-    // Normalise to the 1st so month stepping never skips a short month.
-    state.pubDatePicker.viewDate.setDate(1);
-    state.pubDatePicker.viewDate.setMonth(state.pubDatePicker.viewDate.getMonth() + direction);
-    renderPubCalendar();
+    changeCalMonth('pub', direction);
   }
 
   function selectPubDatePreset(preset) {
-    closeCalJump('pub');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    if (preset === 'today') {
-      state.pubDatePicker.start = new Date(now);
-      state.pubDatePicker.end = new Date(now);
-    } else if (preset === 'week') {
-      const dayOfWeek = now.getDay();
-      state.pubDatePicker.start = new Date(now);
-      state.pubDatePicker.start.setDate(now.getDate() - dayOfWeek);
-      state.pubDatePicker.end = new Date(state.pubDatePicker.start);
-      state.pubDatePicker.end.setDate(state.pubDatePicker.start.getDate() + 6);
-    } else if (preset === 'month') {
-      state.pubDatePicker.start = new Date(now.getFullYear(), now.getMonth(), 1);
-      state.pubDatePicker.end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    } else if (preset === 'quarter') {
-      const qStart = Math.floor(now.getMonth() / 3) * 3;
-      state.pubDatePicker.start = new Date(now.getFullYear(), qStart, 1);
-      state.pubDatePicker.end = new Date(now.getFullYear(), qStart + 3, 0);
-    }
-
-    state.pubDatePicker.viewDate = new Date(state.pubDatePicker.start);
-    resetRangeEntryState('pub');
-    renderPubCalendar();
+    selectPresetFor('pub', preset);
   }
 
   function selectPubCalendarDate(date) {
@@ -1432,50 +1510,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderPubCalendar() {
-    const viewDate = state.pubDatePicker.viewDate;
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-    renderCalMonthLabel(dom.pubCalMonth1, viewDate);
-
-    let html = '<div class="cal-row cal-header">';
-    DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
-    html += '</div>';
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let day = 1;
-    for (let week = 0; week < 6; week++) {
-      if (day > daysInMonth) break;
-      html += '<div class="cal-row">';
-      for (let weekday = 0; weekday < 7; weekday++) {
-        if ((week === 0 && weekday < firstDay) || day > daysInMonth) {
-          html += '<div class="cal-cell"></div>';
-          continue;
-        }
-
-        const date = new Date(year, month, day);
-        const dateKey = date.toDateString();
-        let classes = 'cal-cell cal-day';
-
-        if (state.pubDatePicker.start && dateKey === state.pubDatePicker.start.toDateString()) classes += ' cal-start';
-        if (state.pubDatePicker.end && dateKey === state.pubDatePicker.end.toDateString()) classes += ' cal-end';
-        if (state.pubDatePicker.start && state.pubDatePicker.end && date > state.pubDatePicker.start && date < state.pubDatePicker.end) classes += ' cal-in-range';
-        if (date.getTime() === today.getTime()) classes += ' cal-today';
-
-        html += `<div class="${classes}" data-date="${escapeHtml(date.toDateString())}">${day}</div>`;
-        day++;
-      }
-      html += '</div>';
-    }
-
-    dom.pubCalGrid1.innerHTML = html;
-    renderCalJump('pub');
-    syncDateInputs('pub');
-    updatePubDatePickerText();
-    updatePubHoverStyles();
+    renderCalendarFor('pub');
   }
 
   function updatePubDatePickerText() {
@@ -1483,14 +1518,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function updatePubHoverStyles() {
-    if (!state.pubDatePicker.start || state.pubDatePicker.end || !state.pubDatePicker.hover) return;
-    dom.pubCalGrid1.querySelectorAll('.cal-day').forEach((cell) => {
-      cell.classList.remove('cal-hover-range');
-      const date = new Date(cell.dataset.date);
-      if ((date > state.pubDatePicker.start && date <= state.pubDatePicker.hover) || (date < state.pubDatePicker.start && date >= state.pubDatePicker.hover)) {
-        cell.classList.add('cal-hover-range');
-      }
-    });
+    updateHoverStylesFor('pub');
   }
 
   function applyPubDatePicker() {
@@ -1555,39 +1583,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function changeActivityMonth(direction) {
-    closeCalJump('activity');
-    // Normalise to the 1st so month stepping never skips a short month.
-    state.activityDatePicker.viewDate.setDate(1);
-    state.activityDatePicker.viewDate.setMonth(state.activityDatePicker.viewDate.getMonth() + direction);
-    renderActivityCalendar();
+    changeCalMonth('activity', direction);
   }
 
   function selectActivityDatePreset(preset) {
-    closeCalJump('activity');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    if (preset === 'today') {
-      state.activityDatePicker.start = new Date(now);
-      state.activityDatePicker.end = new Date(now);
-    } else if (preset === 'week') {
-      const dayOfWeek = now.getDay();
-      state.activityDatePicker.start = new Date(now);
-      state.activityDatePicker.start.setDate(now.getDate() - dayOfWeek);
-      state.activityDatePicker.end = new Date(state.activityDatePicker.start);
-      state.activityDatePicker.end.setDate(state.activityDatePicker.start.getDate() + 6);
-    } else if (preset === 'month') {
-      state.activityDatePicker.start = new Date(now.getFullYear(), now.getMonth(), 1);
-      state.activityDatePicker.end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    } else if (preset === 'quarter') {
-      const qStart = Math.floor(now.getMonth() / 3) * 3;
-      state.activityDatePicker.start = new Date(now.getFullYear(), qStart, 1);
-      state.activityDatePicker.end = new Date(now.getFullYear(), qStart + 3, 0);
-    }
-
-    state.activityDatePicker.viewDate = new Date(state.activityDatePicker.start);
-    resetRangeEntryState('activity');
-    renderActivityCalendar();
+    selectPresetFor('activity', preset);
   }
 
   function selectActivityCalendarDate(date) {
@@ -1595,50 +1595,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderActivityCalendar() {
-    const viewDate = state.activityDatePicker.viewDate;
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-    renderCalMonthLabel(dom.activityCalMonth1, viewDate);
-
-    let html = '<div class="cal-row cal-header">';
-    DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
-    html += '</div>';
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let day = 1;
-    for (let week = 0; week < 6; week++) {
-      if (day > daysInMonth) break;
-      html += '<div class="cal-row">';
-      for (let weekday = 0; weekday < 7; weekday++) {
-        if ((week === 0 && weekday < firstDay) || day > daysInMonth) {
-          html += '<div class="cal-cell"></div>';
-          continue;
-        }
-
-        const date = new Date(year, month, day);
-        const dateKey = date.toDateString();
-        let classes = 'cal-cell cal-day';
-
-        if (state.activityDatePicker.start && dateKey === state.activityDatePicker.start.toDateString()) classes += ' cal-start';
-        if (state.activityDatePicker.end && dateKey === state.activityDatePicker.end.toDateString()) classes += ' cal-end';
-        if (state.activityDatePicker.start && state.activityDatePicker.end && date > state.activityDatePicker.start && date < state.activityDatePicker.end) classes += ' cal-in-range';
-        if (date.getTime() === today.getTime()) classes += ' cal-today';
-
-        html += `<div class="${classes}" data-date="${escapeHtml(date.toDateString())}">${day}</div>`;
-        day++;
-      }
-      html += '</div>';
-    }
-
-    dom.activityCalGrid1.innerHTML = html;
-    renderCalJump('activity');
-    syncDateInputs('activity');
-    updateActivityDatePickerText();
-    updateActivityHoverStyles();
+    renderCalendarFor('activity');
   }
 
   function updateActivityDatePickerText() {
@@ -1646,15 +1603,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function updateActivityHoverStyles() {
-    if (!state.activityDatePicker.start || state.activityDatePicker.end || !state.activityDatePicker.hover) return;
-
-    dom.activityCalGrid1.querySelectorAll('.cal-day').forEach((cell) => {
-      cell.classList.remove('cal-hover-range');
-      const date = new Date(cell.dataset.date);
-      if ((date > state.activityDatePicker.start && date <= state.activityDatePicker.hover) || (date < state.activityDatePicker.start && date >= state.activityDatePicker.hover)) {
-        cell.classList.add('cal-hover-range');
-      }
-    });
+    updateHoverStylesFor('activity');
   }
 
   function applyActivityDatePicker() {
@@ -1693,7 +1642,10 @@ export function createFixtureImportApp({ data, actions = {} }) {
       if (state.activityFilters.dateFrom || state.activityFilters.dateTo) {
         const entryDate = new Date(entry.timestamp);
         if (Number.isNaN(entryDate.getTime())) return false;
-        const entryDay = entryDate.toISOString().slice(0, 10);
+        // Must match the local-day basis used for the filter bounds, otherwise an
+        // entry logged just after local midnight falls into the previous UTC day
+        // and is wrongly excluded.
+        const entryDay = toLocalISODate(entryDate);
         if (state.activityFilters.dateFrom && entryDay < state.activityFilters.dateFrom) return false;
         if (state.activityFilters.dateTo && entryDay > state.activityFilters.dateTo) return false;
       }
@@ -2036,23 +1988,21 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function changeMonth(direction) {
-    closeCalJump('fixtures');
-    // Normalise to the 1st so month stepping never skips a short month.
-    state.datePicker.viewDate.setDate(1);
-    state.datePicker.viewDate.setMonth(state.datePicker.viewDate.getMonth() + direction);
-    renderCalendar();
+    changeCalMonth('fixtures', direction);
   }
 
   function changeYear(direction) {
     changeCalYear('fixtures', direction);
   }
 
-  // ─── Shared typed From/To range inputs ───
-  // Clicking through the grid is painful for ranges that span years, so every
-  // picker also accepts DD/MM/YYYY typed straight into its From and To fields.
+  // ─── Shared date range picker plumbing ───
+  // All three pickers (Import Fixtures, Imported Fixtures, Activity Log) are the
+  // same widget over different state, so one context lookup drives every shared
+  // behaviour: grid rendering, presets, typed DD/MM/YYYY input and keyboard nav.
   function getDateRangeCtx(key) {
     if (key === 'pub') {
       return {
+        key,
         picker: state.pubDatePicker,
         fromInput: dom.pubDateFromInput,
         toInput: dom.pubDateToInput,
@@ -2060,12 +2010,16 @@ export function createFixtureImportApp({ data, actions = {} }) {
         toField: dom.pubDateToField,
         errorEl: dom.pubDateInputError,
         rangeTextEl: dom.pubDateRangeText,
+        gridEl: dom.pubCalGrid1,
+        monthEl: dom.pubCalMonth1,
+        jumpEl: dom.pubCalJump1,
         render: renderPubCalendar,
         apply: applyPubDatePicker
       };
     }
     if (key === 'activity') {
       return {
+        key,
         picker: state.activityDatePicker,
         fromInput: dom.activityDateFromInput,
         toInput: dom.activityDateToInput,
@@ -2073,11 +2027,15 @@ export function createFixtureImportApp({ data, actions = {} }) {
         toField: dom.activityDateToField,
         errorEl: dom.activityDateInputError,
         rangeTextEl: dom.activityDateRangeText,
+        gridEl: dom.activityCalGrid1,
+        monthEl: dom.activityCalMonth1,
+        jumpEl: dom.activityCalJump1,
         render: renderActivityCalendar,
         apply: applyActivityDatePicker
       };
     }
     return {
+      key,
       picker: state.datePicker,
       fromInput: dom.dateFromInput,
       toInput: dom.dateToInput,
@@ -2085,9 +2043,186 @@ export function createFixtureImportApp({ data, actions = {} }) {
       toField: dom.dateToField,
       errorEl: dom.dateInputError,
       rangeTextEl: dom.dateRangeText,
+      gridEl: dom.calGrid1,
+      monthEl: dom.calMonth1,
+      jumpEl: dom.calJump1,
       render: renderCalendar,
       apply: applyDatePicker
     };
+  }
+
+  // Builds the month grid for any picker. Previously this existed three times,
+  // byte-identical apart from the state path, which is how date bugs got fixed
+  // in one calendar and missed in the other two.
+  function renderCalendarFor(key) {
+    const ctx = getDateRangeCtx(key);
+    const { picker, gridEl } = ctx;
+    const viewDate = picker.viewDate;
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    renderCalMonthLabel(ctx.monthEl, viewDate);
+
+    let html = '<div class="cal-row cal-header" role="row">';
+    DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name" role="columnheader">${day}</div>`; });
+    html += '</div>';
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const focusDay = getCalFocusDay(picker, year, month, daysInMonth);
+
+    let day = 1;
+    for (let week = 0; week < 6; week++) {
+      if (day > daysInMonth) break;
+      html += '<div class="cal-row" role="row">';
+      for (let weekday = 0; weekday < 7; weekday++) {
+        if ((week === 0 && weekday < firstDay) || day > daysInMonth) {
+          html += '<div class="cal-cell" role="gridcell"></div>';
+          continue;
+        }
+
+        const date = new Date(year, month, day);
+        const dateKey = date.toDateString();
+        let classes = 'cal-cell cal-day';
+        let selected = false;
+
+        if (picker.start && dateKey === picker.start.toDateString()) { classes += ' cal-start'; selected = true; }
+        if (picker.end && dateKey === picker.end.toDateString()) { classes += ' cal-end'; selected = true; }
+        if (picker.start && picker.end && date > picker.start && date < picker.end) classes += ' cal-in-range';
+        if (date.getTime() === today.getTime()) classes += ' cal-today';
+
+        // Roving tabindex: exactly one cell is tabbable, arrow keys move it.
+        const tabIndex = day === focusDay ? 0 : -1;
+        html += `<div class="${classes}" role="gridcell" tabindex="${tabIndex}"`
+          + ` aria-selected="${selected ? 'true' : 'false'}"`
+          + ` aria-label="${escapeHtml(formatDisplayDate(date))}"`
+          + ` data-date="${escapeHtml(dateKey)}">${day}</div>`;
+        day++;
+      }
+      html += '</div>';
+    }
+
+    gridEl.innerHTML = html;
+    renderCalJump(key);
+    syncDateInputs(key);
+    updateRangeFooterText(key);
+    updateHoverStylesFor(key);
+  }
+
+  // Which day in the visible month should own the single tab stop.
+  function getCalFocusDay(picker, year, month, daysInMonth) {
+    const inView = (date) => date && date.getFullYear() === year && date.getMonth() === month;
+    if (inView(picker.start)) return picker.start.getDate();
+    if (inView(picker.end)) return picker.end.getDate();
+    const today = new Date();
+    if (today.getFullYear() === year && today.getMonth() === month) return today.getDate();
+    return Math.min(1, daysInMonth);
+  }
+
+  function updateHoverStylesFor(key) {
+    const { picker, gridEl } = getDateRangeCtx(key);
+    if (!picker.start || picker.end || !picker.hover) return;
+
+    gridEl.querySelectorAll('.cal-day').forEach((cell) => {
+      cell.classList.remove('cal-hover-range');
+      const date = new Date(cell.dataset.date);
+      if ((date > picker.start && date <= picker.hover) || (date < picker.start && date >= picker.hover)) {
+        cell.classList.add('cal-hover-range');
+      }
+    });
+  }
+
+  function changeCalMonth(key, direction) {
+    const { picker, render } = getDateRangeCtx(key);
+    closeCalJump(key);
+    // Normalise to the 1st so month stepping never skips a short month.
+    picker.viewDate.setDate(1);
+    picker.viewDate.setMonth(picker.viewDate.getMonth() + direction);
+    render();
+  }
+
+  function selectPresetFor(key, preset) {
+    const ctx = getDateRangeCtx(key);
+    const { picker } = ctx;
+    closeCalJump(key);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (preset === 'today') {
+      picker.start = new Date(now);
+      picker.end = new Date(now);
+    } else if (preset === 'week') {
+      const dayOfWeek = now.getDay();
+      picker.start = new Date(now);
+      picker.start.setDate(now.getDate() - dayOfWeek);
+      picker.end = new Date(picker.start);
+      picker.end.setDate(picker.start.getDate() + 6);
+    } else if (preset === 'month') {
+      picker.start = new Date(now.getFullYear(), now.getMonth(), 1);
+      picker.end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    } else if (preset === 'quarter') {
+      const qStart = Math.floor(now.getMonth() / 3) * 3;
+      picker.start = new Date(now.getFullYear(), qStart, 1);
+      picker.end = new Date(now.getFullYear(), qStart + 3, 0);
+    } else {
+      return;
+    }
+
+    picker.viewDate = new Date(picker.start);
+    resetRangeEntryState(key);
+    ctx.render();
+  }
+
+  // Arrow-key navigation over the month grid, mirroring native date pickers.
+  function handleCalGridKeydown(key, event) {
+    const cell = event.target.closest('.cal-day');
+    if (!cell) return;
+
+    const STEPS = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    const current = new Date(cell.dataset.date);
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectRangeDate(key, current);
+      focusCalDay(key, current);
+      return;
+    }
+
+    let target = null;
+    if (STEPS[event.key] !== undefined) {
+      target = new Date(current);
+      target.setDate(current.getDate() + STEPS[event.key]);
+    } else if (event.key === 'Home') {
+      target = new Date(current.getFullYear(), current.getMonth(), 1);
+    } else if (event.key === 'End') {
+      target = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+    } else if (event.key === 'PageUp' || event.key === 'PageDown') {
+      target = new Date(current);
+      target.setDate(1);
+      target.setMonth(current.getMonth() + (event.key === 'PageUp' ? -1 : 1));
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const ctx = getDateRangeCtx(key);
+    // Follow the cursor into the neighbouring month when it steps outside.
+    if (target.getMonth() !== ctx.picker.viewDate.getMonth() || target.getFullYear() !== ctx.picker.viewDate.getFullYear()) {
+      ctx.picker.viewDate = new Date(target.getFullYear(), target.getMonth(), 1);
+      closeCalJump(key);
+      ctx.render();
+    }
+    focusCalDay(key, target);
+  }
+
+  function focusCalDay(key, date) {
+    const { gridEl } = getDateRangeCtx(key);
+    const cell = gridEl.querySelector(`.cal-day[data-date="${date.toDateString()}"]`);
+    if (!cell) return;
+    gridEl.querySelectorAll('.cal-day').forEach((day) => { day.tabIndex = -1; });
+    cell.tabIndex = 0;
+    cell.focus();
   }
 
   function changeCalYear(key, direction) {
@@ -2272,31 +2407,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function selectDatePreset(preset) {
-    closeCalJump('fixtures');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-
-    if (preset === 'today') {
-      state.datePicker.start = new Date(now);
-      state.datePicker.end = new Date(now);
-    } else if (preset === 'week') {
-      const dayOfWeek = now.getDay();
-      state.datePicker.start = new Date(now);
-      state.datePicker.start.setDate(now.getDate() - dayOfWeek);
-      state.datePicker.end = new Date(state.datePicker.start);
-      state.datePicker.end.setDate(state.datePicker.start.getDate() + 6);
-    } else if (preset === 'month') {
-      state.datePicker.start = new Date(now.getFullYear(), now.getMonth(), 1);
-      state.datePicker.end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    } else if (preset === 'quarter') {
-      const qStart = Math.floor(now.getMonth() / 3) * 3;
-      state.datePicker.start = new Date(now.getFullYear(), qStart, 1);
-      state.datePicker.end = new Date(now.getFullYear(), qStart + 3, 0);
-    }
-
-    state.datePicker.viewDate = new Date(state.datePicker.start);
-    resetRangeEntryState('fixtures');
-    renderCalendar();
+    selectPresetFor('fixtures', preset);
   }
 
   function selectCalendarDate(date) {
@@ -2304,50 +2415,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderCalendar() {
-    const viewDate = state.datePicker.viewDate;
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-    renderCalMonthLabel(dom.calMonth1, viewDate);
-
-    let html = '<div class="cal-row cal-header">';
-    DAYS.forEach((day) => { html += `<div class="cal-cell cal-day-name">${day}</div>`; });
-    html += '</div>';
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let day = 1;
-    for (let week = 0; week < 6; week++) {
-      if (day > daysInMonth) break;
-      html += '<div class="cal-row">';
-      for (let weekday = 0; weekday < 7; weekday++) {
-        if ((week === 0 && weekday < firstDay) || day > daysInMonth) {
-          html += '<div class="cal-cell"></div>';
-          continue;
-        }
-
-        const date = new Date(year, month, day);
-        const dateKey = date.toDateString();
-        let classes = 'cal-cell cal-day';
-
-        if (state.datePicker.start && dateKey === state.datePicker.start.toDateString()) classes += ' cal-start';
-        if (state.datePicker.end && dateKey === state.datePicker.end.toDateString()) classes += ' cal-end';
-        if (state.datePicker.start && state.datePicker.end && date > state.datePicker.start && date < state.datePicker.end) classes += ' cal-in-range';
-        if (date.getTime() === today.getTime()) classes += ' cal-today';
-
-        html += `<div class="${classes}" data-date="${escapeHtml(date.toDateString())}">${day}</div>`;
-        day++;
-      }
-      html += '</div>';
-    }
-
-    dom.calGrid1.innerHTML = html;
-    renderCalJump('fixtures');
-    syncDateInputs('fixtures');
-    updateDatePickerText();
-    updateHoverStyles();
+    renderCalendarFor('fixtures');
   }
 
   function updateDatePickerText() {
@@ -2355,15 +2423,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function updateHoverStyles() {
-    if (!state.datePicker.start || state.datePicker.end || !state.datePicker.hover) return;
-
-    dom.calGrid1.querySelectorAll('.cal-day').forEach((cell) => {
-      cell.classList.remove('cal-hover-range');
-      const date = new Date(cell.dataset.date);
-      if ((date > state.datePicker.start && date <= state.datePicker.hover) || (date < state.datePicker.start && date >= state.datePicker.hover)) {
-        cell.classList.add('cal-hover-range');
-      }
-    });
+    updateHoverStylesFor('fixtures');
   }
 
   function applyDatePicker() {
@@ -2425,7 +2485,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.currentImport = fixture;
     dom.importConfirmMessage.textContent = getImportConfirmationMessage(1);
     dom.importFixtureSummary.textContent = fixture.name;
-    dom.importModal.classList.add('visible');
+    openModal(dom.importModal);
   }
 
   function getImportConfirmationMessage(count) {
@@ -2434,7 +2494,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function closeImportModal() {
-    dom.importModal.classList.remove('visible');
+    closeModal(dom.importModal);
     state.currentImport = null;
     dom.importFixtureSummary.textContent = '';
   }
@@ -2463,11 +2523,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.bulkFixtureList.innerHTML = state.bulkImportFixtures.map((fixture) => `
       <div class="bulk-fixture-item"><strong>${escapeHtml(fixture.name)}</strong> <span class="badge badge-gray">${escapeHtml(fixture.sportType)}</span> <span>${escapeHtml(fixture.date)}</span></div>
     `).join('');
-    dom.bulkImportModal.classList.add('visible');
+    openModal(dom.bulkImportModal);
   }
 
   function closeBulkImportModal() {
-    dom.bulkImportModal.classList.remove('visible');
+    closeModal(dom.bulkImportModal);
     state.bulkImportFixtures = [];
     dom.bulkFixtureList.innerHTML = '';
   }
@@ -2498,11 +2558,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
     dom.groupModalSubtitle.textContent = `${group.sport} · ${group.organiser}`;
     dom.groupDetailsGrid.innerHTML = buildGroupDetailsHtml(group);
     dom.groupFixturesList.innerHTML = buildGroupFixturesHtml(group.fixtures || []);
-    dom.groupModal.classList.add('visible');
+    openModal(dom.groupModal);
   }
 
   function closeGroupModal() {
-    dom.groupModal.classList.remove('visible');
+    closeModal(dom.groupModal);
     state.currentGroupId = null;
   }
 
@@ -2543,11 +2603,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
     dom.impGroupDetails.innerHTML = group ? buildImportedGroupDetailsHtml(group) : '<p class="empty-state">Group details not available.</p>';
     dom.impGroupFixturesList.innerHTML = group ? buildGroupFixturesHtml(group.fixtures || [], item.name) : '<p class="empty-state">No fixtures data available.</p>';
-    dom.importedFixtureModal.classList.add('visible');
+    openModal(dom.importedFixtureModal);
   }
 
   function closeImportedFixtureModal() {
-    dom.importedFixtureModal.classList.remove('visible');
+    closeModal(dom.importedFixtureModal);
     state.currentImportedFixture = null;
   }
 
@@ -2580,11 +2640,11 @@ export function createFixtureImportApp({ data, actions = {} }) {
       </div>
     `;
 
-    dom.activityDetailsModal.classList.add('visible');
+    openModal(dom.activityDetailsModal);
   }
 
   function closeActivityDetailsModal() {
-    dom.activityDetailsModal.classList.remove('visible');
+    closeModal(dom.activityDetailsModal);
     state.currentActivityEntry = null;
   }
 

@@ -9,7 +9,7 @@
 <title>RightsLogic - Fixtures</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=c3c9a04b7a">
+<link rel="stylesheet" href="css/styles.css?v=54419a171f">
 </head>
 <body>
 <div class="app">
@@ -195,12 +195,12 @@
               <div class="datepicker-inputs">
                 <label class="datepicker-field is-active" id="dateFromField">
                   <span class="datepicker-field-label">From</span>
-                  <input type="text" class="datepicker-input" id="dateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="dateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY" aria-describedby="dateInputError">
                 </label>
                 <span class="datepicker-field-arrow" aria-hidden="true">→</span>
                 <label class="datepicker-field" id="dateToField">
                   <span class="datepicker-field-label">To</span>
-                  <input type="text" class="datepicker-input" id="dateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="dateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY" aria-describedby="dateInputError">
                 </label>
               </div>
               <div class="datepicker-input-error" id="dateInputError" role="alert" hidden></div>
@@ -214,7 +214,7 @@
                     <button type="button" class="cal-nav-btn" id="datePickerNextBtn" aria-label="Next month">›</button>
                     <button type="button" class="cal-nav-btn" id="datePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
-                  <div class="cal-grid" id="calGrid1"></div>
+                  <div class="cal-grid" id="calGrid1" role="grid" aria-label="Choose a date"></div>
                   <div class="cal-jump" id="calJump1"></div>
                 </div>
               </div>
@@ -301,12 +301,12 @@
               <div class="datepicker-inputs">
                 <label class="datepicker-field is-active" id="pubDateFromField">
                   <span class="datepicker-field-label">From</span>
-                  <input type="text" class="datepicker-input" id="pubDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="pubDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY" aria-describedby="pubDateInputError">
                 </label>
                 <span class="datepicker-field-arrow" aria-hidden="true">→</span>
                 <label class="datepicker-field" id="pubDateToField">
                   <span class="datepicker-field-label">To</span>
-                  <input type="text" class="datepicker-input" id="pubDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="pubDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY" aria-describedby="pubDateInputError">
                 </label>
               </div>
               <div class="datepicker-input-error" id="pubDateInputError" role="alert" hidden></div>
@@ -320,7 +320,7 @@
                     <button type="button" class="cal-nav-btn" id="pubDatePickerNextBtn" aria-label="Next month">›</button>
                     <button type="button" class="cal-nav-btn" id="pubDatePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
-                  <div class="cal-grid" id="pubCalGrid1"></div>
+                  <div class="cal-grid" id="pubCalGrid1" role="grid" aria-label="Choose a date"></div>
                   <div class="cal-jump" id="pubCalJump1"></div>
                 </div>
               </div>
@@ -399,12 +399,12 @@
               <div class="datepicker-inputs">
                 <label class="datepicker-field is-active" id="activityDateFromField">
                   <span class="datepicker-field-label">From</span>
-                  <input type="text" class="datepicker-input" id="activityDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="activityDateFromInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range start date, format DD/MM/YYYY" aria-describedby="activityDateInputError">
                 </label>
                 <span class="datepicker-field-arrow" aria-hidden="true">→</span>
                 <label class="datepicker-field" id="activityDateToField">
                   <span class="datepicker-field-label">To</span>
-                  <input type="text" class="datepicker-input" id="activityDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY">
+                  <input type="text" class="datepicker-input" id="activityDateToInput" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Range end date, format DD/MM/YYYY" aria-describedby="activityDateInputError">
                 </label>
               </div>
               <div class="datepicker-input-error" id="activityDateInputError" role="alert" hidden></div>
@@ -418,7 +418,7 @@
                     <button type="button" class="cal-nav-btn" id="activityDatePickerNextBtn" aria-label="Next month">›</button>
                     <button type="button" class="cal-nav-btn" id="activityDatePickerNextYearBtn" aria-label="Next year" title="Next year">»</button>
                   </div>
-                  <div class="cal-grid" id="activityCalGrid1"></div>
+                  <div class="cal-grid" id="activityCalGrid1" role="grid" aria-label="Choose a date"></div>
                   <div class="cal-jump" id="activityCalJump1"></div>
                 </div>
               </div>
@@ -598,6 +598,6 @@
   </div>
 </div>
 
-<script type="module" src="js/app.js?v=c3c9a04b7a"></script>
+<script type="module" src="js/app.js?v=54419a171f"></script>
 </body>
 </html>

@@ -88,6 +88,32 @@ export function escapeHtml(value) {
   }[char]));
 }
 
+// Dashboard stat icons are the one provider-supplied value rendered as raw
+// markup. Allow only inline SVG shape markup through; anything that could
+// execute (scripts, event handlers, javascript: URLs, foreignObject) is dropped
+// so a compromised or careless data source cannot inject behaviour.
+const SVG_ALLOWED_TAGS = new Set([
+  'svg', 'g', 'path', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
+  'rect', 'defs', 'linearGradient', 'radialGradient', 'stop', 'title', 'text', 'tspan'
+]);
+
+export function sanitizeInlineSvg(markup) {
+  const source = String(markup ?? '');
+  if (!source.trim()) return '';
+  // Reject outright if it contains anything executable.
+  if (/<\s*(script|foreignObject|iframe|object|embed|style)\b/i.test(source)) return '';
+  if (/\son[a-z]+\s*=/i.test(source)) return '';
+  if (/(?:href|xlink:href|src)\s*=\s*["']?\s*javascript:/i.test(source)) return '';
+
+  // Every tag used must be on the allow list.
+  const tags = source.match(/<\s*\/?\s*([a-zA-Z][\w:-]*)/g) || [];
+  const allTagsAllowed = tags.every((tag) => {
+    const name = tag.replace(/[<\/\s]/g, '');
+    return SVG_ALLOWED_TAGS.has(name);
+  });
+  return allTagsAllowed ? source : '';
+}
+
 export function normalizeGroupKey(name, fixtureGroups) {
   const normalizedName = String(name ?? '').trim().toLowerCase();
   return Object.entries(fixtureGroups || {}).find(([, group]) => {

@@ -1,5 +1,5 @@
-import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=54419a171f';
-import { loadAppProvider } from './providers/index.js?v=54419a171f';
+import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=987c722c04';
+import { loadAppProvider } from './providers/index.js?v=987c722c04';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const provider = await loadAppProvider();

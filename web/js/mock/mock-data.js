@@ -1,4 +1,4 @@
-import { getFixtureShortId } from '../core/helpers.js?v=54419a171f';
+import { getFixtureShortId } from '../core/helpers.js?v=987c722c04';
 
 const sportTypes = [
   { id: 'american-football', label: 'American Football' },
@@ -596,6 +596,7 @@ const recentlyImported = publishedFixturesSeed
     groupId: entry.groupId,
     sport: fixtureGroups[entry.groupId]?.sport || 'Unknown',
     importDate: entry.importedOn,
+    date: fixtureGroups[entry.groupId]?.fixtures.find((fixture) => fixture.name === entry.name)?.date || '',
     titleId: idx < 2 ? '' : entry.titleId,
     importStatus: idx < 2 ? 'In Progress' : 'Processed',
     venue: fixtureGroups[entry.groupId]?.fixtures.find((fixture) => fixture.name === entry.name)?.venue || 'Various',

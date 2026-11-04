@@ -340,6 +340,15 @@ click(document.querySelector('#recentlyImportedBody [data-action="view-imported"
 assert.ok(document.getElementById('importedFixtureModal').classList.contains('visible'), 'imported fixture modal opens');
 assert.equal(document.getElementById('impFixtureTitle').textContent, mockData.recentlyImported[0].name, 'imported fixture modal title renders');
 assert.ok(document.getElementById('impGroupDetails').textContent.includes(mockData.fixtureGroups[mockData.recentlyImported[0].groupId].name), 'imported fixture group details render');
+{
+  const groupLabels = [...document.querySelectorAll('#impGroupDetails .group-detail-label')].map((el) => el.textContent);
+  assert.deepEqual(groupLabels, ['Fixture Group', 'Sport', 'Start Date', 'Imported Fixtures', 'Imported Since', 'Imported By'], 'imported fixture group details mirror Imported Fixtures columns plus Start Date');
+  const groupStartDate = mockData.fixtureGroups[mockData.recentlyImported[0].groupId].startDate;
+  assert.ok(document.getElementById('impGroupDetails').textContent.includes(groupStartDate), 'imported fixture group details show group start date');
+  const fixtureLabels = [...document.querySelectorAll('#impFixtureDetails .group-detail-label')].map((el) => el.textContent);
+  assert.ok(fixtureLabels.includes('Start Date'), 'imported fixture details include fixture start date');
+  assert.ok(!fixtureLabels.includes('Venue'), 'imported fixture details omit venue');
+}
 click(document.getElementById('closeImportedFixtureFooterBtn'));
 assert.ok(!document.getElementById('importedFixtureModal').classList.contains('visible'), 'imported fixture modal closes');
 

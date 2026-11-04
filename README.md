@@ -35,7 +35,6 @@ docs/
   fixture-import-ui-confluence.md            # product/technical reference
   fixture-import-ui-architecture-overview.md # system context and integration model
   fixture-import-ui-phased-delivery-plan.md  # phased delivery approach
-  fixture-import-ui-sdh-integration.md       # SDH GraphQL integration: connectivity, queries, mapping
   fixture-import-ui-architecture.drawio
 package.json
 ```

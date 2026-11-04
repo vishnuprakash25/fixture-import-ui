@@ -10,7 +10,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=520eddcdb3';
+} from './helpers.js?v=987c722c04';
 
 export function createFixtureImportApp({ data, actions = {} }) {
   const notify = actions.notify || ((message) => window.alert(message));

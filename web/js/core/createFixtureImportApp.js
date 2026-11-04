@@ -10,7 +10,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=54419a171f';
+} from './helpers.js?v=520eddcdb3';
 
 export function createFixtureImportApp({ data, actions = {} }) {
   const notify = actions.notify || ((message) => window.alert(message));
@@ -1290,10 +1290,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     return `${primaryHtml} <span class="user-cell-more" title="${escapeHtml(importers.join(', '))}">+${others.length}</span>`;
   }
 
-  function buildSubscriptionDetailsRowHtml(subscription) {
-    const importers = Array.isArray(subscription.importedByList) && subscription.importedByList.length
+  function getImportersLabel(subscription) {
+    return Array.isArray(subscription.importedByList) && subscription.importedByList.length
       ? subscription.importedByList.join(', ')
       : subscription.importedBy || 'Unknown';
+  }
+
+  function buildSubscriptionDetailsRowHtml(subscription) {
+    const importers = getImportersLabel(subscription);
     return `
       <tr class="subscription-details-row">
         <td colspan="8">
@@ -2555,7 +2559,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     if (!group) return;
 
     dom.groupModalTitle.textContent = group.name;
-    dom.groupModalSubtitle.textContent = `${group.sport} · ${group.organiser}`;
+    dom.groupModalSubtitle.textContent = group.sport;
     dom.groupDetailsGrid.innerHTML = buildGroupDetailsHtml(group);
     dom.groupFixturesList.innerHTML = buildGroupFixturesHtml(group.fixtures || []);
     openModal(dom.groupModal);
@@ -2591,17 +2595,19 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
     const importStatus = item.importStatus || 'Processed';
     const canShowTitleId = importStatus === 'Processed' && item.titleId;
+    const startDate = item.date || group?.fixtures?.find((fixture) => fixture.name === item.name)?.date || 'Not available';
     dom.impFixtureTitle.textContent = item.name;
     dom.impFixtureDetails.innerHTML = [
       detailCell('Fixture Name', item.name),
       detailCell('Sport Type', item.sport),
-      detailCell('Venue', item.venue),
+      detailCell('Start Date', startDate),
       detailCell('Import Date', item.importDate),
       detailCell('RightsLogic Title ID', canShowTitleId ? `<span class="fixture-id" title="${escapeHtml(item.titleId)}" data-copy-value="${escapeHtml(item.titleId)}">${escapeHtml(item.titleId.slice(0, 7))}</span>` : 'Not available until processed', canShowTitleId),
       detailCell('Imported By', item.importedBy)
     ].join('');
 
-    dom.impGroupDetails.innerHTML = group ? buildImportedGroupDetailsHtml(group) : '<p class="empty-state">Group details not available.</p>';
+    const subscription = subscriptions.find((entry) => entry.groupId === groupId);
+    dom.impGroupDetails.innerHTML = group || subscription ? buildImportedGroupDetailsHtml(group, subscription) : '<p class="empty-state">Group details not available.</p>';
     dom.impGroupFixturesList.innerHTML = group ? buildGroupFixturesHtml(group.fixtures || [], item.name) : '<p class="empty-state">No fixtures data available.</p>';
     openModal(dom.importedFixtureModal);
   }
@@ -2651,22 +2657,21 @@ export function createFixtureImportApp({ data, actions = {} }) {
   function buildGroupDetailsHtml(group) {
     return [
       detailCell('Sport', group.sport),
-      detailCell('Season', group.season),
+      detailCell('Season', group.name),
       detailCell('Start Date', group.startDate),
-      detailCell('End Date', group.endDate),
-      detailCell('Organiser', group.organiser),
-      detailCell('Total Fixtures', group.totalFixtures),
-      group.venue ? detailCell('Venue', group.venue, false, 'grid-column:1/-1') : ''
+      detailCell('Total Fixtures', group.totalFixtures)
     ].join('');
   }
 
-  function buildImportedGroupDetailsHtml(group) {
+  // Mirrors the columns of the Imported Fixtures tab table, plus the group's Start Date.
+  function buildImportedGroupDetailsHtml(group, subscription) {
     return [
-      detailCell('Group Name', group.name),
-      detailCell('Organiser', group.organiser),
-      detailCell('Season', group.season),
-      detailCell('Period', `${group.startDate} – ${group.endDate}`),
-      group.venue ? detailCell('Venue', group.venue, false, 'grid-column:1/-1') : ''
+      detailCell('Fixture Group', subscription?.groupName || group?.name || 'Unknown'),
+      detailCell('Sport', subscription?.type || group?.sport || 'Unknown'),
+      detailCell('Start Date', group?.startDate || 'N/A'),
+      detailCell('Imported Fixtures', String(subscription?.importedFixtures?.length ?? 0)),
+      detailCell('Imported Since', subscription?.importedSince || 'N/A'),
+      detailCell('Imported By', subscription ? getImportersLabel(subscription) : 'Unknown')
     ].join('');
   }
 

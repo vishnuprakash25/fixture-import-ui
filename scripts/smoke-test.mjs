@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { buildFixtureTitle, filterFixtures, getGroupOptions, parseInputDate, sanitizeInlineSvg, toLocalISODate, toYYYYMMDD } from '../web/js/core/helpers.js';
+import { buildFixtureTitle, filterFixtures, getGroupOptions, parseEnabledPages, parseInputDate, parseListAttribute, sanitizeInlineSvg, toLocalISODate, toYYYYMMDD } from '../web/js/core/helpers.js';
 import { mockData } from '../web/js/mock/mock-data.js';
 
 // Test date formatting utility
@@ -67,6 +67,15 @@ assert.equal(sanitizeInlineSvg(safeIcon), safeIcon, 'legitimate inline SVG icons
 mockData.dashboardStats.filter((stat) => stat.iconSvg).forEach((stat) => {
   assert.equal(sanitizeInlineSvg(stat.iconSvg), stat.iconSvg, `mock dashboard icon survives sanitising: ${stat.label}`);
 });
+
+// Missing/empty data-enabled-pages must enable every page (regression: '' parsed as page 0).
+assert.equal(parseEnabledPages(undefined), null);
+assert.equal(parseEnabledPages(''), null);
+assert.equal(parseEnabledPages(' , '), null);
+assert.deepEqual(parseEnabledPages('1'), [1]);
+assert.deepEqual(parseEnabledPages('0, 2,x'), [0, 2]);
+assert.equal(parseListAttribute(''), null);
+assert.deepEqual(parseListAttribute('fixture, group,,id'), ['fixture', 'group', 'id']);
 
 console.log('Smoke test passed: core helpers and mock data are wired correctly.');
 

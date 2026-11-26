@@ -10,6 +10,8 @@ A dependency-free, ES-module front end for the fixture import workflow. The reus
 
 ```text
 index.html                         # redirect shim -> /web/index.html
+mvp1/
+  index.html                       # GENERATED MVP1 shell (Import Fixtures only), shares /web/ assets
 web/
   index.html                       # reusable UI shell (layout, tables, modals, filters)
   css/
@@ -29,8 +31,10 @@ web/
 scripts/
   smoke-test.mjs                   # helper + mock-data validation
   dom-integration-test.mjs         # JSDOM regression coverage for the main UI flows
+  dom-mvp1-test.mjs                # JSDOM coverage for the MVP1 shell
   dev-server.mjs                   # no-cache static server for local development
   cache-bust.mjs                   # stamps ?v=<hash> onto local asset references
+  build-mvp1.mjs                   # generates mvp1/index.html from web/index.html
 docs/
   fixture-import-ui-confluence.md            # product/technical reference
   fixture-import-ui-architecture-overview.md # system context and integration model
@@ -70,6 +74,30 @@ npm run serve
 Then open <http://localhost:4173/web/> (the root `index.html` also redirects there).
 
 `npm run serve` runs `scripts/dev-server.mjs`, a zero-dependency static server that sends `Cache-Control: no-store`. A normal refresh always shows your latest edits — no "clear cache and hard reload" needed, including for anyone hitting your machine over the LAN. Pass a port to override the default: `npm run serve -- 5000`.
+
+## MVP1 build (`/mvp1/`)
+
+<http://localhost:4173/mvp1/> serves MVP1: the same app restricted to the **Import Fixtures** page (single/bulk import, group details). The other nav entries are hidden and can't be navigated to, and signing in lands on Import Fixtures.
+
+MVP1 uses **guided import filters** (`importFilterMode: 'guided'`):
+
+- no free-text search; the filters are **Sport → Date range → Fixture group**, all required (Search with missing fields outlines them in red with a one-line message)
+- picking a sport defaults the date range to **today → today + 365 days** (only if no range is set; the user can change it)
+- once sport and dates are set, fixture groups are fetched via `actions.fetchFixtureGroups` and the Fixture group selector is enabled; until then it is disabled with the placeholder "Select sport & dates first". Loading shows in the selector; empty and error (with Retry) states show a one-line message
+- changing sports or dates re-queries groups and drops selections no longer offered
+- fixtures are listed only after **Search** is clicked with all three filters set; changing any filter clears the results until Search is clicked again
+
+There is no forked code. `mvp1/index.html` is generated from `web/index.html` by `scripts/build-mvp1.mjs`, which adds:
+
+- `<base href="../web/">` so CSS/JS/providers load from `/web/`
+- `<html data-enabled-pages="1" data-import-filter-mode="guided" data-fixture-columns="…">`, which `app.js` passes to `createFixtureImportApp({ enabledPages, importFilterMode, fixtureColumns })`
+
+```bash
+npm run build:mvp1   # regenerate (also run automatically by npm run cache-bust)
+npm run check:mvp1   # exit 1 if mvp1/index.html is stale (used by npm test)
+```
+
+Never edit `mvp1/index.html` by hand; change `web/index.html` and run `npm run cache-bust`.
 
 ## Cache busting
 
@@ -146,12 +174,19 @@ Every handler is invoked with optional chaining, so a provider may implement onl
 | `unsubscribe` | `(subscription)` | unsubscribe from a group |
 | `exportLog` | `({ data, state })` | Activity Log export |
 | `viewActivityDetails` | `(entry)` | activity row details (modal is rendered by the core) |
+| `fetchFixtureGroups` | `({ sportIds, dateFrom, dateTo, data })` → `Promise<[{ id, label, sport?, startDate?, endDate? }]>` | guided filters: sport + date range chosen. Mocked with 600 ms latency; falls back to filtering `data` locally when absent |
 
 ## Core module reference
 
-### `createFixtureImportApp({ data, actions = {} })`
+### `createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' })`
 
 Returns `{ init }`. `init()` caches DOM nodes, restores any stored auth session, binds event handlers and performs the first render.
+
+`enabledPages` is an optional array of `data-page-index` values (e.g. `[1]` for MVP1). Other pages keep their markup but their nav items are hidden and `switchPage` ignores them; the first enabled page is the home page.
+
+`fixtureColumns` is an optional array of Import Fixtures column keys: `fixture`, `fixtureWithAudit` (name plus a muted "Created … · Updated …" line), `group`, `sport`, `type` (sport labelled "Type"), `date`, `scheduledStartDate`, `venue`, `elapsedTime`, `createdDate`, `updatedDate`, `id`. The default is `fixture, group, sport, date, venue, id`. MVP1 uses `fixtureWithAudit, group, type, scheduledStartDate, elapsedTime, id`. `elapsedTime` (`HH:MM:SS`), `createdDate` and `updatedDate` are optional fixture fields; the mock data generates them deterministically from realistic per-sport durations and dates before the scheduled start.
+
+`importFilterMode: 'guided'` switches Import Fixtures to the MVP1 filters described above; `'standard'` (default) keeps free-text search and optional filters.
 
 Behaviour owned by the core layer:
 

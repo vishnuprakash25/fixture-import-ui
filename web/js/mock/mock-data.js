@@ -1,4 +1,4 @@
-import { getFixtureShortId } from '../core/helpers.js?v=987c722c04';
+import { getFixtureShortId } from '../core/helpers.js?v=babb946dd4';
 
 const sportTypes = [
   { id: 'american-football', label: 'American Football' },
@@ -471,6 +471,157 @@ const groupCatalog = [
       { name: 'Abu Dhabi GP - Qualifying', date: 'Dec 5, 2026', venue: 'Yas Marina Circuit' },
       { name: 'Abu Dhabi GP - Race', date: 'Dec 6, 2026', venue: 'Yas Marina Circuit' }
     ]
+  },
+  // ─── 2026/27 season (future-dated, so the MVP1 default date range returns results) ───
+  {
+    id: 'premier-league-2026',
+    name: 'Premier League 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'English Premier League',
+    startDate: 'Aug 22, 2026',
+    endDate: 'May 23, 2027',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'Man City vs Arsenal', date: 'Dec 12, 2026', venue: 'Etihad Stadium, Manchester' },
+      { name: 'Chelsea vs Liverpool', date: 'Jan 9, 2027', venue: 'Stamford Bridge, London' },
+      { name: 'Man United vs Tottenham', date: 'Mar 13, 2027', venue: 'Old Trafford, Manchester' }
+    ]
+  },
+  {
+    id: 'champions-league-2026',
+    name: 'UEFA Champions League 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'UEFA',
+    startDate: 'Sep 15, 2026',
+    endDate: 'Jun 5, 2027',
+    venue: 'Various (Europe)',
+    fixtures: [
+      { name: 'Bayern Munich vs PSG', date: 'Feb 16, 2027', venue: 'Allianz Arena, Munich' },
+      { name: 'Inter Milan vs Real Madrid', date: 'Mar 9, 2027', venue: 'San Siro, Milan' },
+      { name: 'Champions League Final', date: 'Jun 5, 2027', venue: 'Metropolitano Stadium, Madrid' }
+    ]
+  },
+  {
+    id: 'la-liga-2026',
+    name: 'La Liga 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'LaLiga',
+    startDate: 'Aug 15, 2026',
+    endDate: 'May 30, 2027',
+    venue: 'Various (Spain)',
+    fixtures: [
+      { name: 'Barcelona vs Real Madrid', date: 'Dec 20, 2026', venue: 'Spotify Camp Nou, Barcelona' },
+      { name: 'Atletico Madrid vs Sevilla', date: 'Feb 7, 2027', venue: 'Metropolitano Stadium, Madrid' },
+      { name: 'Real Betis vs Valencia', date: 'Apr 18, 2027', venue: 'Benito Villamarin, Seville' }
+    ]
+  },
+  {
+    id: 'fa-cup-2026',
+    name: 'FA Cup 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'The Football Association',
+    startDate: 'Nov 7, 2026',
+    endDate: 'May 15, 2027',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'FA Cup Third Round - Everton vs Brighton', date: 'Jan 9, 2027', venue: 'Hill Dickinson Stadium, Liverpool' },
+      { name: 'FA Cup Quarter Final - Newcastle vs Aston Villa', date: 'Mar 6, 2027', venue: 'St James\' Park, Newcastle' },
+      { name: 'FA Cup Final', date: 'May 15, 2027', venue: 'Wembley Stadium, London' }
+    ]
+  },
+  {
+    id: 'australian-open-2027',
+    name: 'Australian Open 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'Tennis Australia',
+    startDate: 'Jan 18, 2027',
+    endDate: 'Jan 31, 2027',
+    venue: 'Melbourne Park, Australia',
+    fixtures: [
+      { name: 'Australian Open Round 1', date: 'Jan 18, 2027', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Semi Final', date: 'Jan 29, 2027', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Final', date: 'Jan 31, 2027', venue: 'Rod Laver Arena, Melbourne' }
+    ]
+  },
+  {
+    id: 'wimbledon-2027',
+    name: 'Wimbledon 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'All England Lawn Tennis Club',
+    startDate: 'Jun 28, 2027',
+    endDate: 'Jul 11, 2027',
+    venue: 'All England Club, London',
+    fixtures: [
+      { name: 'Wimbledon Round 1', date: 'Jun 28, 2027', venue: 'Centre Court, Wimbledon' },
+      { name: 'Wimbledon Semi Final', date: 'Jul 9, 2027', venue: 'Centre Court, Wimbledon' },
+      { name: 'Wimbledon Final', date: 'Jul 11, 2027', venue: 'Centre Court, Wimbledon' }
+    ]
+  },
+  {
+    id: 'us-open-2027',
+    name: 'US Open 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'USTA',
+    startDate: 'Aug 30, 2027',
+    endDate: 'Sep 12, 2027',
+    venue: 'USTA Billie Jean King National Tennis Center, New York',
+    fixtures: [
+      { name: 'US Open Round 1', date: 'Aug 30, 2027', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Semi Final', date: 'Sep 10, 2027', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Final', date: 'Sep 12, 2027', venue: 'Arthur Ashe Stadium, New York' }
+    ]
+  },
+  {
+    id: 'f1-australian-gp-2027',
+    name: 'Formula 1 Australian Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Mar 12, 2027',
+    endDate: 'Mar 14, 2027',
+    venue: 'Albert Park Circuit, Melbourne',
+    fixtures: [
+      { name: 'Australian GP - Practice 1', date: 'Mar 12, 2027', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Qualifying', date: 'Mar 13, 2027', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Race', date: 'Mar 14, 2027', venue: 'Albert Park Circuit' }
+    ]
+  },
+  {
+    id: 'f1-monaco-gp-2027',
+    name: 'Formula 1 Monaco Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Jun 4, 2027',
+    endDate: 'Jun 6, 2027',
+    venue: 'Circuit de Monaco, Monte Carlo',
+    fixtures: [
+      { name: 'Monaco GP - Practice 1', date: 'Jun 4, 2027', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Qualifying', date: 'Jun 5, 2027', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Race', date: 'Jun 6, 2027', venue: 'Circuit de Monaco' }
+    ]
+  },
+  {
+    id: 'f1-british-gp-2027',
+    name: 'Formula 1 British Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Jul 2, 2027',
+    endDate: 'Jul 4, 2027',
+    venue: 'Silverstone Circuit, UK',
+    fixtures: [
+      { name: 'British GP - Practice 1', date: 'Jul 2, 2027', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Qualifying', date: 'Jul 3, 2027', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Race', date: 'Jul 4, 2027', venue: 'Silverstone Circuit' }
+    ]
   }
 ];
 
@@ -529,6 +680,65 @@ const sportTypeBySport = {
   'Formula 1': { typeId: 'motorsport', sportType: 'Formula 1' }
 };
 
+// Deterministic sample metadata so the mock table is stable between reloads.
+const MOCK_DATA_AS_OF = new Date(2026, 10, 25);
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// Typical event durations in seconds, kick-off/lights-out to final whistle/flag.
+const ELAPSED_RANGE_BY_SPORT = {
+  Football: [6600, 7200],
+  Tennis: [4800, 16200],
+  'Formula 1': [5100, 7500]
+};
+
+function seededInt(seed, min, max) {
+  let hash = 2166136261;
+  for (const char of seed) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  return min + ((hash >>> 0) % (max - min + 1));
+}
+
+function formatDuration(totalSeconds) {
+  return [Math.floor(totalSeconds / 3600), Math.floor(totalSeconds / 60) % 60, totalSeconds % 60]
+    .map((part) => String(part).padStart(2, '0')).join(':');
+}
+
+function formatMockDate(date) {
+  return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+// F1 sessions: practice runs ~60 min, qualifying ~45–70 min.
+const ELAPSED_RANGE_BY_SESSION = [
+  [/practice/i, [3600, 3660]],
+  [/qualifying/i, [2700, 4200]]
+];
+
+function getElapsedRange(sport, fixtureName) {
+  if (sport === 'Formula 1') {
+    const session = ELAPSED_RANGE_BY_SESSION.find(([pattern]) => pattern.test(fixtureName));
+    if (session) return session[1];
+  }
+  return ELAPSED_RANGE_BY_SPORT[sport] || [5400, 10800];
+}
+
+function buildFixtureMetadata(seed, sport, fixtureName, fixtureDate) {
+  const [minSeconds, maxSeconds] = getElapsedRange(sport, fixtureName);
+  const scheduled = new Date(fixtureDate);
+  const created = new Date(Math.min(
+    scheduled.getTime() - seededInt(`${seed}:created`, 45, 180) * DAY_MS,
+    MOCK_DATA_AS_OF.getTime() - seededInt(`${seed}:recent`, 5, 30) * DAY_MS
+  ));
+  const updated = new Date(Math.min(
+    created.getTime() + seededInt(`${seed}:updated`, 1, 40) * DAY_MS,
+    scheduled.getTime() - DAY_MS,
+    MOCK_DATA_AS_OF.getTime()
+  ));
+  return {
+    elapsedTime: formatDuration(seededInt(`${seed}:elapsed`, minSeconds, maxSeconds)),
+    createdDate: formatMockDate(created),
+    updatedDate: formatMockDate(updated < created ? created : updated)
+  };
+}
+
 let fixtureCounter = 1;
 const importableFixtures = Object.entries(fixtureGroups).flatMap(([groupId, group]) => {
   const sportInfo = sportTypeBySport[group.sport] || { typeId: '', sportType: group.sport };
@@ -544,6 +754,7 @@ const importableFixtures = Object.entries(fixtureGroups).flatMap(([groupId, grou
       sportType: sportInfo.sportType,
       date: fixture.date,
       venue: fixture.venue,
+      ...buildFixtureMetadata(id, group.sport, fixture.name, fixture.date),
       status: imported ? 'Imported' : 'Available'
     };
   });

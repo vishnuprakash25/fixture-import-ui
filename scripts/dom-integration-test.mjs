@@ -106,6 +106,11 @@ const input = (el) => el.dispatchEvent(new window.Event('input', { bubbles: true
 const keydown = (el, key, init = {}) => el.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
 
 const fixtureRowCount = () => document.querySelectorAll('#fixturesTableBody tr').length;
+assert.deepEqual(
+  [...document.querySelectorAll('#fixturesTable thead th')].map((th) => th.textContent.trim()),
+  ['', 'Fixture', 'Fixture Group', 'Sport', 'Date', 'Venue', 'Fixture ID', ''],
+  'standard build keeps the default fixture columns'
+);
 const assertFixturePrompt = (context) => {
   assert.equal(fixtureRowCount(), 1, `${context}: fixture table falls back to a single prompt row`);
   assert.match(

@@ -174,7 +174,7 @@ Every handler is invoked with optional chaining, so a provider may implement onl
 | `unsubscribe` | `(subscription)` | unsubscribe from a group |
 | `exportLog` | `({ data, state })` | Activity Log export |
 | `viewActivityDetails` | `(entry)` | activity row details (modal is rendered by the core) |
-| `fetchFixtureGroups` | `({ sportIds, dateFrom, dateTo, data })` → `Promise<[{ id, label, fixtureCount? }]>` | guided filters: sport + date range chosen. Mocked with 600 ms latency; falls back to filtering `data` locally when absent |
+| `fetchFixtureGroups` | `({ sportIds, dateFrom, dateTo, data })` → `Promise<[{ id, label, sport?, startDate?, endDate? }]>` | guided filters: sport + date range chosen. Mocked with 600 ms latency; falls back to filtering `data` locally when absent |
 
 ## Core module reference
 

@@ -176,8 +176,9 @@ export function getFixtureShortId(id) {
 // fallback so both return the same answer for the same criteria.
 export function getFixtureGroupsForCriteria(fixtures, { sports, dateFrom, dateTo } = {}, fixtureGroups = {}) {
   const matches = filterFixtures(fixtures, { sports: new Set(sports || []), dateFrom, dateTo }, fixtureGroups);
-  const counts = new Map();
-  matches.forEach((fixture) => counts.set(fixture.groupId, (counts.get(fixture.groupId) || 0) + 1));
-  return Array.from(counts, ([id, fixtureCount]) => ({ id, label: fixtureGroups[id]?.name || id, fixtureCount }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const ids = new Set(matches.map((fixture) => fixture.groupId));
+  return Array.from(ids, (id) => {
+    const group = fixtureGroups[id] || {};
+    return { id, label: group.name || id, sport: group.sport, startDate: group.startDate, endDate: group.endDate };
+  }).sort((a, b) => a.label.localeCompare(b.label));
 }

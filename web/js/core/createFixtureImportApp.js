@@ -11,7 +11,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=45f73ef3e0';
+} from './helpers.js?v=53a25ac71d';
 
 export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' }) {
   // 'guided' (MVP1): no free-text search; Sport → Date range → Fixture group
@@ -1155,7 +1155,10 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     dom.groupOptions.innerHTML = visibleGroups.map((group) => `
       <label class="multiselect-option">
         <input type="checkbox" value="${escapeHtml(group.id)}" ${state.filters.groups.has(group.id) ? 'checked' : ''}>
-        ${escapeHtml(group.label)}${isGuided && group.fixtureCount ? ` <span class="multiselect-option-count">${escapeHtml(group.fixtureCount)}</span>` : ''}
+        ${isGuided ? `<span class="multiselect-option-text">
+          <span class="multiselect-option-title">${escapeHtml(group.label)}</span>
+          ${group.meta ? `<span class="multiselect-option-meta">${escapeHtml(group.meta)}</span>` : ''}
+        </span>` : escapeHtml(group.label)}
       </label>
     `).join('') || `<div class="multiselect-option">${emptyMessage}</div>`;
   }
@@ -1165,6 +1168,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     const toolbar = dom.sportTypeMultiselect.parentElement;
     toolbar.classList.add('toolbar-guided');
     dom.searchInput.hidden = true;
+    dom.groupDropdown.classList.add('multiselect-dropdown-wide');
 
     const sportField = wrapGuidedField(dom.sportTypeMultiselect, 'Sport', dom.sportTriggerBtn);
     const dateField = wrapGuidedField(dom.dateRangeWrapper, 'Date range', dom.dateTriggerBtn);
@@ -1303,7 +1307,12 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     return (Array.isArray(result) ? result : []).map((item) => {
       if (typeof item === 'string') return { id: item, label: fixtureGroups[item]?.name || item };
       const id = String(item?.id ?? '');
-      return { id, label: item.label || item.name || fixtureGroups[id]?.name || id, fixtureCount: item.fixtureCount };
+      const known = fixtureGroups[id] || {};
+      const sport = item.sport || known.sport;
+      const startDate = item.startDate || known.startDate;
+      const endDate = item.endDate || known.endDate;
+      const dates = startDate && endDate ? `${startDate} – ${endDate}` : startDate || endDate;
+      return { id, label: item.label || item.name || known.name || id, meta: [sport, dates].filter(Boolean).join(' · ') };
     }).filter((group) => group.id);
   }
 

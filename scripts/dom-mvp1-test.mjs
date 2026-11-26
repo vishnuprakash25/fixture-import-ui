@@ -122,6 +122,11 @@ assert.ok(!groupTrigger.disabled, 'group selector enabled once groups load');
 const footballGroups = [...document.querySelectorAll('#groupOptions input')].map((input) => input.value);
 assert.ok(footballGroups.length > 0, 'fixture groups populated from the API');
 footballGroups.forEach((id) => assert.equal(mockData.fixtureGroups[id].sport, 'Football', 'only football groups are offered'));
+const firstOption = document.querySelector('#groupOptions .multiselect-option');
+assert.equal(firstOption.querySelector('.multiselect-option-title').textContent, mockData.fixtureGroups[footballGroups[0]].name);
+assert.match(firstOption.querySelector('.multiselect-option-meta').textContent, /^Football · .+ – .+$/, 'group option shows sport and season dates');
+assert.ok(!document.querySelector('.multiselect-option-count'), 'no fixture counts in the group dropdown');
+assert.ok(document.getElementById('groupDropdown').classList.contains('multiselect-dropdown-wide'));
 assert.equal(rows().length, 1, 'no fixtures shown until a fixture group is chosen');
 
 // Adding a second sport re-queries; the date range the user has is kept.

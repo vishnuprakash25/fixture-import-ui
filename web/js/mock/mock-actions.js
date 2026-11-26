@@ -1,4 +1,4 @@
-import { getFixtureGroupsForCriteria } from '../core/helpers.js?v=45f73ef3e0';
+import { getFixtureGroupsForCriteria } from '../core/helpers.js?v=53a25ac71d';
 
 // Simulated network latency for the mocked Fixture Manager/SDH API calls.
 const MOCK_API_LATENCY_MS = 600;
@@ -53,7 +53,7 @@ export const mockActions = {
     void entry;
   },
   // Mocks GET /fixture-groups?sports=…&from=…&to=… on Fixture Manager/SDH.
-  // Resolves to [{ id, label, fixtureCount }] for groups with importable
+  // Resolves to [{ id, label, sport, startDate, endDate }] for groups with importable
   // fixtures of the selected sports in the date range.
   fetchFixtureGroups({ sportIds, dateFrom, dateTo, data }) {
     const available = (data?.importableFixtures || []).filter((fixture) => fixture.status !== 'Imported');

@@ -11,7 +11,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=46a3b20ae3';
+} from './helpers.js?v=45f73ef3e0';
 
 export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' }) {
   // 'guided' (MVP1): no free-text search; Sport → Date range → Fixture group
@@ -1166,9 +1166,9 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     toolbar.classList.add('toolbar-guided');
     dom.searchInput.hidden = true;
 
-    const sportField = wrapGuidedField(dom.sportTypeMultiselect, 1, 'Sport', dom.sportTriggerBtn);
-    const dateField = wrapGuidedField(dom.dateRangeWrapper, 2, 'Date range', dom.dateTriggerBtn);
-    const groupField = wrapGuidedField(dom.fixtureGroupMultiselect, 3, 'Fixture group', dom.groupTriggerBtn);
+    const sportField = wrapGuidedField(dom.sportTypeMultiselect, 'Sport', dom.sportTriggerBtn);
+    const dateField = wrapGuidedField(dom.dateRangeWrapper, 'Date range', dom.dateTriggerBtn);
+    const groupField = wrapGuidedField(dom.fixtureGroupMultiselect, 'Fixture group', dom.groupTriggerBtn);
     toolbar.insertBefore(dateField, groupField);
 
     const hint = document.createElement('div');
@@ -1187,15 +1187,11 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     Object.assign(dom, { guidedSportField: sportField, guidedDateField: dateField, guidedGroupField: groupField, guidedHint: hint });
   }
 
-  function wrapGuidedField(element, step, label, trigger) {
+  function wrapGuidedField(element, label, trigger) {
     const field = document.createElement('div');
     field.className = 'guided-field';
     const labelId = `${element.id}GuidedLabel`;
-    field.innerHTML = `
-      <span class="guided-field-label" id="${labelId}">
-        <span class="guided-step" aria-hidden="true">${step}</span>${escapeHtml(label)}<span class="guided-required" aria-hidden="true">*</span>
-      </span>
-    `;
+    field.innerHTML = `<span class="sr-only" id="${labelId}">${escapeHtml(label)} (required)</span>`;
     element.before(field);
     field.appendChild(element);
     trigger.setAttribute('aria-labelledby', `${labelId} ${trigger.querySelector('span')?.id || ''}`.trim());
@@ -1311,25 +1307,20 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     }).filter((group) => group.id);
   }
 
+  // Only actionable messages are shown; the group placeholder covers the normal flow.
   function getGuidedHint() {
-    const { status, groupOptions: options } = state.guided;
-    if (!state.filters.sports.size) {
-      return { tone: 'info', html: 'Select one or more <strong>sports</strong> and a <strong>date range</strong> to load the fixture groups. All three fields are required.' };
+    const { status, groupOptions: options, showErrors } = state.guided;
+    const hasCriteria = state.filters.sports.size > 0 && Boolean(state.filters.dateFrom);
+    if (hasCriteria && status === 'error') {
+      return { tone: 'error', html: 'Couldn’t load fixture groups. <button type="button" class="guided-hint-action" data-action="retry-groups">Retry</button>' };
     }
-    if (!state.filters.dateFrom) {
-      return { tone: 'info', html: 'Select a <strong>date range</strong> to load the fixture groups for the chosen sports.' };
+    if (hasCriteria && status === 'ready' && !options.length) {
+      return { tone: 'warning', html: 'No fixture groups for these sports and dates. Try a wider date range.' };
     }
-    if (status === 'loading') return { tone: 'loading', html: 'Loading fixture groups for the selected sports and dates…' };
-    if (status === 'error') {
-      return { tone: 'error', html: 'Couldn’t load fixture groups. <button type="button" class="btn btn-ghost btn-sm" data-action="retry-groups">Retry</button>' };
+    if (showErrors && !isGuidedFilterComplete()) {
+      return { tone: 'error', html: 'Select a sport, date range and fixture group.' };
     }
-    if (!options.length) {
-      return { tone: 'warning', html: 'No fixture groups found for the selected sports and dates. Try a different sport or a wider date range.' };
-    }
-    if (!state.filters.groups.size) {
-      return { tone: state.guided.showErrors ? 'error' : 'info', html: `${options.length} fixture group${options.length === 1 ? '' : 's'} found. Select at least one <strong>fixture group</strong> to see fixtures.` };
-    }
-    return { tone: 'success', html: 'Showing fixtures for the selected sports, date range and fixture groups.' };
+    return { tone: 'none', html: '' };
   }
 
   function syncGuidedFilterUi() {
@@ -1359,6 +1350,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     const hint = getGuidedHint();
     dom.guidedHint.dataset.tone = hint.tone;
     dom.guidedHint.innerHTML = hint.html;
+    dom.guidedHint.hidden = !hint.html;
   }
 
   function hasActiveFilters() {

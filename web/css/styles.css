@@ -1369,52 +1369,26 @@ body.dark .auth-submit-btn { box-shadow:0 4px 16px rgba(79,70,229,.35); }
 
 /* ─── Guided import filters (MVP1) ─── */
 .search-input[hidden] { display:none; }
-.toolbar-guided { align-items:flex-end; }
-.guided-field { display:flex; flex-direction:column; gap:6px; }
-.guided-field-label {
-  display:flex; align-items:center; gap:6px;
-  font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary);
+.sr-only {
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
-.guided-step {
-  display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%;
-  background:var(--accent-bg); color:var(--accent); font-size:10px; font-weight:800; letter-spacing:0;
-  transition:var(--transition);
-}
-.guided-required { color:#dc2626; font-weight:800; }
-.guided-field.is-complete .guided-step { background:#16a34a; color:#fff; font-size:0; }
-.guided-field.is-complete .guided-step::before { content:'✓'; font-size:11px; }
-.guided-field.is-invalid .multiselect-trigger { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,.1); }
-.guided-field.is-invalid .guided-field-label { color:#dc2626; }
-.guided-field.is-disabled .guided-field-label { opacity:.6; }
-.multiselect-trigger:disabled { cursor:not-allowed; opacity:.6; border-style:dashed; }
+.guided-field { display:flex; }
+.guided-field.is-invalid .multiselect-trigger { border-color:#dc2626; }
+.multiselect-trigger:disabled { cursor:not-allowed; opacity:.55; }
 .multiselect-trigger:disabled:hover { border-color:var(--border); }
-.guided-field.is-loading .multiselect-trigger { opacity:1; cursor:progress; }
+.guided-field.is-loading .multiselect-trigger { cursor:progress; }
 .guided-field.is-loading .multiselect-arrow {
-  width:12px; height:12px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%;
+  width:10px; height:10px; border:1.5px solid var(--border); border-top-color:var(--text-secondary); border-radius:50%;
   font-size:0; animation:guided-spin .8s linear infinite;
 }
 @keyframes guided-spin { to { transform:rotate(360deg); } }
-.multiselect-option-count {
-  margin-left:auto; padding:1px 7px; border-radius:999px; background:var(--accent-bg); color:var(--accent);
-  font-size:11px; font-weight:700;
+.multiselect-option-count { margin-left:auto; color:var(--text-secondary); font-size:12px; }
+.guided-hint { flex:1 0 100%; font-size:12px; color:var(--text-secondary); }
+.guided-hint[hidden] { display:none; }
+.guided-hint[data-tone="error"] { color:#dc2626; }
+.guided-hint-action {
+  padding:0; margin-left:4px; border:0; background:none; font:inherit; color:inherit;
+  text-decoration:underline; cursor:pointer;
 }
-.guided-hint {
-  flex:1 0 100%; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  padding:9px 12px; border-radius:10px; font-size:12.5px; line-height:1.4;
-  background:var(--accent-bg); color:var(--text-secondary);
-}
-.guided-hint::before { content:'ℹ'; font-weight:800; color:var(--accent); }
-.guided-hint strong { color:var(--text); }
-.guided-hint[data-tone="loading"]::before {
-  content:''; width:12px; height:12px; border:2px solid rgba(99,102,241,.25); border-top-color:var(--accent);
-  border-radius:50%; animation:guided-spin .8s linear infinite;
-}
-.guided-hint[data-tone="warning"] { background:#fffbeb; color:#92400e; }
-.guided-hint[data-tone="warning"]::before { content:'!'; color:#d97706; }
-.guided-hint[data-tone="error"] { background:#fef2f2; color:#991b1b; }
-.guided-hint[data-tone="error"]::before { content:'!'; color:#dc2626; }
-.guided-hint[data-tone="success"] { background:#f0fdf4; color:#166534; }
-.guided-hint[data-tone="success"]::before { content:'✓'; color:#16a34a; }
-body.dark .guided-hint[data-tone="warning"] { background:#1f1a0b; color:#fbbf24; }
-body.dark .guided-hint[data-tone="error"] { background:#1c1117; color:#f87171; }
-body.dark .guided-hint[data-tone="success"] { background:#052e16; color:#4ade80; }
+body.dark .guided-hint[data-tone="error"] { color:#f87171; }

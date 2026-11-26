@@ -1,5 +1,5 @@
-import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=46a3b20ae3';
-import { loadAppProvider } from './providers/index.js?v=46a3b20ae3';
+import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=45f73ef3e0';
+import { loadAppProvider } from './providers/index.js?v=45f73ef3e0';
 
 // <html data-enabled-pages="1,2"> limits the app to those pages (used by /mvp1/).
 function getEnabledPages() {

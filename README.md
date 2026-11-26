@@ -81,9 +81,9 @@ Then open <http://localhost:4173/web/> (the root `index.html` also redirects the
 
 MVP1 uses **guided import filters** (`importFilterMode: 'guided'`):
 
-- no free-text search; the filters are **Sport → Date range → Fixture group**, numbered and all required
+- no free-text search; the filters are **Sport → Date range → Fixture group**, all required (Search with missing fields outlines them in red with a one-line message)
 - picking a sport defaults the date range to **today → today + 365 days** (only if no range is set; the user can change it)
-- once sport and dates are set, fixture groups are fetched via `actions.fetchFixtureGroups` and the Fixture group selector is enabled; it stays disabled (with a hint) until then, and shows loading, empty and error/retry states
+- once sport and dates are set, fixture groups are fetched via `actions.fetchFixtureGroups` and the Fixture group selector is enabled; until then it is disabled with the placeholder "Select sport & dates first". Loading shows in the selector; empty and error (with Retry) states show a one-line message
 - changing sports or dates re-queries groups and drops selections no longer offered
 - fixtures are listed only when all three filters are set; Search with missing fields highlights them
 

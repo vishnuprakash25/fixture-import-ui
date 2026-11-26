@@ -88,16 +88,17 @@ const selectOption = (container, value, checked = true) => {
 assert.ok(document.getElementById('fixtureSearchInput').hidden, 'free-text search is hidden');
 const fieldOrder = [...toolbar.querySelectorAll('.guided-field')].map((field) => field.querySelector('.multiselect-wrapper, .daterange-wrapper').id);
 assert.deepEqual(fieldOrder, ['sportTypeMultiselect', 'dateRangeWrapper', 'fixtureGroupMultiselect'], 'filters are ordered Sport, Date range, Fixture group');
-assert.equal(toolbar.querySelectorAll('.guided-required').length, 3, 'all three filters are marked required');
+assert.equal(toolbar.querySelectorAll('.guided-field .sr-only').length, 3, 'each filter has an accessible required label');
 [sportTrigger, dateTrigger, groupTrigger].forEach((trigger) => assert.equal(trigger.getAttribute('aria-required'), 'true'));
 assert.ok(groupTrigger.disabled, 'fixture group selector is disabled until sport and dates are chosen');
 assert.match(document.getElementById('groupFilterLabel').textContent, /sport & dates first/i);
-assert.match(hint.textContent, /sports.*date range.*fixture groups/i, 'hint explains sport + date unlock fixture groups');
+assert.ok(hint.hidden, 'no hint message by default; the group placeholder guides the user');
 
 click(document.getElementById('searchFixturesBtn'));
 assert.equal(apiCalls.length, 0, 'no API call before sport and dates are chosen');
 assert.ok(toolbar.querySelectorAll('.guided-field.is-invalid').length === 3, 'Search with nothing selected flags all three required fields');
 assert.match(rows()[0].textContent, /Select a sport, date range and fixture group/);
+assert.ok(!hint.hidden && hint.dataset.tone === 'error', 'Search with missing fields shows a short validation message');
 
 // Selecting a sport defaults the date range to today → today + 365 days and queries groups.
 selectOption('sportOptions', 'football');
@@ -113,7 +114,7 @@ assert.equal(apiCalls.length, 1, 'choosing a sport (with the default dates) fire
 assert.deepEqual(apiCalls[0].sportIds, ['football']);
 assert.equal(apiCalls[0].dateFrom.getTime(), today.getTime());
 assert.equal(apiCalls[0].dateTo.getTime(), inAYear.getTime());
-assert.equal(hint.dataset.tone, 'loading', 'hint shows loading while groups are fetched');
+assert.match(document.getElementById('groupFilterLabel').textContent, /loading/i, 'group selector shows loading while groups are fetched');
 assert.ok(groupTrigger.disabled, 'group selector stays disabled while loading');
 
 await flush();
@@ -121,7 +122,6 @@ assert.ok(!groupTrigger.disabled, 'group selector enabled once groups load');
 const footballGroups = [...document.querySelectorAll('#groupOptions input')].map((input) => input.value);
 assert.ok(footballGroups.length > 0, 'fixture groups populated from the API');
 footballGroups.forEach((id) => assert.equal(mockData.fixtureGroups[id].sport, 'Football', 'only football groups are offered'));
-assert.match(hint.textContent, /fixture groups? found/i);
 assert.equal(rows().length, 1, 'no fixtures shown until a fixture group is chosen');
 
 // Adding a second sport re-queries; the date range the user has is kept.
@@ -132,7 +132,7 @@ assert.equal(apiCalls[1].dateTo.getTime(), inAYear.getTime(), 'second sport does
 await flush();
 
 selectOption('groupOptions', footballGroups[0]);
-assert.equal(hint.dataset.tone, 'success');
+assert.ok(hint.hidden, 'hint hidden once all filters are set');
 assert.ok(rows().length > 0 && !rows()[0].querySelector('.empty-state'), 'fixtures shown once all three filters are set');
 [...rows()].forEach((row) => assert.ok(row.textContent.includes(mockData.fixtureGroups[footballGroups[0]].name), 'rows belong to the selected group'));
 
@@ -149,7 +149,7 @@ assert.equal(document.querySelectorAll('#groupOptions input:checked').length, 0,
 // Clearing the date range locks the group selector again.
 document.getElementById('dateClearBtn').click();
 assert.ok(groupTrigger.disabled, 'clearing dates disables the group selector');
-assert.match(hint.textContent, /date range/i);
+assert.match(document.getElementById('groupFilterLabel').textContent, /sport & dates first/i);
 
 // Re-applying dates after an API failure shows a retry affordance.
 failNextGroupFetch = true;

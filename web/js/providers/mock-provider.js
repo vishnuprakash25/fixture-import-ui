@@ -1,5 +1,5 @@
-import { mockActions } from '../mock/mock-actions.js?v=46a3b20ae3';
-import { mockData } from '../mock/mock-data.js?v=46a3b20ae3';
+import { mockActions } from '../mock/mock-actions.js?v=45f73ef3e0';
+import { mockData } from '../mock/mock-data.js?v=45f73ef3e0';
 
 export async function loadMockProvider() {
   return {

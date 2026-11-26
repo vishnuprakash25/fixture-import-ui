@@ -1,33 +1,18 @@
-import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=6cc5c71119';
-import { loadAppProvider } from './providers/index.js?v=6cc5c71119';
+import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=babb946dd4';
+import { parseEnabledPages, parseListAttribute } from './core/helpers.js?v=babb946dd4';
+import { loadAppProvider } from './providers/index.js?v=babb946dd4';
 
-// <html data-enabled-pages="1,2"> limits the app to those pages (used by /mvp1/).
-function getEnabledPages() {
-  const raw = document.documentElement.dataset.enabledPages || '';
-  const pages = raw.split(',').map((value) => Number(value.trim())).filter(Number.isInteger);
-  return pages.length ? pages : null;
-}
-
-// <html data-import-filter-mode="guided"> switches Import Fixtures to the MVP1 filters.
-function getImportFilterMode() {
-  return document.documentElement.dataset.importFilterMode === 'guided' ? 'guided' : 'standard';
-}
-
-// <html data-fixture-columns="fixture,group,…"> sets the Import Fixtures table columns.
-function getFixtureColumns() {
-  const raw = document.documentElement.dataset.fixtureColumns || '';
-  const columns = raw.split(',').map((value) => value.trim()).filter(Boolean);
-  return columns.length ? columns : null;
-}
+const rootData = document.documentElement.dataset;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const provider = await loadAppProvider();
   const app = createFixtureImportApp({
     data: provider.data,
     actions: provider.actions,
-    enabledPages: getEnabledPages(),
-    importFilterMode: getImportFilterMode(),
-    fixtureColumns: getFixtureColumns()
+    // <html data-enabled-pages="1" data-import-filter-mode="guided" data-fixture-columns="…"> (used by /mvp1/).
+    enabledPages: parseEnabledPages(rootData.enabledPages),
+    importFilterMode: rootData.importFilterMode === 'guided' ? 'guided' : 'standard',
+    fixtureColumns: parseListAttribute(rootData.fixtureColumns)
   });
 
   app.init();

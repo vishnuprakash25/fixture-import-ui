@@ -1400,6 +1400,8 @@ body.dark .auth-submit-btn { box-shadow:0 4px 16px rgba(79,70,229,.35); }
 }
 body.dark .guided-hint[data-tone="error"] { color:#f87171; }
 .cell-nowrap { white-space:nowrap; }
+#fixturesTable thead th { white-space:nowrap; }
+.th-stack { display:inline-flex; flex-direction:column; line-height:1.35; }
 .fixture-audit { display:block; margin-top:2px; font-size:11px; font-weight:400; color:#94a3b8; white-space:nowrap; }
 body.dark .fixture-audit { color:#7c8aa0; }
 .cell-duration { font-variant-numeric:tabular-nums; }

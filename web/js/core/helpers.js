@@ -182,3 +182,15 @@ export function getFixtureGroupsForCriteria(fixtures, { sports, dateFrom, dateTo
     return { id, label: group.name || id, sport: group.sport, startDate: group.startDate, endDate: group.endDate };
   }).sort((a, b) => a.label.localeCompare(b.label));
 }
+
+// "a, b,,c" → ['a', 'b', 'c']; empty/missing → null.
+export function parseListAttribute(value) {
+  const items = String(value ?? '').split(',').map((item) => item.trim()).filter(Boolean);
+  return items.length ? items : null;
+}
+
+// "1,2" → [1, 2]; empty/missing/invalid → null (all pages enabled).
+export function parseEnabledPages(value) {
+  const pages = (parseListAttribute(value) || []).map(Number).filter(Number.isInteger);
+  return pages.length ? pages : null;
+}

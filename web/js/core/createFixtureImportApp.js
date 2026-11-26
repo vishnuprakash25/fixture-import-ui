@@ -11,7 +11,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=6cc5c71119';
+} from './helpers.js?v=babb946dd4';
 
 const FIXTURE_COLUMN_DEFS = {
   fixture: { label: 'Fixture', render: (fixture) => `<strong>${escapeHtml(fixture.name)}</strong>` },
@@ -31,8 +31,13 @@ const FIXTURE_COLUMN_DEFS = {
     render: (fixture, groups) => `<span class="badge badge-gray fixture-group-link" data-action="open-group" data-group-id="${escapeHtml(fixture.groupId)}">${escapeHtml(groups[fixture.groupId]?.name || fixture.groupId)}</span>`
   },
   sport: { label: 'Sport', render: (fixture) => escapeHtml(fixture.sportType) },
+  type: { label: 'Type', render: (fixture) => escapeHtml(fixture.sportType) },
   date: { label: 'Date', render: (fixture) => escapeHtml(fixture.date) },
-  scheduledStartDate: { label: 'Scheduled Start Date', className: 'cell-nowrap', render: (fixture) => escapeHtml(fixture.date) },
+  scheduledStartDate: {
+    label: 'Scheduled Start Date',
+    headerHtml: '<span class="th-stack"><span>Scheduled</span><span>Start Date</span></span>',
+    className: 'cell-nowrap',
+    render: (fixture) => escapeHtml(fixture.date) },
   venue: { label: 'Venue', render: (fixture) => escapeHtml(fixture.venue) },
   elapsedTime: { label: 'Elapsed Time', className: 'cell-nowrap cell-duration', render: (fixture) => escapeHtml(fixture.elapsedTime || '—') },
   createdDate: { label: 'Created Date', className: 'cell-nowrap', render: (fixture) => escapeHtml(fixture.createdDate || '—') },
@@ -1451,7 +1456,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
   function renderFixturesTableHeader() {
     const headerRow = document.querySelector('#fixturesTable thead tr');
     if (!headerRow) return;
-    headerRow.innerHTML = `<th style="width:44px"></th>${activeFixtureColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join('')}<th></th>`;
+    headerRow.innerHTML = `<th style="width:44px"></th>${activeFixtureColumns.map((column) => `<th${column.headerHtml ? ` aria-label="${escapeHtml(column.label)}"` : ''}>${column.headerHtml || escapeHtml(column.label)}</th>`).join('')}<th></th>`;
   }
 
   function renderFixturesTable() {

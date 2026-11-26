@@ -143,8 +143,8 @@ assert.equal(rows().length, 1, 'selecting a group does not list fixtures by itse
 assert.match(rows()[0].textContent, /Click Search/, 'user is prompted to click Search');
 click(document.getElementById('searchFixturesBtn'));
 assert.ok(rows().length > 0 && !rows()[0].querySelector('.empty-state'), 'fixtures shown after Search once all three filters are set');
-const headers = [...document.querySelectorAll('#fixturesTable thead th')].map((th) => th.textContent.trim());
-assert.deepEqual(headers, ['', 'Fixture', 'Fixture Group', 'Sport', 'Scheduled Start Date', 'Elapsed Time', 'Fixture ID', ''], 'MVP1 fixture columns');
+const headers = [...document.querySelectorAll('#fixturesTable thead th')].map((th) => th.getAttribute('aria-label') || th.textContent.trim());
+assert.deepEqual(headers, ['', 'Fixture', 'Fixture Group', 'Type', 'Scheduled Start Date', 'Elapsed Time', 'Fixture ID', ''], 'MVP1 fixture columns');
 const firstCells = [...rows()[0].children].map((td) => td.textContent.trim());
 assert.equal(firstCells.length, headers.length, 'row cells line up with headers');
 assert.match(firstCells[5], /^\d{2}:\d{2}:\d{2}$/, 'elapsed time is HH:MM:SS');

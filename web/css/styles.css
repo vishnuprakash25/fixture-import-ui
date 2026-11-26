@@ -1400,4 +1400,5 @@ body.dark .auth-submit-btn { box-shadow:0 4px 16px rgba(79,70,229,.35); }
 }
 body.dark .guided-hint[data-tone="error"] { color:#f87171; }
 .cell-nowrap { white-space:nowrap; }
+.fixture-audit { display:block; margin-top:3px; font-size:11.5px; color:var(--text-secondary); white-space:nowrap; }
 .cell-duration { font-variant-numeric:tabular-nums; }

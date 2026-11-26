@@ -11,10 +11,21 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=df7c39027d';
+} from './helpers.js?v=b4e6e85b9a';
 
 const FIXTURE_COLUMN_DEFS = {
   fixture: { label: 'Fixture', render: (fixture) => `<strong>${escapeHtml(fixture.name)}</strong>` },
+  // Fixture name with created/updated dates as a muted second line.
+  fixtureWithAudit: {
+    label: 'Fixture',
+    render: (fixture) => {
+      const audit = [
+        fixture.createdDate && `Created ${escapeHtml(fixture.createdDate)}`,
+        fixture.updatedDate && `Updated ${escapeHtml(fixture.updatedDate)}`
+      ].filter(Boolean).join(' · ');
+      return `<strong>${escapeHtml(fixture.name)}</strong>${audit ? `<span class="fixture-audit">${audit}</span>` : ''}`;
+    }
+  },
   group: {
     label: 'Fixture Group',
     render: (fixture, groups) => `<span class="badge badge-gray fixture-group-link" data-action="open-group" data-group-id="${escapeHtml(fixture.groupId)}">${escapeHtml(groups[fixture.groupId]?.name || fixture.groupId)}</span>`

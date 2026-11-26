@@ -184,7 +184,7 @@ Returns `{ init }`. `init()` caches DOM nodes, restores any stored auth session,
 
 `enabledPages` is an optional array of `data-page-index` values (e.g. `[1]` for MVP1). Other pages keep their markup but their nav items are hidden and `switchPage` ignores them; the first enabled page is the home page.
 
-`fixtureColumns` is an optional array of Import Fixtures column keys: `fixture`, `group`, `sport`, `date`, `scheduledStartDate`, `venue`, `elapsedTime`, `createdDate`, `updatedDate`, `id`. The default is `fixture, group, sport, date, venue, id`. MVP1 uses `fixture, group, sport, scheduledStartDate, elapsedTime, createdDate, updatedDate, id`. `elapsedTime` (`HH:MM:SS`), `createdDate` and `updatedDate` are optional fixture fields; the mock data generates them deterministically from realistic per-sport durations and dates before the scheduled start.
+`fixtureColumns` is an optional array of Import Fixtures column keys: `fixture`, `fixtureWithAudit` (name plus a muted "Created … · Updated …" line), `group`, `sport`, `date`, `scheduledStartDate`, `venue`, `elapsedTime`, `createdDate`, `updatedDate`, `id`. The default is `fixture, group, sport, date, venue, id`. MVP1 uses `fixtureWithAudit, group, sport, scheduledStartDate, elapsedTime, id`. `elapsedTime` (`HH:MM:SS`), `createdDate` and `updatedDate` are optional fixture fields; the mock data generates them deterministically from realistic per-sport durations and dates before the scheduled start.
 
 `importFilterMode: 'guided'` switches Import Fixtures to the MVP1 filters described above; `'standard'` (default) keeps free-text search and optional filters.
 

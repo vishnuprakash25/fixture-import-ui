@@ -26,7 +26,7 @@ const MVP1_PAGES = [1];
 // → Fixture group, with groups loaded from the API for the sport + dates.
 const MVP1_IMPORT_FILTER_MODE = 'guided';
 // Import Fixtures table columns (keys of FIXTURE_COLUMN_DEFS in the core).
-const MVP1_FIXTURE_COLUMNS = ['fixture', 'group', 'sport', 'scheduledStartDate', 'elapsedTime', 'createdDate', 'updatedDate', 'id'];
+const MVP1_FIXTURE_COLUMNS = ['fixtureWithAudit', 'group', 'sport', 'scheduledStartDate', 'elapsedTime', 'id'];
 
 function replaceOnce(source, pattern, replacement, label) {
   if (!pattern.test(source)) throw new Error(`build-mvp1: could not find ${label} in web/index.html`);

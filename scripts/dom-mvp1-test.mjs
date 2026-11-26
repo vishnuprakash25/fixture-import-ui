@@ -138,7 +138,10 @@ await flush();
 
 selectOption('groupOptions', footballGroups[0]);
 assert.ok(hint.hidden, 'hint hidden once all filters are set');
-assert.ok(rows().length > 0 && !rows()[0].querySelector('.empty-state'), 'fixtures shown once all three filters are set');
+assert.equal(rows().length, 1, 'selecting a group does not list fixtures by itself');
+assert.match(rows()[0].textContent, /Click Search/, 'user is prompted to click Search');
+click(document.getElementById('searchFixturesBtn'));
+assert.ok(rows().length > 0 && !rows()[0].querySelector('.empty-state'), 'fixtures shown after Search once all three filters are set');
 [...rows()].forEach((row) => assert.ok(row.textContent.includes(mockData.fixtureGroups[footballGroups[0]].name), 'rows belong to the selected group'));
 
 // The user can change the period; a narrower range re-queries and prunes groups.
@@ -146,6 +149,7 @@ click(dateTrigger);
 document.querySelector('[data-date-preset="today"]').click();
 document.getElementById('applyDatePickerBtn').click();
 assert.equal(apiCalls.length, 3, 'changing the date range re-queries fixture groups');
+assert.match(rows()[0].textContent, /Click Search|Select a sport/, 'changing filters hides results until the next Search');
 await flush();
 assert.equal(document.getElementById('dateFromInput').value, fmt(today), 'user-chosen range is applied');
 assert.equal(document.getElementById('dateToInput').value, fmt(today));

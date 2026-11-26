@@ -85,7 +85,7 @@ MVP1 uses **guided import filters** (`importFilterMode: 'guided'`):
 - picking a sport defaults the date range to **today → today + 365 days** (only if no range is set; the user can change it)
 - once sport and dates are set, fixture groups are fetched via `actions.fetchFixtureGroups` and the Fixture group selector is enabled; until then it is disabled with the placeholder "Select sport & dates first". Loading shows in the selector; empty and error (with Retry) states show a one-line message
 - changing sports or dates re-queries groups and drops selections no longer offered
-- fixtures are listed only when all three filters are set; Search with missing fields highlights them
+- fixtures are listed only after **Search** is clicked with all three filters set; changing any filter clears the results until Search is clicked again
 
 There is no forked code. `mvp1/index.html` is generated from `web/index.html` by `scripts/build-mvp1.mjs`, which adds:
 

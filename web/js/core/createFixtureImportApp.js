@@ -11,7 +11,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=53a25ac71d';
+} from './helpers.js?v=7fb7d89d3a';
 
 export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' }) {
   // 'guided' (MVP1): no free-text search; Sport → Date range → Fixture group
@@ -50,7 +50,8 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
       groupOptions: [],
       criteriaKey: '',
       requestId: 0,
-      showErrors: false
+      showErrors: false,
+      searchedKey: ''
     },
     selectedFixtureIds: new Set(),
     currentImport: null,
@@ -473,6 +474,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
         focusFirstMissingGuidedField();
         return;
       }
+      if (isGuided) state.guided.searchedKey = getGuidedSearchKey();
       state.hasSearched = true;
       state.pagination.fixturesPage = 1;
       renderFixturesTable();
@@ -1236,6 +1238,11 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     syncDateInputs('fixtures');
   }
 
+  // Results are shown only while the filters match those used for the last Search.
+  function getGuidedSearchKey() {
+    return `${getGuidedCriteriaKey()}|${[...state.filters.groups].sort().join(',')}`;
+  }
+
   function getGuidedCriteriaKey() {
     const { sports, dateFrom, dateTo } = state.filters;
     return [[...sports].sort().join(','), toLocalISODate(dateFrom), toLocalISODate(dateTo || dateFrom)].join('|');
@@ -1404,10 +1411,12 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
   }
 
   function renderFixturesTable() {
-    if (isGuided && !isGuidedFilterComplete()) {
+    if (isGuided && (!isGuidedFilterComplete() || state.guided.searchedKey !== getGuidedSearchKey())) {
       dom.fixturesBody.innerHTML = `
         <tr>
-          <td colspan="8"><div class="empty-state">Select a sport, date range and fixture group above to see fixtures available to import.</div></td>
+          <td colspan="8"><div class="empty-state">${isGuidedFilterComplete()
+            ? 'Click <strong>Search</strong> to see fixtures for the selected filters.'
+            : 'Select a sport, date range and fixture group above to see fixtures available to import.'}</div></td>
         </tr>
       `;
       dom.fixturesPagination.innerHTML = '';

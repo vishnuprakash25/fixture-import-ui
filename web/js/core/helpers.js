@@ -170,3 +170,14 @@ export function getFixtureShortId(id) {
   return value.includes('-') ? value.split('-')[0] : value;
 }
 
+
+// Fixture groups that have at least one fixture for the given sports within the
+// date range. Shared by the mock fixture-group API and the core's offline
+// fallback so both return the same answer for the same criteria.
+export function getFixtureGroupsForCriteria(fixtures, { sports, dateFrom, dateTo } = {}, fixtureGroups = {}) {
+  const matches = filterFixtures(fixtures, { sports: new Set(sports || []), dateFrom, dateTo }, fixtureGroups);
+  const counts = new Map();
+  matches.forEach((fixture) => counts.set(fixture.groupId, (counts.get(fixture.groupId) || 0) + 1));
+  return Array.from(counts, ([id, fixtureCount]) => ({ id, label: fixtureGroups[id]?.name || id, fixtureCount }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}

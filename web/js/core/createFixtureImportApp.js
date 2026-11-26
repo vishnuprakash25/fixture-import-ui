@@ -4,15 +4,21 @@ import {
   filterFixtures,
   formatDisplayDate,
   formatInputDate,
+  getFixtureGroupsForCriteria,
   getGroupOptions,
   maskInputDate,
   normalizeGroupKey,
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=987c722c04';
+} from './helpers.js?v=46a3b20ae3';
 
-export function createFixtureImportApp({ data, actions = {} }) {
+export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' }) {
+  // 'guided' (MVP1): no free-text search; Sport → Date range → Fixture group
+  // are mandatory and fixture groups are loaded from the API for the chosen
+  // sports and dates.
+  const isGuided = importFilterMode === 'guided';
+  const GUIDED_DEFAULT_RANGE_DAYS = 365;
   const notify = actions.notify || ((message) => window.alert(message));
   const AUTH_STORAGE_KEY = 'fixture-import-ui.auth-user';
   const fixtureGroups = data.fixtureGroups || {};
@@ -37,6 +43,14 @@ export function createFixtureImportApp({ data, actions = {} }) {
     optionSearch: {
       sport: '',
       group: ''
+    },
+    guided: {
+      // 'idle' (sport/dates missing) | 'loading' | 'ready' | 'error'
+      status: 'idle',
+      groupOptions: [],
+      criteriaKey: '',
+      requestId: 0,
+      showErrors: false
     },
     selectedFixtureIds: new Set(),
     currentImport: null,
@@ -114,13 +128,16 @@ export function createFixtureImportApp({ data, actions = {} }) {
   let copyToastEl = null;
   let copyToastTimer = null;
   let authToastTimer = null;
+  let allowedPages = [];
 
   function init() {
     cacheDom();
+    applyEnabledPages();
+    if (isGuided) setupGuidedFilters();
     registerModalClosers();
     restoreAuthSession();
     bindEvents();
-    switchPage(0);
+    switchPage(getHomePage());
     syncFilterLabels();
     renderAll();
     updateThemeToggle();
@@ -160,6 +177,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
       searchInput: document.getElementById('fixtureSearchInput'),
       searchBtn: document.getElementById('searchFixturesBtn'),
       sportTypeMultiselect: document.getElementById('sportTypeMultiselect'),
+      fixtureGroupMultiselect: document.getElementById('fixtureGroupMultiselect'),
       sportTriggerBtn: document.getElementById('sportTriggerBtn'),
       sportClearBtn: document.getElementById('sportClearBtn'),
       sportDropdown: document.getElementById('sportDropdown'),
@@ -449,6 +467,12 @@ export function createFixtureImportApp({ data, actions = {} }) {
       renderFixturesTable();
     });
     dom.searchBtn.addEventListener('click', () => {
+      if (isGuided && !isGuidedFilterComplete()) {
+        state.guided.showErrors = true;
+        syncGuidedFilterUi();
+        focusFirstMissingGuidedField();
+        return;
+      }
       state.hasSearched = true;
       state.pagination.fixturesPage = 1;
       renderFixturesTable();
@@ -465,10 +489,12 @@ export function createFixtureImportApp({ data, actions = {} }) {
       if (event.target.checked) state.filters.sports.add(event.target.value);
       else state.filters.sports.delete(event.target.value);
       state.hasSearched = true;
+      if (isGuided && state.filters.sports.size && !state.filters.dateFrom) applyGuidedDefaultDateRange();
       syncFilterLabels();
       renderSportOptions();
       state.pagination.fixturesPage = 1;
       renderFixturesTable();
+      onGuidedCriteriaChange();
     });
     document.getElementById('clearSportOptionsBtn').addEventListener('click', clearSportFilter);
 
@@ -782,7 +808,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.auth.displayName = deriveDisplayName(email);
     persistAuthSession();
     syncAuthUi();
-    switchPage(0);
+    switchPage(getHomePage());
     showAuthToast(`Welcome, ${state.auth.displayName}`);
     actions.login?.({ email: state.auth.email, displayName: state.auth.displayName });
   }
@@ -1115,16 +1141,224 @@ export function createFixtureImportApp({ data, actions = {} }) {
     `).join('') || '<div class="multiselect-option">No sport types match.</div>';
   }
 
+  function getActiveGroupOptions() {
+    return isGuided ? state.guided.groupOptions : groupOptions;
+  }
+
   function renderGroupOptions() {
     const search = state.optionSearch.group.trim().toLowerCase();
-    const visibleGroups = groupOptions.filter((group) => !search || group.label.toLowerCase().includes(search));
+    const visibleGroups = getActiveGroupOptions().filter((group) => !search || group.label.toLowerCase().includes(search));
+    const emptyMessage = isGuided && !state.guided.groupOptions.length
+      ? 'No fixture groups for the selected sports and dates.'
+      : 'No fixture groups match.';
 
     dom.groupOptions.innerHTML = visibleGroups.map((group) => `
       <label class="multiselect-option">
         <input type="checkbox" value="${escapeHtml(group.id)}" ${state.filters.groups.has(group.id) ? 'checked' : ''}>
-        ${escapeHtml(group.label)}
+        ${escapeHtml(group.label)}${isGuided && group.fixtureCount ? ` <span class="multiselect-option-count">${escapeHtml(group.fixtureCount)}</span>` : ''}
       </label>
-    `).join('') || '<div class="multiselect-option">No fixture groups match.</div>';
+    `).join('') || `<div class="multiselect-option">${emptyMessage}</div>`;
+  }
+
+  // ─── Guided filters (MVP1) ───
+  function setupGuidedFilters() {
+    const toolbar = dom.sportTypeMultiselect.parentElement;
+    toolbar.classList.add('toolbar-guided');
+    dom.searchInput.hidden = true;
+
+    const sportField = wrapGuidedField(dom.sportTypeMultiselect, 1, 'Sport', dom.sportTriggerBtn);
+    const dateField = wrapGuidedField(dom.dateRangeWrapper, 2, 'Date range', dom.dateTriggerBtn);
+    const groupField = wrapGuidedField(dom.fixtureGroupMultiselect, 3, 'Fixture group', dom.groupTriggerBtn);
+    toolbar.insertBefore(dateField, groupField);
+
+    const hint = document.createElement('div');
+    hint.className = 'guided-hint';
+    hint.id = 'guidedFilterHint';
+    hint.setAttribute('role', 'status');
+    hint.setAttribute('aria-live', 'polite');
+    hint.addEventListener('click', (event) => {
+      if (event.target.closest('[data-action="retry-groups"]')) loadGuidedFixtureGroups(state.guided.criteriaKey);
+    });
+    toolbar.appendChild(hint);
+    [dom.sportTriggerBtn, dom.dateTriggerBtn, dom.groupTriggerBtn].forEach((button) => {
+      button.setAttribute('aria-describedby', hint.id);
+    });
+
+    Object.assign(dom, { guidedSportField: sportField, guidedDateField: dateField, guidedGroupField: groupField, guidedHint: hint });
+  }
+
+  function wrapGuidedField(element, step, label, trigger) {
+    const field = document.createElement('div');
+    field.className = 'guided-field';
+    const labelId = `${element.id}GuidedLabel`;
+    field.innerHTML = `
+      <span class="guided-field-label" id="${labelId}">
+        <span class="guided-step" aria-hidden="true">${step}</span>${escapeHtml(label)}<span class="guided-required" aria-hidden="true">*</span>
+      </span>
+    `;
+    element.before(field);
+    field.appendChild(element);
+    trigger.setAttribute('aria-labelledby', `${labelId} ${trigger.querySelector('span')?.id || ''}`.trim());
+    trigger.setAttribute('aria-required', 'true');
+    return field;
+  }
+
+  function isGuidedFilterComplete() {
+    return state.filters.sports.size > 0 && Boolean(state.filters.dateFrom) && state.filters.groups.size > 0;
+  }
+
+  function getMissingGuidedFields() {
+    const missing = [];
+    if (!state.filters.sports.size) missing.push('sport');
+    if (!state.filters.dateFrom) missing.push('date');
+    if (!state.filters.groups.size) missing.push('group');
+    return missing;
+  }
+
+  function focusFirstMissingGuidedField() {
+    const [first] = getMissingGuidedFields();
+    const target = { sport: dom.sportTriggerBtn, date: dom.dateTriggerBtn, group: dom.groupTriggerBtn }[first];
+    if (target && !target.disabled) target.focus();
+  }
+
+  function applyGuidedDefaultDateRange() {
+    const from = new Date();
+    from.setHours(0, 0, 0, 0);
+    const to = new Date(from);
+    to.setDate(to.getDate() + GUIDED_DEFAULT_RANGE_DAYS);
+
+    state.filters.dateFrom = cloneDate(from);
+    state.filters.dateTo = cloneDate(to);
+    state.datePicker.start = cloneDate(from);
+    state.datePicker.end = cloneDate(to);
+    state.datePicker.viewDate = cloneDate(from);
+    state.datePicker.hover = null;
+    syncDateInputs('fixtures');
+  }
+
+  function getGuidedCriteriaKey() {
+    const { sports, dateFrom, dateTo } = state.filters;
+    return [[...sports].sort().join(','), toLocalISODate(dateFrom), toLocalISODate(dateTo || dateFrom)].join('|');
+  }
+
+  // Re-queries fixture groups whenever the sport selection or date range changes.
+  function onGuidedCriteriaChange() {
+    if (!isGuided) return;
+    if (!state.filters.sports.size || !state.filters.dateFrom) {
+      state.guided.requestId += 1;
+      state.guided.status = 'idle';
+      state.guided.criteriaKey = '';
+      state.guided.groupOptions = [];
+      state.filters.groups.clear();
+      dom.groupDropdown.classList.remove('open');
+      syncFilterLabels();
+      renderGroupOptions();
+      renderFixturesTable();
+      return;
+    }
+
+    const key = getGuidedCriteriaKey();
+    if (key === state.guided.criteriaKey && state.guided.status !== 'error') return;
+    loadGuidedFixtureGroups(key);
+  }
+
+  async function loadGuidedFixtureGroups(key) {
+    const requestId = ++state.guided.requestId;
+    state.guided.criteriaKey = key;
+    state.guided.status = 'loading';
+    dom.groupDropdown.classList.remove('open');
+    syncFilterLabels();
+    renderFixturesTable();
+
+    const criteria = {
+      sportIds: [...state.filters.sports],
+      dateFrom: cloneDate(state.filters.dateFrom),
+      dateTo: cloneDate(state.filters.dateTo || state.filters.dateFrom)
+    };
+
+    try {
+      const result = actions.fetchFixtureGroups
+        ? await actions.fetchFixtureGroups({ ...criteria, data })
+        : getFixtureGroupsForCriteria(
+          importableFixtures.filter((fixture) => fixture.status !== 'Imported'),
+          { sports: criteria.sportIds, dateFrom: criteria.dateFrom, dateTo: criteria.dateTo },
+          fixtureGroups
+        );
+      if (requestId !== state.guided.requestId) return;
+
+      state.guided.groupOptions = normalizeGroupOptions(result);
+      state.guided.status = 'ready';
+      const availableIds = new Set(state.guided.groupOptions.map((group) => group.id));
+      [...state.filters.groups].forEach((id) => { if (!availableIds.has(id)) state.filters.groups.delete(id); });
+    } catch (error) {
+      if (requestId !== state.guided.requestId) return;
+      state.guided.status = 'error';
+      state.guided.groupOptions = [];
+      state.filters.groups.clear();
+    }
+
+    state.pagination.fixturesPage = 1;
+    syncFilterLabels();
+    renderGroupOptions();
+    renderFixturesTable();
+  }
+
+  function normalizeGroupOptions(result) {
+    return (Array.isArray(result) ? result : []).map((item) => {
+      if (typeof item === 'string') return { id: item, label: fixtureGroups[item]?.name || item };
+      const id = String(item?.id ?? '');
+      return { id, label: item.label || item.name || fixtureGroups[id]?.name || id, fixtureCount: item.fixtureCount };
+    }).filter((group) => group.id);
+  }
+
+  function getGuidedHint() {
+    const { status, groupOptions: options } = state.guided;
+    if (!state.filters.sports.size) {
+      return { tone: 'info', html: 'Select one or more <strong>sports</strong> and a <strong>date range</strong> to load the fixture groups. All three fields are required.' };
+    }
+    if (!state.filters.dateFrom) {
+      return { tone: 'info', html: 'Select a <strong>date range</strong> to load the fixture groups for the chosen sports.' };
+    }
+    if (status === 'loading') return { tone: 'loading', html: 'Loading fixture groups for the selected sports and dates…' };
+    if (status === 'error') {
+      return { tone: 'error', html: 'Couldn’t load fixture groups. <button type="button" class="btn btn-ghost btn-sm" data-action="retry-groups">Retry</button>' };
+    }
+    if (!options.length) {
+      return { tone: 'warning', html: 'No fixture groups found for the selected sports and dates. Try a different sport or a wider date range.' };
+    }
+    if (!state.filters.groups.size) {
+      return { tone: state.guided.showErrors ? 'error' : 'info', html: `${options.length} fixture group${options.length === 1 ? '' : 's'} found. Select at least one <strong>fixture group</strong> to see fixtures.` };
+    }
+    return { tone: 'success', html: 'Showing fixtures for the selected sports, date range and fixture groups.' };
+  }
+
+  function syncGuidedFilterUi() {
+    if (!isGuided || !dom.guidedHint) return;
+    const { status } = state.guided;
+    const hasCriteria = state.filters.sports.size > 0 && Boolean(state.filters.dateFrom);
+    const groupsReady = hasCriteria && status === 'ready' && state.guided.groupOptions.length > 0;
+
+    dom.groupTriggerBtn.disabled = !groupsReady;
+    dom.groupTriggerBtn.setAttribute('aria-busy', String(status === 'loading'));
+    dom.guidedGroupField.classList.toggle('is-disabled', !groupsReady);
+    dom.guidedGroupField.classList.toggle('is-loading', status === 'loading');
+
+    const complete = {
+      sport: state.filters.sports.size > 0,
+      date: Boolean(state.filters.dateFrom),
+      group: state.filters.groups.size > 0
+    };
+    [[dom.guidedSportField, 'sport', dom.sportTriggerBtn], [dom.guidedDateField, 'date', dom.dateTriggerBtn], [dom.guidedGroupField, 'group', dom.groupTriggerBtn]]
+      .forEach(([field, key, trigger]) => {
+        const invalid = state.guided.showErrors && !complete[key];
+        field.classList.toggle('is-complete', complete[key]);
+        field.classList.toggle('is-invalid', invalid);
+        trigger.setAttribute('aria-invalid', String(invalid));
+      });
+
+    const hint = getGuidedHint();
+    dom.guidedHint.dataset.tone = hint.tone;
+    dom.guidedHint.innerHTML = hint.html;
   }
 
   function hasActiveFilters() {
@@ -1169,7 +1403,20 @@ export function createFixtureImportApp({ data, actions = {} }) {
   }
 
   function renderFixturesTable() {
-    if (!state.hasSearched) {
+    if (isGuided && !isGuidedFilterComplete()) {
+      dom.fixturesBody.innerHTML = `
+        <tr>
+          <td colspan="8"><div class="empty-state">Select a sport, date range and fixture group above to see fixtures available to import.</div></td>
+        </tr>
+      `;
+      dom.fixturesPagination.innerHTML = '';
+      dom.fixtureBulkBar.style.display = 'none';
+      syncSelectAllState();
+      syncImportSelectedButton();
+      return;
+    }
+
+    if (!isGuided && !state.hasSearched) {
       dom.fixturesBody.innerHTML = `
         <tr>
           <td colspan="8"><div class="empty-state">Use the search bar or filters above to find available fixtures to import.</div></td>
@@ -1783,20 +2030,20 @@ export function createFixtureImportApp({ data, actions = {} }) {
 
   function syncFilterLabels() {
     const selectedSports = sportTypes.filter((sport) => state.filters.sports.has(sport.id));
-    const selectedGroups = groupOptions.filter((group) => state.filters.groups.has(group.id));
+    const selectedGroups = getActiveGroupOptions().filter((group) => state.filters.groups.has(group.id));
 
-    if (!selectedSports.length) dom.sportFilterLabel.textContent = 'All Sports';
+    if (!selectedSports.length) dom.sportFilterLabel.textContent = isGuided ? 'Select sport(s)' : 'All Sports';
     else if (selectedSports.length === 1) dom.sportFilterLabel.textContent = selectedSports[0].label;
     else dom.sportFilterLabel.textContent = `${selectedSports.length} sports selected`;
     dom.sportClearBtn.style.display = selectedSports.length ? '' : 'none';
 
-    if (!selectedGroups.length) dom.groupFilterLabel.textContent = 'All Fixture Groups';
+    if (!selectedGroups.length) dom.groupFilterLabel.textContent = isGuided ? getGuidedGroupPlaceholder() : 'All Fixture Groups';
     else if (selectedGroups.length === 1) dom.groupFilterLabel.textContent = selectedGroups[0].label;
     else dom.groupFilterLabel.textContent = `${selectedGroups.length} groups selected`;
     dom.groupClearBtn.style.display = selectedGroups.length ? '' : 'none';
 
     if (!state.filters.dateFrom) {
-      dom.dateRangeLabel.textContent = 'All Dates';
+      dom.dateRangeLabel.textContent = isGuided ? 'Select date range' : 'All Dates';
       dom.dateClearBtn.style.display = 'none';
     } else if (!state.filters.dateTo) {
       dom.dateRangeLabel.textContent = formatDisplayDate(state.filters.dateFrom);
@@ -1806,6 +2053,15 @@ export function createFixtureImportApp({ data, actions = {} }) {
       dom.dateClearBtn.style.display = '';
     }
     updateRangeFooterText('fixtures');
+    syncGuidedFilterUi();
+  }
+
+  function getGuidedGroupPlaceholder() {
+    if (!state.filters.sports.size || !state.filters.dateFrom) return 'Select sport & dates first';
+    if (state.guided.status === 'loading') return 'Loading fixture groups…';
+    if (state.guided.status === 'error') return 'Couldn’t load groups';
+    if (!state.guided.groupOptions.length) return 'No fixture groups found';
+    return 'Select fixture group(s)';
   }
 
   function clearSportFilter() {
@@ -1817,6 +2073,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     syncFilterLabels();
     renderSportOptions();
     renderFixturesTable();
+    onGuidedCriteriaChange();
   }
 
   function clearGroupFilter() {
@@ -2442,6 +2699,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     state.pagination.fixturesPage = 1;
     syncFilterLabels();
     renderFixturesTable();
+    onGuidedCriteriaChange();
   }
 
   function clearDateRange() {
@@ -2458,6 +2716,7 @@ export function createFixtureImportApp({ data, actions = {} }) {
     syncFilterLabels();
     renderCalendar();
     renderFixturesTable();
+    onGuidedCriteriaChange();
   }
 
   function toggleSelectAll(checked) {
@@ -2720,7 +2979,29 @@ export function createFixtureImportApp({ data, actions = {} }) {
     `;
   }
 
+  // Restricts the app to a subset of pages (e.g. the MVP1 build). Disabled
+  // pages keep their markup so the shared controller can still bind to it,
+  // but their nav entries are hidden and they can never be switched to.
+  function applyEnabledPages() {
+    const allPages = dom.pages.map((page) => Number(page.dataset.pageIndex));
+    const requested = Array.isArray(enabledPages) ? enabledPages.filter((index) => allPages.includes(index)) : [];
+    allowedPages = requested.length ? requested : allPages;
+
+    dom.navItems.forEach((item) => {
+      item.hidden = !allowedPages.includes(Number(item.dataset.pageIndex));
+    });
+    document.querySelectorAll('.nav-section').forEach((section) => {
+      const items = Array.from(section.querySelectorAll('.nav-item[data-page-index]'));
+      if (items.length) section.hidden = items.every((item) => item.hidden);
+    });
+  }
+
+  function getHomePage() {
+    return allowedPages[0] ?? 0;
+  }
+
   function switchPage(index) {
+    if (allowedPages.length && !allowedPages.includes(index)) return;
     state.activePage = index;
     dom.navItems.forEach((item) => item.classList.toggle('active', Number(item.dataset.pageIndex) === index));
     dom.pages.forEach((page) => page.classList.toggle('active', Number(page.dataset.pageIndex) === index));

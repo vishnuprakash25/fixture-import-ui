@@ -1,4 +1,4 @@
-import { getFixtureShortId } from '../core/helpers.js?v=987c722c04';
+import { getFixtureShortId } from '../core/helpers.js?v=46a3b20ae3';
 
 const sportTypes = [
   { id: 'american-football', label: 'American Football' },
@@ -470,6 +470,157 @@ const groupCatalog = [
       { name: 'Abu Dhabi GP - Practice 1', date: 'Dec 4, 2026', venue: 'Yas Marina Circuit' },
       { name: 'Abu Dhabi GP - Qualifying', date: 'Dec 5, 2026', venue: 'Yas Marina Circuit' },
       { name: 'Abu Dhabi GP - Race', date: 'Dec 6, 2026', venue: 'Yas Marina Circuit' }
+    ]
+  },
+  // ─── 2026/27 season (future-dated, so the MVP1 default date range returns results) ───
+  {
+    id: 'premier-league-2026',
+    name: 'Premier League 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'English Premier League',
+    startDate: 'Aug 22, 2026',
+    endDate: 'May 23, 2027',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'Man City vs Arsenal', date: 'Dec 12, 2026', venue: 'Etihad Stadium, Manchester' },
+      { name: 'Chelsea vs Liverpool', date: 'Jan 9, 2027', venue: 'Stamford Bridge, London' },
+      { name: 'Man United vs Tottenham', date: 'Mar 13, 2027', venue: 'Old Trafford, Manchester' }
+    ]
+  },
+  {
+    id: 'champions-league-2026',
+    name: 'UEFA Champions League 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'UEFA',
+    startDate: 'Sep 15, 2026',
+    endDate: 'Jun 5, 2027',
+    venue: 'Various (Europe)',
+    fixtures: [
+      { name: 'Bayern Munich vs PSG', date: 'Feb 16, 2027', venue: 'Allianz Arena, Munich' },
+      { name: 'Inter Milan vs Real Madrid', date: 'Mar 9, 2027', venue: 'San Siro, Milan' },
+      { name: 'Champions League Final', date: 'Jun 5, 2027', venue: 'Metropolitano Stadium, Madrid' }
+    ]
+  },
+  {
+    id: 'la-liga-2026',
+    name: 'La Liga 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'LaLiga',
+    startDate: 'Aug 15, 2026',
+    endDate: 'May 30, 2027',
+    venue: 'Various (Spain)',
+    fixtures: [
+      { name: 'Barcelona vs Real Madrid', date: 'Dec 20, 2026', venue: 'Spotify Camp Nou, Barcelona' },
+      { name: 'Atletico Madrid vs Sevilla', date: 'Feb 7, 2027', venue: 'Metropolitano Stadium, Madrid' },
+      { name: 'Real Betis vs Valencia', date: 'Apr 18, 2027', venue: 'Benito Villamarin, Seville' }
+    ]
+  },
+  {
+    id: 'fa-cup-2026',
+    name: 'FA Cup 2026/27',
+    sport: 'Football',
+    season: '2026/27',
+    organiser: 'The Football Association',
+    startDate: 'Nov 7, 2026',
+    endDate: 'May 15, 2027',
+    venue: 'Various (England)',
+    fixtures: [
+      { name: 'FA Cup Third Round - Everton vs Brighton', date: 'Jan 9, 2027', venue: 'Hill Dickinson Stadium, Liverpool' },
+      { name: 'FA Cup Quarter Final - Newcastle vs Aston Villa', date: 'Mar 6, 2027', venue: 'St James\' Park, Newcastle' },
+      { name: 'FA Cup Final', date: 'May 15, 2027', venue: 'Wembley Stadium, London' }
+    ]
+  },
+  {
+    id: 'australian-open-2027',
+    name: 'Australian Open 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'Tennis Australia',
+    startDate: 'Jan 18, 2027',
+    endDate: 'Jan 31, 2027',
+    venue: 'Melbourne Park, Australia',
+    fixtures: [
+      { name: 'Australian Open Round 1', date: 'Jan 18, 2027', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Semi Final', date: 'Jan 29, 2027', venue: 'Rod Laver Arena, Melbourne' },
+      { name: 'Australian Open Final', date: 'Jan 31, 2027', venue: 'Rod Laver Arena, Melbourne' }
+    ]
+  },
+  {
+    id: 'wimbledon-2027',
+    name: 'Wimbledon 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'All England Lawn Tennis Club',
+    startDate: 'Jun 28, 2027',
+    endDate: 'Jul 11, 2027',
+    venue: 'All England Club, London',
+    fixtures: [
+      { name: 'Wimbledon Round 1', date: 'Jun 28, 2027', venue: 'Centre Court, Wimbledon' },
+      { name: 'Wimbledon Semi Final', date: 'Jul 9, 2027', venue: 'Centre Court, Wimbledon' },
+      { name: 'Wimbledon Final', date: 'Jul 11, 2027', venue: 'Centre Court, Wimbledon' }
+    ]
+  },
+  {
+    id: 'us-open-2027',
+    name: 'US Open 2027',
+    sport: 'Tennis',
+    season: '2027',
+    organiser: 'USTA',
+    startDate: 'Aug 30, 2027',
+    endDate: 'Sep 12, 2027',
+    venue: 'USTA Billie Jean King National Tennis Center, New York',
+    fixtures: [
+      { name: 'US Open Round 1', date: 'Aug 30, 2027', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Semi Final', date: 'Sep 10, 2027', venue: 'Arthur Ashe Stadium, New York' },
+      { name: 'US Open Final', date: 'Sep 12, 2027', venue: 'Arthur Ashe Stadium, New York' }
+    ]
+  },
+  {
+    id: 'f1-australian-gp-2027',
+    name: 'Formula 1 Australian Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Mar 12, 2027',
+    endDate: 'Mar 14, 2027',
+    venue: 'Albert Park Circuit, Melbourne',
+    fixtures: [
+      { name: 'Australian GP - Practice 1', date: 'Mar 12, 2027', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Qualifying', date: 'Mar 13, 2027', venue: 'Albert Park Circuit' },
+      { name: 'Australian GP - Race', date: 'Mar 14, 2027', venue: 'Albert Park Circuit' }
+    ]
+  },
+  {
+    id: 'f1-monaco-gp-2027',
+    name: 'Formula 1 Monaco Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Jun 4, 2027',
+    endDate: 'Jun 6, 2027',
+    venue: 'Circuit de Monaco, Monte Carlo',
+    fixtures: [
+      { name: 'Monaco GP - Practice 1', date: 'Jun 4, 2027', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Qualifying', date: 'Jun 5, 2027', venue: 'Circuit de Monaco' },
+      { name: 'Monaco GP - Race', date: 'Jun 6, 2027', venue: 'Circuit de Monaco' }
+    ]
+  },
+  {
+    id: 'f1-british-gp-2027',
+    name: 'Formula 1 British Grand Prix 2027',
+    sport: 'Formula 1',
+    season: '2027',
+    organiser: 'FIA / Formula 1',
+    startDate: 'Jul 2, 2027',
+    endDate: 'Jul 4, 2027',
+    venue: 'Silverstone Circuit, UK',
+    fixtures: [
+      { name: 'British GP - Practice 1', date: 'Jul 2, 2027', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Qualifying', date: 'Jul 3, 2027', venue: 'Silverstone Circuit' },
+      { name: 'British GP - Race', date: 'Jul 4, 2027', venue: 'Silverstone Circuit' }
     ]
   }
 ];

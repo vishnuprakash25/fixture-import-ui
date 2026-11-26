@@ -1,3 +1,8 @@
+import { getFixtureGroupsForCriteria } from '../core/helpers.js?v=46a3b20ae3';
+
+// Simulated network latency for the mocked Fixture Manager/SDH API calls.
+const MOCK_API_LATENCY_MS = 600;
+
 export const mockActions = {
   notify(message) {
     window.alert(message);
@@ -46,6 +51,14 @@ export const mockActions = {
   viewActivityDetails(entry) {
     // Details are rendered in the Activity details modal by core UI.
     void entry;
+  },
+  // Mocks GET /fixture-groups?sports=…&from=…&to=… on Fixture Manager/SDH.
+  // Resolves to [{ id, label, fixtureCount }] for groups with importable
+  // fixtures of the selected sports in the date range.
+  fetchFixtureGroups({ sportIds, dateFrom, dateTo, data }) {
+    const available = (data?.importableFixtures || []).filter((fixture) => fixture.status !== 'Imported');
+    const groups = getFixtureGroupsForCriteria(available, { sports: sportIds, dateFrom, dateTo }, data?.fixtureGroups);
+    return new Promise((resolve) => setTimeout(() => resolve(groups), MOCK_API_LATENCY_MS));
   }
 };
 

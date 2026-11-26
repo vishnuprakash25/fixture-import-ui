@@ -1399,3 +1399,5 @@ body.dark .auth-submit-btn { box-shadow:0 4px 16px rgba(79,70,229,.35); }
   text-decoration:underline; cursor:pointer;
 }
 body.dark .guided-hint[data-tone="error"] { color:#f87171; }
+.cell-nowrap { white-space:nowrap; }
+.cell-duration { font-variant-numeric:tabular-nums; }

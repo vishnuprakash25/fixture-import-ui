@@ -54,7 +54,8 @@ const fetchFixtureGroups = async (criteria) => {
 };
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-createFixtureImportApp({ data: mockData, actions: { fetchFixtureGroups }, enabledPages, importFilterMode: 'guided' }).init();
+const fixtureColumns = document.documentElement.dataset.fixtureColumns.split(',');
+createFixtureImportApp({ data: mockData, actions: { fetchFixtureGroups }, enabledPages, importFilterMode: 'guided', fixtureColumns }).init();
 
 assert.equal(activePage(), '1', 'MVP1 opens on Import Fixtures');
 const visibleNav = [...document.querySelectorAll('.nav-item[data-page-index]')].filter((item) => !item.hidden);
@@ -142,6 +143,13 @@ assert.equal(rows().length, 1, 'selecting a group does not list fixtures by itse
 assert.match(rows()[0].textContent, /Click Search/, 'user is prompted to click Search');
 click(document.getElementById('searchFixturesBtn'));
 assert.ok(rows().length > 0 && !rows()[0].querySelector('.empty-state'), 'fixtures shown after Search once all three filters are set');
+const headers = [...document.querySelectorAll('#fixturesTable thead th')].map((th) => th.textContent.trim());
+assert.deepEqual(headers, ['', 'Fixture', 'Fixture Group', 'Sport', 'Scheduled Start Date', 'Elapsed Time', 'Created Date', 'Updated Date', 'Fixture ID', ''], 'MVP1 fixture columns');
+const firstCells = [...rows()[0].children].map((td) => td.textContent.trim());
+assert.equal(firstCells.length, headers.length, 'row cells line up with headers');
+assert.match(firstCells[5], /^\d{2}:\d{2}:\d{2}$/, 'elapsed time is HH:MM:SS');
+assert.ok(new Date(firstCells[6]) <= new Date(firstCells[7]), 'created date is not after updated date');
+assert.ok(new Date(firstCells[7]) < new Date(firstCells[4]), 'updated before scheduled start');
 [...rows()].forEach((row) => assert.ok(row.textContent.includes(mockData.fixtureGroups[footballGroups[0]].name), 'rows belong to the selected group'));
 
 // The user can change the period; a narrower range re-queries and prunes groups.

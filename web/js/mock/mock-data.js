@@ -1,4 +1,4 @@
-import { getFixtureShortId } from '../core/helpers.js?v=7fb7d89d3a';
+import { getFixtureShortId } from '../core/helpers.js?v=df7c39027d';
 
 const sportTypes = [
   { id: 'american-football', label: 'American Football' },
@@ -680,6 +680,65 @@ const sportTypeBySport = {
   'Formula 1': { typeId: 'motorsport', sportType: 'Formula 1' }
 };
 
+// Deterministic sample metadata so the mock table is stable between reloads.
+const MOCK_DATA_AS_OF = new Date(2026, 10, 25);
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// Typical event durations in seconds, kick-off/lights-out to final whistle/flag.
+const ELAPSED_RANGE_BY_SPORT = {
+  Football: [6600, 7200],
+  Tennis: [4800, 16200],
+  'Formula 1': [5100, 7500]
+};
+
+function seededInt(seed, min, max) {
+  let hash = 2166136261;
+  for (const char of seed) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  return min + ((hash >>> 0) % (max - min + 1));
+}
+
+function formatDuration(totalSeconds) {
+  return [Math.floor(totalSeconds / 3600), Math.floor(totalSeconds / 60) % 60, totalSeconds % 60]
+    .map((part) => String(part).padStart(2, '0')).join(':');
+}
+
+function formatMockDate(date) {
+  return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+// F1 sessions: practice runs ~60 min, qualifying ~45–70 min.
+const ELAPSED_RANGE_BY_SESSION = [
+  [/practice/i, [3600, 3660]],
+  [/qualifying/i, [2700, 4200]]
+];
+
+function getElapsedRange(sport, fixtureName) {
+  if (sport === 'Formula 1') {
+    const session = ELAPSED_RANGE_BY_SESSION.find(([pattern]) => pattern.test(fixtureName));
+    if (session) return session[1];
+  }
+  return ELAPSED_RANGE_BY_SPORT[sport] || [5400, 10800];
+}
+
+function buildFixtureMetadata(seed, sport, fixtureName, fixtureDate) {
+  const [minSeconds, maxSeconds] = getElapsedRange(sport, fixtureName);
+  const scheduled = new Date(fixtureDate);
+  const created = new Date(Math.min(
+    scheduled.getTime() - seededInt(`${seed}:created`, 45, 180) * DAY_MS,
+    MOCK_DATA_AS_OF.getTime() - seededInt(`${seed}:recent`, 5, 30) * DAY_MS
+  ));
+  const updated = new Date(Math.min(
+    created.getTime() + seededInt(`${seed}:updated`, 1, 40) * DAY_MS,
+    scheduled.getTime() - DAY_MS,
+    MOCK_DATA_AS_OF.getTime()
+  ));
+  return {
+    elapsedTime: formatDuration(seededInt(`${seed}:elapsed`, minSeconds, maxSeconds)),
+    createdDate: formatMockDate(created),
+    updatedDate: formatMockDate(updated < created ? created : updated)
+  };
+}
+
 let fixtureCounter = 1;
 const importableFixtures = Object.entries(fixtureGroups).flatMap(([groupId, group]) => {
   const sportInfo = sportTypeBySport[group.sport] || { typeId: '', sportType: group.sport };
@@ -695,6 +754,7 @@ const importableFixtures = Object.entries(fixtureGroups).flatMap(([groupId, grou
       sportType: sportInfo.sportType,
       date: fixture.date,
       venue: fixture.venue,
+      ...buildFixtureMetadata(id, group.sport, fixture.name, fixture.date),
       status: imported ? 'Imported' : 'Available'
     };
   });

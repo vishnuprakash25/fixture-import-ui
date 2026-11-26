@@ -90,7 +90,7 @@ MVP1 uses **guided import filters** (`importFilterMode: 'guided'`):
 There is no forked code. `mvp1/index.html` is generated from `web/index.html` by `scripts/build-mvp1.mjs`, which adds:
 
 - `<base href="../web/">` so CSS/JS/providers load from `/web/`
-- `<html data-enabled-pages="1" data-import-filter-mode="guided">`, which `app.js` passes to `createFixtureImportApp({ enabledPages, importFilterMode })`
+- `<html data-enabled-pages="1" data-import-filter-mode="guided" data-fixture-columns="…">`, which `app.js` passes to `createFixtureImportApp({ enabledPages, importFilterMode, fixtureColumns })`
 
 ```bash
 npm run build:mvp1   # regenerate (also run automatically by npm run cache-bust)
@@ -183,6 +183,8 @@ Every handler is invoked with optional chaining, so a provider may implement onl
 Returns `{ init }`. `init()` caches DOM nodes, restores any stored auth session, binds event handlers and performs the first render.
 
 `enabledPages` is an optional array of `data-page-index` values (e.g. `[1]` for MVP1). Other pages keep their markup but their nav items are hidden and `switchPage` ignores them; the first enabled page is the home page.
+
+`fixtureColumns` is an optional array of Import Fixtures column keys: `fixture`, `group`, `sport`, `date`, `scheduledStartDate`, `venue`, `elapsedTime`, `createdDate`, `updatedDate`, `id`. The default is `fixture, group, sport, date, venue, id`. MVP1 uses `fixture, group, sport, scheduledStartDate, elapsedTime, createdDate, updatedDate, id`. `elapsedTime` (`HH:MM:SS`), `createdDate` and `updatedDate` are optional fixture fields; the mock data generates them deterministically from realistic per-sport durations and dates before the scheduled start.
 
 `importFilterMode: 'guided'` switches Import Fixtures to the MVP1 filters described above; `'standard'` (default) keeps free-text search and optional filters.
 

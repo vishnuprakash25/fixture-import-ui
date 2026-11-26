@@ -11,13 +11,39 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=7fb7d89d3a';
+} from './helpers.js?v=df7c39027d';
 
-export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard' }) {
+const FIXTURE_COLUMN_DEFS = {
+  fixture: { label: 'Fixture', render: (fixture) => `<strong>${escapeHtml(fixture.name)}</strong>` },
+  group: {
+    label: 'Fixture Group',
+    render: (fixture, groups) => `<span class="badge badge-gray fixture-group-link" data-action="open-group" data-group-id="${escapeHtml(fixture.groupId)}">${escapeHtml(groups[fixture.groupId]?.name || fixture.groupId)}</span>`
+  },
+  sport: { label: 'Sport', render: (fixture) => escapeHtml(fixture.sportType) },
+  date: { label: 'Date', render: (fixture) => escapeHtml(fixture.date) },
+  scheduledStartDate: { label: 'Scheduled Start Date', className: 'cell-nowrap', render: (fixture) => escapeHtml(fixture.date) },
+  venue: { label: 'Venue', render: (fixture) => escapeHtml(fixture.venue) },
+  elapsedTime: { label: 'Elapsed Time', className: 'cell-nowrap cell-duration', render: (fixture) => escapeHtml(fixture.elapsedTime || '—') },
+  createdDate: { label: 'Created Date', className: 'cell-nowrap', render: (fixture) => escapeHtml(fixture.createdDate || '—') },
+  updatedDate: { label: 'Updated Date', className: 'cell-nowrap', render: (fixture) => escapeHtml(fixture.updatedDate || '—') },
+  id: {
+    label: 'Fixture ID',
+    className: 'fixture-id',
+    attrs: (fixture) => ` title="${escapeHtml(fixture.id)}" data-copy-value="${escapeHtml(fixture.id)}"`,
+    render: (fixture) => escapeHtml(fixture.shortId)
+  }
+};
+const DEFAULT_FIXTURE_COLUMNS = ['fixture', 'group', 'sport', 'date', 'venue', 'id'];
+
+export function createFixtureImportApp({ data, actions = {}, enabledPages = null, importFilterMode = 'standard', fixtureColumns = null }) {
   // 'guided' (MVP1): no free-text search; Sport → Date range → Fixture group
   // are mandatory and fixture groups are loaded from the API for the chosen
   // sports and dates.
   const isGuided = importFilterMode === 'guided';
+  // Columns of the Import Fixtures table (keys of FIXTURE_COLUMN_DEFS).
+  const fixtureColumnKeys = (fixtureColumns || []).filter((key) => FIXTURE_COLUMN_DEFS[key]);
+  const activeFixtureColumns = (fixtureColumnKeys.length ? fixtureColumnKeys : DEFAULT_FIXTURE_COLUMNS).map((key) => FIXTURE_COLUMN_DEFS[key]);
+  const fixturesColspan = activeFixtureColumns.length + 2;
   const GUIDED_DEFAULT_RANGE_DAYS = 365;
   const notify = actions.notify || ((message) => window.alert(message));
   const AUTH_STORAGE_KEY = 'fixture-import-ui.auth-user';
@@ -134,6 +160,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
   function init() {
     cacheDom();
     applyEnabledPages();
+    renderFixturesTableHeader();
     if (isGuided) setupGuidedFilters();
     registerModalClosers();
     restoreAuthSession();
@@ -1410,11 +1437,17 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     `;
   }
 
+  function renderFixturesTableHeader() {
+    const headerRow = document.querySelector('#fixturesTable thead tr');
+    if (!headerRow) return;
+    headerRow.innerHTML = `<th style="width:44px"></th>${activeFixtureColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join('')}<th></th>`;
+  }
+
   function renderFixturesTable() {
     if (isGuided && (!isGuidedFilterComplete() || state.guided.searchedKey !== getGuidedSearchKey())) {
       dom.fixturesBody.innerHTML = `
         <tr>
-          <td colspan="8"><div class="empty-state">${isGuidedFilterComplete()
+          <td colspan="${fixturesColspan}"><div class="empty-state">${isGuidedFilterComplete()
             ? 'Click <strong>Search</strong> to see fixtures for the selected filters.'
             : 'Select a sport, date range and fixture group above to see fixtures available to import.'}</div></td>
         </tr>
@@ -1429,7 +1462,7 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
     if (!isGuided && !state.hasSearched) {
       dom.fixturesBody.innerHTML = `
         <tr>
-          <td colspan="8"><div class="empty-state">Use the search bar or filters above to find available fixtures to import.</div></td>
+          <td colspan="${fixturesColspan}"><div class="empty-state">Use the search bar or filters above to find available fixtures to import.</div></td>
         </tr>
       `;
       dom.fixturesPagination.innerHTML = '';
@@ -1452,18 +1485,13 @@ export function createFixtureImportApp({ data, actions = {}, enabledPages = null
       return `
       <tr>
         <td><input type="checkbox" class="checkbox fixture-checkbox" data-fixture-id="${escapeHtml(fixture.id)}" ${state.selectedFixtureIds.has(fixture.id) ? 'checked' : ''}></td>
-        <td><strong>${escapeHtml(fixture.name)}</strong></td>
-        <td><span class="badge badge-gray fixture-group-link" data-action="open-group" data-group-id="${escapeHtml(fixture.groupId)}">${escapeHtml(fixtureGroups[fixture.groupId]?.name || fixture.groupId)}</span></td>
-        <td>${escapeHtml(fixture.sportType)}</td>
-        <td>${escapeHtml(fixture.date)}</td>
-        <td>${escapeHtml(fixture.venue)}</td>
-        <td class="fixture-id" title="${escapeHtml(fixture.id)}" data-copy-value="${escapeHtml(fixture.id)}">${escapeHtml(fixture.shortId)}</td>
+        ${activeFixtureColumns.map((column) => `<td${column.className ? ` class="${column.className}"` : ''}${column.attrs ? column.attrs(fixture) : ''}>${column.render(fixture, fixtureGroups)}</td>`).join('')}
         <td>${importCell}</td>
       </tr>
     `;
     }).join('') : `
       <tr>
-        <td colspan="8"><div class="empty-state">No fixtures match the current filters.</div></td>
+        <td colspan="${fixturesColspan}"><div class="empty-state">No fixtures match the current filters.</div></td>
       </tr>
     `;
 

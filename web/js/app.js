@@ -1,5 +1,5 @@
-import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=7fb7d89d3a';
-import { loadAppProvider } from './providers/index.js?v=7fb7d89d3a';
+import { createFixtureImportApp } from './core/createFixtureImportApp.js?v=df7c39027d';
+import { loadAppProvider } from './providers/index.js?v=df7c39027d';
 
 // <html data-enabled-pages="1,2"> limits the app to those pages (used by /mvp1/).
 function getEnabledPages() {
@@ -13,13 +13,21 @@ function getImportFilterMode() {
   return document.documentElement.dataset.importFilterMode === 'guided' ? 'guided' : 'standard';
 }
 
+// <html data-fixture-columns="fixture,group,…"> sets the Import Fixtures table columns.
+function getFixtureColumns() {
+  const raw = document.documentElement.dataset.fixtureColumns || '';
+  const columns = raw.split(',').map((value) => value.trim()).filter(Boolean);
+  return columns.length ? columns : null;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const provider = await loadAppProvider();
   const app = createFixtureImportApp({
     data: provider.data,
     actions: provider.actions,
     enabledPages: getEnabledPages(),
-    importFilterMode: getImportFilterMode()
+    importFilterMode: getImportFilterMode(),
+    fixtureColumns: getFixtureColumns()
   });
 
   app.init();

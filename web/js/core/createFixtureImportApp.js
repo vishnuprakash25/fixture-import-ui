@@ -11,7 +11,7 @@ import {
   parseInputDate,
   sanitizeInlineSvg,
   toLocalISODate
-} from './helpers.js?v=b4e6e85b9a';
+} from './helpers.js?v=6cc5c71119';
 
 const FIXTURE_COLUMN_DEFS = {
   fixture: { label: 'Fixture', render: (fixture) => `<strong>${escapeHtml(fixture.name)}</strong>` },

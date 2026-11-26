@@ -1,4 +1,4 @@
-import { getFixtureShortId } from '../core/helpers.js?v=b4e6e85b9a';
+import { getFixtureShortId } from '../core/helpers.js?v=6cc5c71119';
 
 const sportTypes = [
   { id: 'american-football', label: 'American Football' },

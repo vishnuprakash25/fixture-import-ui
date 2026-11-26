@@ -27,11 +27,11 @@ export async function loadAppProvider() {
   const mode = getAppMode();
 
   if (mode === 'real') {
-    const module = await import('./real-provider.js?v=b4e6e85b9a');
+    const module = await import('./real-provider.js?v=6cc5c71119');
     return module.loadRealProvider();
   }
 
-  const module = await import('./mock-provider.js?v=b4e6e85b9a');
+  const module = await import('./mock-provider.js?v=6cc5c71119');
   return module.loadMockProvider();
 }
 

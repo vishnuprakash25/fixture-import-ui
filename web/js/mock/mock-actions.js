@@ -1,4 +1,4 @@
-import { getFixtureGroupsForCriteria } from '../core/helpers.js?v=b4e6e85b9a';
+import { getFixtureGroupsForCriteria } from '../core/helpers.js?v=6cc5c71119';
 
 // Simulated network latency for the mocked Fixture Manager/SDH API calls.
 const MOCK_API_LATENCY_MS = 600;
